@@ -144,7 +144,6 @@ export function OrderDialog({
       buildOrderMessage({
         details: trimDetails(details),
         items,
-        siteName: siteConfig.name,
         totals,
       }),
     [details, items, totals]

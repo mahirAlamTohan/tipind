@@ -137,16 +137,16 @@ export interface CheckoutContent {
     readonly closeAction: string
   }
   readonly message: {
-    readonly heading: string
     readonly itemsHeading: string
-    readonly customerHeading: string
     readonly addressHeading: string
     readonly notesHeading: string
     readonly name: string
     readonly email: string
-    readonly phone: string
     readonly company: string
     readonly payment: string
-    readonly pendingNote: string
+    readonly subtotalLabel: string
+    readonly shippingLabel: string
+    readonly shippingText: string
+    readonly orderSeparator: string
   }
 }

@@ -112,16 +112,17 @@ export const checkoutContent = {
     closeAction: "Close",
   },
   message: {
-    heading: "{name} — new order request",
     itemsHeading: "ITEMS",
-    customerHeading: "CUSTOMER",
     addressHeading: "SHIPPING ADDRESS",
     notesHeading: "NOTES",
     name: "Name",
-    email: "Email",
-    phone: "Phone",
+    email: "Main email",
     company: "Company",
     payment: "Preferred payment",
-    pendingNote: "VAT and cargo will be confirmed by our team.",
+    subtotalLabel: "order subtotal",
+    shippingLabel: "order+shipping",
+    shippingText:
+      "will be calculated at checkout and you will informed how many separate parcels will be shipped.",
+    orderSeparator: "ORDER------",
   },
 } satisfies CheckoutContent

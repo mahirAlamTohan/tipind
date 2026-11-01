@@ -1,18 +1,16 @@
 import { cartLineSummary } from "@/features/cart/lib/summary"
 import type { CartLineItem } from "@/features/cart/types"
-import { formatMessage, formatMills } from "@/lib/format"
+import { formatMills } from "@/lib/format"
 
+import { siteConfig } from "@/config/site"
 import { checkoutContent } from "../content"
 import type { OrderTotals, ShippingDetails } from "../types"
-import { chargeLabel } from "./charges"
 import { findPayment } from "./details"
-import { formatPhone } from "./address"
 import { findCountry } from "./countries"
 
 interface OrderMessageInput {
   details: ShippingDetails
   items: readonly CartLineItem[]
-  siteName: string
   totals: OrderTotals
 }
 
@@ -23,7 +21,6 @@ const row = (label: string, value: string) =>
 export function buildOrderMessage({
   details,
   items,
-  siteName,
   totals,
 }: OrderMessageInput) {
   const m = checkoutContent.message
@@ -36,36 +33,34 @@ export function buildOrderMessage({
     .filter(Boolean)
     .join(", ")
 
+  const emailLine = siteConfig.contact.email
+    ? `${m.email}: [${siteConfig.contact.email}](${siteConfig.contact.emailHref})`
+    : ""
+
   return [
-    formatMessage(m.heading, { name: siteName }),
+    `${m.subtotalLabel}: ${formatMills(totals.subtotalMills)}`,
+    `${m.shippingLabel}: ${m.shippingText}`,
     "",
-    m.itemsHeading,
-    ...items.map(cartLineSummary),
+    m.orderSeparator,
     "",
-    `${checkoutContent.summary.subtotal}: ${formatMills(totals.subtotalMills)}`,
-    ...totals.charges.map(
-      (charge) =>
-        `${chargeLabel(charge.id)}: ${
-          charge.amountMills === null
-            ? checkoutContent.summary.pending
-            : formatMills(charge.amountMills)
-        }`
-    ),
-    `${checkoutContent.summary.total}: ${formatMills(totals.totalMills)}`,
-    ...(totals.isFinal ? [] : [m.pendingNote]),
-    "",
-    m.customerHeading,
     ...row(m.name, `${details.firstName} ${details.lastName}`.trim()),
-    ...row(m.email, details.email),
-    ...row(m.phone, formatPhone(details.phone, details.country)),
     ...row(m.company, details.company),
-    ...row(m.payment, payment?.label ?? ""),
     "",
     m.addressHeading,
     details.addressLine1,
     ...(details.addressLine2 ? [details.addressLine2] : []),
     place,
     country?.name ?? "",
-    ...(details.notes ? ["", m.notesHeading, details.notes] : []),
+    "",
+    m.itemsHeading,
+    ...items.map(cartLineSummary),
+    "",
+    ...(details.notes ? [m.notesHeading, details.notes] : []),
+    "",
+    ...(emailLine ? [emailLine] : []),
+    "",
+    "```",
+    `Preferred payment: ${payment?.label ?? ""}`,
+    "```",
   ].join("\n")
 }
