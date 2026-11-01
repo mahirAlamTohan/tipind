@@ -2,7 +2,6 @@ import { cartLineSummary } from "@/features/cart/lib/summary"
 import type { CartLineItem } from "@/features/cart/types"
 import { formatMills } from "@/lib/format"
 
-import { siteConfig } from "@/config/site"
 import { checkoutContent } from "../content"
 import type { OrderTotals, ShippingDetails } from "../types"
 import { findPayment } from "./details"
@@ -33,10 +32,6 @@ export function buildOrderMessage({
     .filter(Boolean)
     .join(", ")
 
-  const emailLine = siteConfig.contact.email
-    ? `${m.email}: [${siteConfig.contact.email}](${siteConfig.contact.emailHref})`
-    : ""
-
   return [
     `${m.subtotalLabel}: ${formatMills(totals.subtotalMills)}`,
     `${m.shippingLabel}: ${m.shippingText}`,
@@ -57,10 +52,8 @@ export function buildOrderMessage({
     "",
     ...(details.notes ? [m.notesHeading, details.notes] : []),
     "",
-    ...(emailLine ? [emailLine] : []),
+    ...(m.email ? [m.email, details.email] : []),
     "",
-    "```",
-    `Preferred payment: ${payment?.label ?? ""}`,
-    "```",
+    payment?.label ? `Preferred payment: ${payment.label}` : "",
   ].join("\n")
 }
