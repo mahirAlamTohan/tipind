@@ -38,7 +38,7 @@ const MAX_UNIT_PRICE_MILLS = 100_000_000
 /** Status value that holds a product out of the published catalog. */
 const REVIEW_STATUS = "needs review"
 /** Default range asked of the Apps Script (header row + data rows). */
-const DEFAULT_RANGE = "A1:Z1000"
+const DEFAULT_RANGE = "A1:Z10000"
 /** Default sheet tab name. */
 const DEFAULT_SHEET_TAB = "Price List 1 July 2026"
 
@@ -179,10 +179,7 @@ function build(json) {
       invalid += 1
       continue
     }
-    if (
-      row.status &&
-      row.status.trim().toLowerCase() === REVIEW_STATUS
-    ) {
+    if (row.status && row.status.trim().toLowerCase() === REVIEW_STATUS) {
       needsReview += 1
       continue
     }
@@ -288,7 +285,8 @@ function rowsFromAppsScript(result) {
     const cells = raw[r]
     for (let c = 0; c < headers.length; c++) {
       if (!headers[c]) continue
-      obj[headers[c]] = cells[c] === undefined || cells[c] === null ? "" : cells[c]
+      obj[headers[c]] =
+        cells[c] === undefined || cells[c] === null ? "" : cells[c]
     }
     objects.push(obj)
   }
@@ -374,9 +372,7 @@ async function main() {
     json = await fetchSheetRows(values.sheet)
   } else {
     const input = path.resolve(ROOT, values.input)
-    json = JSON.parse(
-      (await readFile(input, "utf8")).replace(/^\uFEFF/, "")
-    )
+    json = JSON.parse((await readFile(input, "utf8")).replace(/^\uFEFF/, ""))
   }
 
   const outputDir = path.resolve(ROOT, values.output)
