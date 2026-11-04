@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "catalog:build": "node scripts/build-catalog.mjs --sheet \"https://script.google.com/macros/s/AKfycbzLaOQ7GDe_C-QKsYK4lPxcbMlgpulBtktNuoeF-4cGYdwE1X9YxrvWRoOCDvXIKmyy/exec\" --clean --write-env"
+    "catalog:build": "node scripts/build-catalog.mjs --sheet \"https://script.google.com/macros/s/AKfycbzFRbjmjnm-n-BHTXiEo7FtPOJP0PyrEBx3bIz3QsAJLaq_UcyPj4bka96gis43mX0w/exec\" --clean --write-env"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

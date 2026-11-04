@@ -8,18 +8,19 @@
  *
  * Output: <output>/catalog.<hash>.dat = MAGIC + XOR(gzip(JSON))
  * JSON:   { format: 4, priceBounds: [minMills, maxMills], manufacturers: string[],
- *           packaging: string[],
- *           products: [name, ingredient, manufacturerIdx, packagingIdx, priceMills][] }
+ *           packaging: string[], types: string[],
+ *           products: [name, ingredient, manufacturerIdx, packagingIdx, typeIdx, priceMills][] }
  * A mill is 1/1000 USD, so "$0.665" is stored as 665 (3 decimals, exact).
  * Missing index/price is -1. Keep FORMAT/MAGIC in sync with
- * src/features/catalog/constants.ts.
+ * src/features/catalog/constants.ts (and check the product tuple matches the reader).
  *
  * Rows whose "status" column is "needs review" are held out of the published
- * catalog (they require manual review first) and are reported in the stats.
+ * catalog and are reported in the stats.
  *
- * When --sheet is used, the raw source fetched from the Apps Script is saved to
- * extras/source.<hash>.json using the same <hash> as the output catalog file,
- * so every published catalog can be traced back to its source snapshot.
+ * --sheet asks the Apps Script how many rows the tab really has (?info=1) and then
+ * downloads exactly that many, in chunks, so it never misses rows and never pulls
+ * thousands of blank ones. Needs the version 2 Apps Script (sheet_editor.gs).
+ * The raw rows are saved to extras/source.<hash>.json (same <hash> as the catalog).
  */
 import { createHash } from "node:crypto"
 import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises"
@@ -37,10 +38,12 @@ const NONE = -1
 const MAX_UNIT_PRICE_MILLS = 100_000_000
 /** Status value that holds a product out of the published catalog. */
 const REVIEW_STATUS = "needs review"
-/** Default range asked of the Apps Script (header row + data rows). */
-const DEFAULT_RANGE = "A1:Z10000"
 /** Default sheet tab name. */
-const DEFAULT_SHEET_TAB = "Price List 1 July 2026"
+const DEFAULT_SHEET_TAB = "Price List"
+/** Rows requested from the Apps Script per call. */
+const CHUNK_ROWS = 2000
+const FETCH_TIMEOUT_MS = 90_000
+const FETCH_ATTEMPTS = 3
 
 const ALIASES = {
   name: [
@@ -89,6 +92,9 @@ const key = (value) =>
     .replace(/[^\p{L}\p{N}]/gu, "")
 
 const compare = (a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+const describe = (error) =>
+  error instanceof Error ? error.message : String(error)
 
 function text(value) {
   if (typeof value !== "string" && typeof value !== "number") return ""
@@ -252,72 +258,157 @@ const encode = (artifact, keyBytes) => {
 
 /* ── Google Apps Script support ─────────────────────────────────────── */
 
-/**
- * Appends range + sheet query params to the Apps Script URL so doGet returns
- * the header row plus all data rows as a 2D array.
- */
-function appsScriptUrl(url) {
-  const separator = url.includes("?") ? "&" : "?"
-  return `${url}${separator}range=${encodeURIComponent(DEFAULT_RANGE)}&sheet=${encodeURIComponent(DEFAULT_SHEET_TAB)}`
+/** 1 -> A, 26 -> Z, 27 -> AA */
+function columnLetter(n) {
+  let letters = ""
+  while (n > 0) {
+    const rem = (n - 1) % 26
+    letters = String.fromCharCode(65 + rem) + letters
+    n = Math.floor((n - 1) / 26)
+  }
+  return letters
 }
 
-/**
- * The Apps Script doGet returns:
- *   { ok: true, range, data: [[headers...], [row1...], ...], rows: N }
- * Converts that into an array of objects keyed by the header row.
- */
-function rowsFromAppsScript(result) {
+/** Builds a request URL with query params (robust against existing params / stray quotes). */
+function withParams(base, params) {
+  const url = new URL(base)
+  for (const [name, value] of Object.entries(params)) {
+    url.searchParams.set(name, value)
+  }
+  return url.toString()
+}
+
+/** GET + parse JSON, with a timeout and retries for network hiccups. */
+async function getJson(url, label) {
+  let lastError
+  for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      })
+      if (!response.ok) throw new Error(`HTTP status ${response.status}`)
+      const body = await response.text()
+      try {
+        return JSON.parse(body)
+      } catch {
+        throw new Error(
+          "response was not JSON (is the web app deployed with access set to 'Anyone'?)"
+        )
+      }
+    } catch (error) {
+      lastError = error
+      if (attempt < FETCH_ATTEMPTS) await sleep(1000 * attempt)
+    }
+  }
+  throw new Error(`${label}: ${describe(lastError)}`)
+}
+
+function requireOk(result, label) {
   if (!result || !result.ok) {
     throw new Error(
-      result && result.error
-        ? `Apps Script error: ${result.error}`
-        : "Apps Script did not return ok:true"
+      `${label}: ${result && result.error ? `Apps Script error: ${result.error}` : "Apps Script did not return ok:true"}`
     )
   }
-  const raw = result.data
-  if (!Array.isArray(raw) || raw.length === 0) return []
-  const headers = raw[0]
-    .map((cell) => (cell === undefined || cell === null ? "" : String(cell)))
-    .map((cell) => cell.trim())
+  return result
+}
+
+/** Asks the Apps Script how big the tab is. */
+async function fetchSheetInfo(base, tab) {
+  const info = requireOk(
+    await getJson(withParams(base, { info: "1", sheet: tab }), "Sheet info"),
+    "Sheet info"
+  )
+  if (!Number.isInteger(info.lastRow) || !Number.isInteger(info.lastColumn)) {
+    throw new Error(
+      "The deployed Apps Script is out of date (it doesn't report the row count). " +
+        "Paste the new sheet_editor.gs, then Deploy > Manage deployments > edit > New version > Deploy."
+    )
+  }
+  return info
+}
+
+/** Downloads rows 1..lastRow (all columns that have data) as a 2D array. */
+async function fetchAllCells(base, tab, info) {
+  const lastCol = columnLetter(Math.max(info.lastColumn, 1))
+  const cells = []
+  for (let start = 1; start <= info.lastRow; start += CHUNK_ROWS) {
+    const end = Math.min(start + CHUNK_ROWS - 1, info.lastRow)
+    const range = `A${start}:${lastCol}${end}`
+    const label = `Rows ${start.toLocaleString()}-${end.toLocaleString()}`
+    const result = requireOk(
+      await getJson(withParams(base, { range, sheet: tab, table: "1" }), label),
+      label
+    )
+    const expected = end - start + 1
+    if (!Array.isArray(result.data) || result.data.length !== expected) {
+      throw new Error(
+        `${label}: expected ${expected.toString()} rows but got ${Array.isArray(result.data) ? result.data.length.toString() : "none"}.`
+      )
+    }
+    for (const row of result.data) cells.push(row)
+    process.stdout.write(
+      `\r  downloaded ${Math.min(end, info.lastRow).toLocaleString()} / ${info.lastRow.toLocaleString()} rows`
+    )
+  }
+  process.stdout.write("\n")
+  return cells
+}
+
+/** Turns [[headers...], [row...], ...] into objects keyed by header; skips fully blank rows. */
+function rowsFromCells(cells) {
+  if (cells.length === 0) return []
+  const headers = cells[0].map((cell) =>
+    cell === undefined || cell === null ? "" : String(cell).trim()
+  )
+  const hasName = headers.some((h) =>
+    ALIASES.name.some((a) => key(a) === key(h))
+  )
+  if (!hasName) {
+    throw new Error(
+      `Row 1 doesn't look like a header row (no Product Name column). Found: ${headers.filter(Boolean).join(", ") || "(empty)"}`
+    )
+  }
   const objects = []
-  for (let r = 1; r < raw.length; r++) {
+  for (let r = 1; r < cells.length; r++) {
+    const row = cells[r]
     const obj = {}
-    const cells = raw[r]
+    let blank = true
     for (let c = 0; c < headers.length; c++) {
       if (!headers[c]) continue
-      obj[headers[c]] =
-        cells[c] === undefined || cells[c] === null ? "" : cells[c]
+      const cell = row[c] === undefined || row[c] === null ? "" : row[c]
+      if (text(cell) !== "") blank = false
+      obj[headers[c]] = cell
     }
-    objects.push(obj)
+    if (!blank) objects.push(obj)
   }
   return objects
 }
 
-/** Downloads data from the Google Apps Script web app and returns row objects. */
-async function fetchSheetRows(url) {
-  const requestUrl = appsScriptUrl(url)
-  let response
+/**
+ * Downloads every row of the tab. Re-checks the row count afterwards and starts
+ * over if the sheet was edited mid-download, so the snapshot is consistent.
+ */
+async function fetchSheetRows(rawUrl) {
+  const base = rawUrl.trim().replace(/^['"]+|['"]+$/g, "")
   try {
-    response = await fetch(requestUrl)
-  } catch (error) {
-    throw new Error(
-      `Couldn't reach the Apps Script web app: ${error instanceof Error ? error.message : String(error)}`
-    )
+    new URL(base)
+  } catch {
+    throw new Error(`Not a valid Apps Script URL: ${base}`)
   }
-  if (!response.ok) {
-    throw new Error(
-      `Apps Script request failed (status ${response.status.toString()}).`
+  const tab = DEFAULT_SHEET_TAB
+
+  for (let pass = 1; pass <= 3; pass++) {
+    const info = await fetchSheetInfo(base, tab)
+    console.log(
+      `Sheet "${info.sheet}": ${info.lastRow.toLocaleString()} rows x ${info.lastColumn.toString()} columns`
     )
+    if (info.lastRow < 2) return []
+    const cells = await fetchAllCells(base, tab, info)
+    const after = await fetchSheetInfo(base, tab)
+    if (after.lastRow === info.lastRow) return rowsFromCells(cells)
+    console.log("Sheet changed while downloading, fetching again...")
   }
-  let result
-  try {
-    result = await response.json()
-  } catch (error) {
-    throw new Error(
-      `Apps Script response was not valid JSON: ${error instanceof Error ? error.message : String(error)}`
-    )
-  }
-  return rowsFromAppsScript(result)
+  throw new Error("The sheet kept changing while downloading. Try again.")
 }
 
 /* ── env / output helpers ──────────────────────────────────────────── */
@@ -335,6 +426,28 @@ async function updateEnv(file, name, value) {
     ? content.replace(pattern, line)
     : `${content}${content && !content.endsWith("\n") ? "\n" : ""}${line}\n`
   await writeFile(file, next)
+}
+
+function loadEnvFiles() {
+  for (const name of [".env", ".env.production"]) {
+    try {
+      process.loadEnvFile(path.join(ROOT, name))
+    } catch {
+      // Optional file.
+    }
+  }
+}
+
+async function removeStale(dir, pattern, keep) {
+  let names = []
+  try {
+    names = await readdir(dir)
+  } catch {
+    return 0
+  }
+  const stale = names.filter((name) => pattern.test(name) && name !== keep)
+  await Promise.all(stale.map((name) => unlink(path.join(dir, name))))
+  return stale.length
 }
 
 async function main() {
@@ -356,15 +469,12 @@ async function main() {
     return
   }
 
-  try {
-    process.loadEnvFile(path.join(ROOT, ".env"))
-  } catch {
-    // .env is optional if the variable is already set.
-  }
+  // Existing environment variables win; .env then .env.production fill gaps.
+  loadEnvFiles()
   const xorKey = process.env[KEY_NAME]?.trim()
   if (!xorKey)
     throw new Error(
-      `Missing ${KEY_NAME} (set it in .env). Note: it ships in the browser bundle, so it only obfuscates.`
+      `Missing ${KEY_NAME} (set it in .env or .env.production). Note: it ships in the browser bundle, so it only obfuscates.`
     )
 
   let json
@@ -386,21 +496,21 @@ async function main() {
 
   // Save the raw source snapshot beside the catalog, sharing the same version hash.
   const extrasDir = path.join(ROOT, "extras")
+  const sourceName = `source.${hash}.json`
   await mkdir(extrasDir, { recursive: true })
   await writeFile(
-    path.join(extrasDir, `source.${hash}.json`),
+    path.join(extrasDir, sourceName),
     JSON.stringify(json, null, 2)
   )
 
   if (values.clean) {
-    const stale = (await readdir(outputDir)).filter(
-      (name) =>
-        /^(catalog|manufacturers|packaging)\.[\w-]+\.dat$/.test(name) &&
-        name !== fileName
-    )
-    await Promise.all(stale.map((name) => unlink(path.join(outputDir, name))))
-    if (stale.length > 0)
-      console.log(`Removed ${stale.length.toString()} stale file(s).`)
+    const removed =
+      (await removeStale(
+        outputDir,
+        /^(catalog|manufacturers|packaging)\.[\w-]+\.dat$/,
+        fileName
+      )) + (await removeStale(extrasDir, /^source\.[\w-]+\.json$/, sourceName))
+    if (removed > 0) console.log(`Removed ${removed.toString()} stale file(s).`)
   }
 
   const dataUrl = `/${path.relative(path.join(ROOT, "public"), path.join(outputDir, fileName)).split(path.sep).join("/")}`
@@ -410,7 +520,7 @@ async function main() {
   }
 
   console.log(`Wrote ${fileName} (${payload.length.toLocaleString()} bytes)`)
-  console.log(`Wrote extras/source.${hash}.json`)
+  console.log(`Wrote extras/${sourceName}`)
   console.log(
     `Products: ${artifact.products.length.toLocaleString()} of ${stats.source.toLocaleString()} rows`
   )
@@ -418,7 +528,7 @@ async function main() {
     `Skipped: ${stats.invalid.toLocaleString()} invalid, ${stats.duplicates.toLocaleString()} duplicates, ${stats.needsReview.toLocaleString()} needs review`
   )
   console.log(
-    `Without a usable price: ${stats.noPrice.toLocaleString()} (shown, but can't be added to an checkout)`
+    `Without a usable price: ${stats.noPrice.toLocaleString()} (shown, but can't be added to a checkout)`
   )
   console.log(
     `Prices rounded to 3 decimals (source had more): ${stats.rounded.toLocaleString()}`
@@ -433,8 +543,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(
-    `Catalog build failed: ${error instanceof Error ? error.message : String(error)}`
-  )
+  console.error(`Catalog build failed: ${describe(error)}`)
   process.exitCode = 1
 })
