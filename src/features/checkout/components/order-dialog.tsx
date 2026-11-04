@@ -1,19 +1,14 @@
 "use client"
-
 import { Dialog } from "@base-ui/react/dialog"
-import { Check, Copy, Mail, MessageCircle, Send, X, Info } from "lucide-react"
+import { Check, Copy, X } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/config/site"
 import type { CartLineItem } from "@/features/cart/types"
-import { formatMessage } from "@/lib/format"
-import { cn } from "@/lib/utils"
 
 import { checkoutContent } from "../content"
-import type { ChannelLink } from "../lib/channels"
-import { buildChannels } from "../lib/channels"
 import { trimDetails } from "../lib/details"
 import { buildOrderMessage } from "../lib/order-message"
 import { useCopy } from "@/hooks/use-copy"
@@ -23,100 +18,45 @@ const list = {
   hidden: {},
   show: { transition: { delayChildren: 0.15, staggerChildren: 0.08 } },
 }
-const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-}
 
-function SuccessMark() {
+function PendingMark() {
   const reduceMotion = useReducedMotion()
-  const draw = (delay: number) => ({
-    animate: { pathLength: 1 },
-    initial: reduceMotion ? false : { pathLength: 0 },
-    transition: { delay, duration: 0.5 },
-  })
 
   return (
-    <svg
-      aria-hidden="true"
-      className="size-14 text-success-600 dark:text-success-300"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={3}
-      viewBox="0 0 52 52"
+    <motion.div
+      initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-500 dark:bg-amber-400/10 dark:text-amber-400"
     >
-      <motion.circle cx="26" cy="26" r="23" {...draw(0)} />
-      <motion.path d="M15 27l8 8 14-16" {...draw(0.35)} />
-    </svg>
-  )
-}
-
-interface OptionProps {
-  description: string
-  icon: ReactNode
-  iconClass: string
-  link: ChannelLink | null
-  onActivate: (link: ChannelLink) => void
-  title: string
-}
-
-function Option({
-  description,
-  icon,
-  iconClass,
-  link,
-  onActivate,
-  title,
-}: OptionProps) {
-  const body = (
-    <>
-      <span
-        className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-xl text-white",
-          iconClass
-        )}
-      >
-        {icon}
-      </span>
-      <span className="flex min-w-0 flex-col gap-0.5 text-left">
-        <span className="text-sm font-extrabold text-ink">{title}</span>
-        <span className="text-xs text-muted-foreground">
-          {link ? description : checkoutContent.dialog.unavailable}
-        </span>
-      </span>
-    </>
-  )
-
-  if (!link) {
-    return (
       <motion.div
-        aria-disabled="true"
-        className="flex items-center gap-3 rounded-2xl border border-dashed border-border p-3.5 opacity-60"
-        variants={item}
+        animate={reduceMotion ? {} : { rotate: [0, 180, 180] }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+          times: [0, 0.2, 1], // Quick flip at the start, then pause
+        }}
       >
-        {body}
+        {/* You can use Lucide's Hourglass icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M5 22h14" />
+          <path d="M5 2h14" />
+          <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+          <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+        </svg>
       </motion.div>
-    )
-  }
-
-  return (
-    <motion.a
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 shadow-sm transition-colors hover:border-primary/50 hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
-      href={link.href}
-      onClick={() => {
-        onActivate(link)
-      }}
-      rel="noreferrer"
-      target="_blank"
-      transition={{ damping: 28, stiffness: 420, type: "spring" }}
-      variants={item}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      {body}
-    </motion.a>
+    </motion.div>
   )
 }
 
@@ -136,8 +76,7 @@ export function OrderDialog({
   totals,
 }: OrderDialogProps) {
   const copy = checkoutContent.dialog
-  const [opened, setOpened] = useState<ChannelLink | null>(null)
-  const { copy: copyText, state } = useCopy()
+  const { copy: copyText, state } = useCopy(999999)
 
   const message = useMemo(
     () =>
@@ -148,19 +87,8 @@ export function OrderDialog({
       }),
     [details, items, totals]
   )
-  const links = useMemo(
-    () =>
-      buildChannels(
-        message,
-        formatMessage(copy.emailSubject, { name: siteConfig.name })
-      ),
-    [message, copy.emailSubject]
-  )
 
-  function activate(link: ChannelLink) {
-    if (link.paste) void copyText(message)
-    setOpened(link)
-  }
+  const { email, telegramUsername } = siteConfig.contact
 
   return (
     <Dialog.Root
@@ -174,7 +102,7 @@ export function OrderDialog({
         <Dialog.Popup className="fixed inset-0 z-91 m-auto flex h-fit max-h-[calc(100dvh-1.5rem)] w-[min(40rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl transition-[opacity,scale] duration-200 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-7">
             <div className="flex items-start justify-between gap-4">
-              <SuccessMark />
+              <PendingMark />
               <Button
                 aria-label={copy.closeAction}
                 className="size-9 rounded-lg text-ink-soft"
@@ -197,79 +125,78 @@ export function OrderDialog({
               {copy.optionsHeading}
             </h3>
             <motion.div
-              animate="show"
-              className="grid gap-2.5 sm:grid-cols-3"
-              initial="hidden"
               variants={list}
+              initial="hidden"
+              animate="show"
+              className="mt-3 flex flex-col gap-3 rounded-lg border border-primary-200/80 bg-primary-50/50 p-4 text-primary-950 dark:border-primary-900/80 dark:bg-primary-950/30 dark:text-primary-100"
             >
-              <Option
-                description={copy.email.description}
-                icon={<Mail aria-hidden="true" className="size-5" />}
-                iconClass="bg-primary"
-                link={links.email}
-                onActivate={activate}
-                title={copy.email.title}
-              />
-              <Option
-                description={copy.whatsapp.description}
-                icon={<MessageCircle aria-hidden="true" className="size-5" />}
-                iconClass="bg-whatsapp"
-                link={links.whatsapp}
-                onActivate={activate}
-                title={copy.whatsapp.title}
-              />
-              <Option
-                description={copy.telegram.description}
-                icon={<Send aria-hidden="true" className="size-5" />}
-                iconClass="bg-highlight-600"
-                link={links.telegram}
-                onActivate={activate}
-                title={copy.telegram.title}
-              />
-            </motion.div>
+              <div className="space-y-2.5 text-sm">
+                {/* Step 1 */}
+                <div className="flex items-start gap-2.5">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200/60 text-xs font-bold dark:bg-primary-800/60">
+                    1
+                  </span>
+                  <p className="leading-relaxed">
+                    Click{" "}
+                    <strong className="font-semibold">"Copy message"</strong>{" "}
+                    below to copy your pre-filled order template.
+                  </p>
+                </div>
 
-            {links.email && (
-              <div className="mt-3 rounded-xl border border-primary-200/80 bg-primary-50/70 p-3 text-xs leading-5 text-primary-950 dark:border-primary-900/80 dark:bg-primary-950/40 dark:text-primary-100">
-                <p className="m-0 flex items-start gap-2">
-                  <Info
-                    aria-hidden="true"
-                    className="mt-0.5 size-3.5 shrink-0"
-                  />
-                  {formatMessage(copy.gmailNotice, {
-                    email: siteConfig.contact.email,
-                  })}
-                </p>
-                <p className="m-0 mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 pl-5.5">
-                  <span className="font-semibold">{copy.otherMail}</span>
-                  {links.outlook && (
-                    <a
-                      className="font-semibold text-primary-text underline-offset-4 hover:underline"
-                      href={links.outlook.href}
-                      onClick={() => {
-                        if (links.outlook) activate(links.outlook)
-                      }}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      {copy.outlook}
-                    </a>
-                  )}
-                  {links.mailApp && (
-                    <a
-                      className="font-semibold text-primary-text underline-offset-4 hover:underline"
-                      href={links.mailApp.href}
-                      onClick={() => {
-                        if (links.mailApp) activate(links.mailApp)
-                      }}
-                    >
-                      {copy.mailApp}
-                    </a>
-                  )}
-                </p>
+                {/* Step 2 */}
+                <div className="flex items-start gap-2.5">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200/60 text-xs font-bold dark:bg-primary-800/60">
+                    2
+                  </span>
+                  <div className="w-full space-y-1.5">
+                    <p className="leading-relaxed">
+                      Send your copied details through our official channels:
+                    </p>
+
+                    <div className="flex flex-col gap-1.5 pl-1">
+                      {email && (
+                        <div className="flex items-center gap-2 text-xs font-medium">
+                          <span>✉️</span>
+                          <span className="text-primary-700 dark:text-primary-300">
+                            Email (Preferred):
+                          </span>
+                          <code className="rounded bg-primary-200/40 px-1.5 py-0.5 dark:bg-primary-900/50">
+                            {email}
+                          </code>
+                        </div>
+                      )}
+                      {telegramUsername && (
+                        <div className="flex items-center gap-2 text-xs font-medium">
+                          <span>✈️</span>
+                          <span className="text-primary-700 dark:text-primary-300">
+                            Telegram:
+                          </span>
+                          <code className="rounded bg-primary-200/40 px-1.5 py-0.5 dark:bg-primary-900/50">
+                            {telegramUsername}
+                          </code>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {opened ? (opened.paste ? copy.pasteHint : copy.openedHint) : ""}
+              {/* Security Warning Box */}
+              {telegramUsername && (
+                <div className="mt-1 flex gap-2 rounded-md border border-amber-500/20 bg-warning-500/5 p-2.5 text-xs leading-relaxed text-warning-900 dark:border-warning-400/20 dark:bg-warning-400/5 dark:text-warning-200">
+                  <span className="shrink-0 text-sm">📌</span>
+                  <p>
+                    <strong className="font-semibold">
+                      Telegram Safety Tip:
+                    </strong>{" "}
+                    Beware of fake impersonator accounts with subtle typos.
+                    Double-check the handle, or use{" "}
+                    <strong className="font-semibold">Email</strong> for maximum
+                    security.
+                  </p>
+                </div>
+              )}
+            </motion.div>
 
             <div className="mt-3 flex items-center justify-between gap-3">
               <h3 className="m-0 text-xs font-extrabold tracking-wide text-muted-foreground uppercase">
@@ -288,7 +215,6 @@ export function OrderDialog({
                     exit={{ opacity: 0, scale: 0.8 }}
                     initial={{ opacity: 0, scale: 0.8 }}
                     key={state}
-                    transition={{ duration: 0.15 }}
                   >
                     {state === "copied" ? (
                       <Check
@@ -323,7 +249,7 @@ export function OrderDialog({
             <Button onClick={onClose} variant="outline">
               {copy.editAction}
             </Button>
-            <Button onClick={onFinish} variant="ghost">
+            <Button onClick={onFinish} variant="default">
               {copy.finishAction}
             </Button>
           </div>

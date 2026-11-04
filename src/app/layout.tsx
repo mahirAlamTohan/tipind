@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/layout/header"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CartRoot } from "@/features/cart/components/cart-root"
+import { Toaster } from "@/components/ui/sonner"
 
 const bodyFont = localFont({
   display: "swap",
@@ -99,6 +100,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <OfflineStatus />
             <SiteHeader />
             {children}
+            <Toaster className="hidden lg:block" />
             <CartRoot />
           </TooltipProvider>
         </ThemeProvider>

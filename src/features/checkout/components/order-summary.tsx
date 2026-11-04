@@ -11,7 +11,6 @@ import { formatMills, formatNumber, pluralize } from "@/lib/format"
 
 import { FORM_ID } from "../constants"
 import { checkoutContent } from "../content"
-import { chargeLabel } from "../lib/charges"
 import type { CheckoutStep, OrderTotals } from "../types"
 
 /** Fades the value in whenever it changes. */
@@ -78,7 +77,7 @@ export function OrderSummary({
 
       {/* Once the cards are gone, keep the items visible. */}
       {step === "details" && (
-        <ul className="m-0 max-h-44 list-none space-y-1.5 overflow-y-auto rounded-xl border border-border/70 bg-muted/40 p-3 text-xs">
+        <ul className="m-0 max-h-44 list-none space-y-1.5 overflow-y-auto rounded-md border border-border/70 bg-muted/40 p-3 text-xs">
           {items.map((item) => (
             <li
               className="flex items-baseline justify-between gap-3"
@@ -107,7 +106,7 @@ export function OrderSummary({
             className="flex items-center justify-between gap-3"
             key={charge.id}
           >
-            <dt className="text-muted-foreground">{chargeLabel(charge.id)}</dt>
+            <dt className="text-muted-foreground">{copy.shipping}</dt>
             <dd className="m-0">
               <Amount mills={charge.amountMills} />
             </dd>

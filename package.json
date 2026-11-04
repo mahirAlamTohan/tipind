@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "ESLINT_FULL_CHECK=true eslint .",
     "catalog:build": "node scripts/build-catalog.mjs --sheet \"https://script.google.com/macros/s/AKfycbzFRbjmjnm-n-BHTXiEo7FtPOJP0PyrEBx3bIz3QsAJLaq_UcyPj4bka96gis43mX0w/exec\" --clean --write-env"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "postcode-validator": "^3.10.26",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "sonner": "^2.0.8",
     "tailwind-animations": "^1.0.2",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7",

@@ -7,9 +7,6 @@ export const FORM_ID = "checkout-details-form"
 export const MAX_FIELD_LENGTH = 200
 export const MAX_NOTES_LENGTH = 1_000
 
-/** VAT in basis points (1000 = 10%). Null shows "To be confirmed". */
-export const VAT_RATE_BPS: number | null = null
-
 /** Cargo fee by ISO country code, in mills (15_000 = $15.000). Missing = "To be confirmed". */
 export const SHIPPING_MILLS: ReadonlyMap<string, number> = new Map<
   string,

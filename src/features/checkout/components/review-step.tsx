@@ -6,10 +6,13 @@ import { CartLineCard } from "@/features/cart/components/cart-line-card"
 import type { CartLineItem } from "@/features/cart/types"
 
 import { checkoutContent } from "../content"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 export function ReviewStep({ items }: { items: readonly CartLineItem[] }) {
   const reduceMotion = useReducedMotion()
   const copy = checkoutContent.review
+  const router = useRouter()
 
   return (
     <section aria-labelledby="checkout-review-heading">
@@ -36,6 +39,15 @@ export function ReviewStep({ items }: { items: readonly CartLineItem[] }) {
               <CartLineCard item={item} />
             </motion.div>
           ))}
+          <Button
+            className="w-full border-3 border-dashed border-primary-600/50 py-8"
+            variant="ghost"
+            onClick={() => {
+              router.push("/#catalog")
+            }}
+          >
+            {copy.addMoreAction}
+          </Button>
         </AnimatePresence>
       </div>
     </section>

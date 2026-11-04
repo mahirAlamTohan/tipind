@@ -78,7 +78,7 @@ export default defineConfig([
   tailwind.configs.recommended,
 
   // Git Diff
-  ...diff.configs["flat/diff"],
+  ...(!process.env.ESLINT_FULL_CHECK ? diff.configs["flat/diff"] : []),
 
   // Main config block
   {

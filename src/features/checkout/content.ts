@@ -15,6 +15,7 @@ export const checkoutContent = {
   review: {
     heading: "Review your items",
     hint: "Change quantities or remove items. The summary updates instantly.",
+    addMoreAction: "Add more items",
   },
   details: {
     heading: "Delivery details",
@@ -36,10 +37,6 @@ export const checkoutContent = {
     firstName: { label: "First name", placeholder: "Jane" },
     lastName: { label: "Last name", placeholder: "Doe" },
     email: { label: "Email address", placeholder: "jane@example.com" },
-    phone: {
-      label: "Phone / WhatsApp number",
-      placeholder: "+1 555 123 4567",
-    },
     company: { label: "Company", placeholder: "Company name" },
     addressLine1: {
       label: "Street address",
@@ -65,7 +62,6 @@ export const checkoutContent = {
   errors: {
     required: "This field is required.",
     email: "Enter a valid email address.",
-    phone: "Enter a valid phone number for {country}.",
     postal: "Enter a valid postal code for {country}.",
     region: "Choose a valid option from the list.",
   },
@@ -74,8 +70,7 @@ export const checkoutContent = {
     itemSingular: "item",
     itemPlural: "items",
     subtotal: "Subtotal",
-    vat: "VAT",
-    shipping: "Cargo",
+    shipping: "shipping",
     total: "Estimated total",
     pending: "To be confirmed",
     continueAction: "Continue",
@@ -84,23 +79,10 @@ export const checkoutContent = {
     note: "No payment is taken on this site. Our team confirms availability, VAT and cargo before anything is charged.",
   },
   dialog: {
-    title: "Your order is ready to send",
+    title: "Your order is almost complete!",
     description:
-      "Choose how you'd like to send it. The message below is filled in for you.",
-    optionsHeading: "Send your order with",
-    whatsapp: { title: "WhatsApp", description: "Opens a chat with us" },
-    telegram: {
-      title: "Telegram",
-      description: "Copies the message, then opens our chat",
-    },
-    unavailable: "Not set up",
-    openedHint: "Check the other app. Your message is already filled in.",
-    email: { title: "Email", description: "Opens Gmail in your browser" },
-    gmailNotice:
-      "Email opens Gmail in your browser, so you need to be signed in. Not using Gmail? Copy the message below and send it to {email}.",
-    otherMail: "Other ways to email:",
-    outlook: "Outlook",
-    mailApp: "Mail app",
+      "Follow the steps below to finalize and send your order details.",
+    optionsHeading: "ORDERING INSTRUCTIONS",
     pasteHint: "Message copied. Paste it into the message box.",
     messageHeading: "Your message",
     copyAction: "Copy message",

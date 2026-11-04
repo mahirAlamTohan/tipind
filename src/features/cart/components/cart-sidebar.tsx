@@ -1,10 +1,9 @@
 "use client"
-import { ShoppingCart, Trash2, X, ArrowRight } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { ShoppingCart, Trash2, X, ArrowRight, CircleCheck } from "lucide-react"
+import { useEffect, useRef } from "react"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { siteConfig } from "@/config/site"
 import { formatMills, formatNumber, pluralize } from "@/lib/format"
 
 import { SIDEBAR_ID } from "../constants"
@@ -13,11 +12,11 @@ import {
   selectTotalMills,
   useCartStore,
 } from "../cart-store"
-import { createCartSummary } from "../lib/summary"
 import { cartContent as copy } from "../content"
 import { CartResizeHandle } from "./cart-resize-handle"
 import { CartLineCard } from "./cart-line-card"
 import { Tooltip } from "@/components/ui/tooltip"
+import { toast } from "sonner"
 
 /**
  * Docked panel, not a modal: the page behind it stays usable.
@@ -31,7 +30,6 @@ export function CartSidebar() {
   const packets = useCartStore(selectPacketCount)
   const total = useCartStore(selectTotalMills)
   const { clear, setOpen } = useCartStore((state) => state.actions)
-  const [feedback, setFeedback] = useState("")
   const asideRef = useRef<HTMLElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -57,17 +55,6 @@ export function CartSidebar() {
   }, [isOpen])
 
   const packetsLabel = `${formatNumber(packets)} ${pluralize(packets, "packet", "packets")}`
-
-  async function copySummary() {
-    try {
-      await navigator.clipboard.writeText(
-        createCartSummary(items, siteConfig.name)
-      )
-      setFeedback(copy.copiedMessage)
-    } catch {
-      setFeedback(copy.copyFailureMessage)
-    }
-  }
 
   return (
     <aside
@@ -107,7 +94,26 @@ export function CartSidebar() {
               className="w-full shrink-0 rounded-lg text-danger-600 hover:bg-danger-50 hover:text-danger-700 dark:text-danger-300 dark:hover:bg-danger-800/50"
               onClick={() => {
                 clear()
-                setFeedback("")
+                if (items.length > 0)
+                  toast.success("Cart cleared", {
+                    position: "bottom-left",
+                    dismissible: true,
+                    closeButton: true,
+                    icon: (
+                      <CircleCheck
+                        aria-hidden="true"
+                        className="size-6 stroke-success-500"
+                      />
+                    ),
+                    classNames: {
+                      title:
+                        "ml-2 text-sm font-semibold text-success-950! dark:text-success-100!",
+                      closeButton:
+                        "bg-success-100! dark:bg-success-900! size-6! shadow",
+                      toast:
+                        "bg-success-50! dark:bg-success-950/70! backdrop-blur-sm! shadow-lg! dark:shadow-none!",
+                    },
+                  })
               }}
               variant="ghost"
             >

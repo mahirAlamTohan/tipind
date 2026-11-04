@@ -1,5 +1,5 @@
 "use client"
-import { Plus } from "lucide-react"
+import { CircleCheck, Plus } from "lucide-react"
 import { type RefObject, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import { formatTip, Tooltip } from "@/components/ui/tooltip"
 import { InfiniteScrollSentinel } from "./infinite-scroll-sentinel"
 import { useCartStore } from "@/features/cart/cart-store"
 import { productLineId, quantityOf } from "@/features/cart/lib/line-items"
+import { toast } from "sonner"
 
 const th =
   "px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
@@ -50,7 +51,29 @@ function AddToCartButton({
         disabled={!isHydrated || lineId === null}
         onClick={() => {
           const result = addProduct(product)
-          if (result === "added" || result === "updated") onAdded(product.name)
+          if (result === "added" || result === "updated") {
+            onAdded(product.name)
+            toast.success("item added", {
+              description: `${product.name} (${product.priceMills ? formatMills(product.priceMills) : ""}) added to cart`,
+              position: "bottom-left",
+              dismissible: true,
+              closeButton: true,
+              icon: (
+                <CircleCheck
+                  aria-hidden="true"
+                  className="size-6 stroke-success-500"
+                />
+              ),
+              classNames: {
+                title:
+                  "ml-2 text-sm font-semibold text-success-950! dark:text-success-100!",
+                closeButton:
+                  "bg-success-100! dark:bg-success-900! size-6! shadow",
+                toast:
+                  "bg-success-50! dark:bg-success-950/70! backdrop-blur-sm! shadow-lg! dark:shadow-none!",
+              },
+            })
+          }
         }}
         size="icon"
         variant="outline"

@@ -28,7 +28,12 @@ export const buttonVariants = cva(
         default: "h-10 px-4 py-2",
         sm: "h-9 px-3 text-xs",
         lg: "h-11 px-6 text-sm",
-        icon: "size-10 p-0",
+        icon: "size-8",
+        "icon-xs":
+          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm":
+          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
+        "icon-lg": "size-9",
       },
     },
     defaultVariants: {

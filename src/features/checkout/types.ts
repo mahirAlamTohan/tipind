@@ -3,7 +3,7 @@ export type PaymentMethodId =
   "btc" | "usdt-erc20" | "usdt-trc20" | "eth" | "usdc-erc20"
 export type CheckoutStep = "review" | "details"
 export type ChannelId = "email" | "whatsapp" | "telegram"
-export type ErrorKind = "required" | "email" | "phone" | "postal" | "region"
+export type ErrorKind = "required" | "email" | "postal" | "region"
 
 export type SERVICED_COUNTRIES_TYPE = typeof SERVICED_COUNTRIES
 export type SERVICED_COUNTRY = (typeof SERVICED_COUNTRIES)[number]
@@ -17,7 +17,6 @@ export interface ShippingDetails {
   firstName: string
   lastName: string
   email: string
-  phone: string
   company: string
   addressLine1: string
   addressLine2: string
@@ -32,7 +31,7 @@ export interface ShippingDetails {
 export type FieldName = keyof ShippingDetails
 
 export interface ChargeLine {
-  readonly id: "vat" | "shipping"
+  readonly id: "shipping"
   /** Null means "to be confirmed". */
   readonly amountMills: number | null
 }
@@ -82,7 +81,11 @@ export interface CheckoutContent {
     readonly details: string
     readonly send: string
   }
-  readonly review: { readonly heading: string; readonly hint: string }
+  readonly review: {
+    readonly heading: string
+    readonly hint: string
+    readonly addMoreAction: string
+  }
   readonly details: {
     readonly heading: string
     readonly description: string
@@ -104,7 +107,6 @@ export interface CheckoutContent {
     readonly itemSingular: string
     readonly itemPlural: string
     readonly subtotal: string
-    readonly vat: string
     readonly shipping: string
     readonly total: string
     readonly pending: string
@@ -117,16 +119,7 @@ export interface CheckoutContent {
     readonly title: string
     readonly description: string
     readonly optionsHeading: string
-    readonly email: ChannelCopy
-    readonly whatsapp: ChannelCopy
-    readonly telegram: ChannelCopy
-    readonly gmailNotice: string
-    readonly outlook: string
-    readonly mailApp: string
     readonly pasteHint: string
-    readonly otherMail: string
-    readonly unavailable: string
-    readonly openedHint: string
     readonly messageHeading: string
     readonly copyAction: string
     readonly copiedAction: string

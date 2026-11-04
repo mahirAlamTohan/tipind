@@ -10,7 +10,7 @@ import type {
   SERVICED_COUNTRY,
   ShippingDetails,
 } from "../types"
-import { hasPostalSystem, isValidPhone, isValidPostal } from "./address"
+import { hasPostalSystem, isValidPostal } from "./address"
 import { findCountry, isCountryCode } from "./countries"
 import { EMPTY_DETAILS } from "./details"
 
@@ -40,10 +40,6 @@ function buildSchema(code: SERVICED_COUNTRY) {
     lastName: required(),
     notes: z.string().trim(),
     paymentMethod: z.string(),
-    phone: required().refine(
-      (value) => !country || isValidPhone(value, code),
-      "phone"
-    ),
     postalCode: (postalNeeded ? required() : z.string().trim()).refine(
       (value) => value === "" || !postalNeeded || isValidPostal(value, code),
       "postal"
@@ -69,7 +65,6 @@ function schemaFor(code: SERVICED_COUNTRY) {
 const KINDS: ReadonlySet<string> = new Set<ErrorKind>([
   "required",
   "email",
-  "phone",
   "postal",
   "region",
 ])
@@ -110,8 +105,6 @@ export function errorText(kind: ErrorKind, details: ShippingDetails) {
       return errors.email
     case "region":
       return errors.region
-    case "phone":
-      return formatMessage(errors.phone, { country })
     case "postal":
       return formatMessage(errors.postal, { country })
   }

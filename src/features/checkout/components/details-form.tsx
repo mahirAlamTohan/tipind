@@ -204,32 +204,15 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
             type="email"
           />
         </FormField>
-        <FormField
-          error={errorFor("phone")}
-          label={copy.fields.phone.label}
-          name="phone"
-        >
+        <FormField label={copy.fields.company.label} name="company" optional>
           <input
-            {...bind("phone")}
-            autoComplete="tel"
+            {...bind("company")}
+            autoComplete="organization"
             className={controlClass}
-            inputMode="tel"
-            maxLength={30}
-            placeholder={copy.fields.phone.placeholder}
-            type="tel"
+            maxLength={150}
+            placeholder={copy.fields.company.placeholder}
           />
         </FormField>
-        <div className="sm:col-span-2">
-          <FormField label={copy.fields.company.label} name="company" optional>
-            <input
-              {...bind("company")}
-              autoComplete="organization"
-              className={controlClass}
-              maxLength={150}
-              placeholder={copy.fields.company.placeholder}
-            />
-          </FormField>
-        </div>
       </Section>
 
       <Section heading={copy.details.addressHeading} index={1}>

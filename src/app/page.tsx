@@ -1,3 +1,5 @@
+"use client"
+
 import { FloatingActions } from "@/components/layout/floating-actions"
 import { AboutSection } from "@/components/sections/about-section"
 import { ContactSection } from "@/components/sections/contact-section"

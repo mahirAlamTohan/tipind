@@ -24,7 +24,6 @@ export const EMPTY_DETAILS: ShippingDetails = {
   lastName: "",
   notes: "",
   paymentMethod: "",
-  phone: "",
   postalCode: "",
   region: "",
 }
@@ -60,7 +59,6 @@ const storedSchema = z.object({
     .string()
     .catch("")
     .transform((value) => findPayment(value)?.id ?? ""),
-  phone: short,
   postalCode: short,
   region: short,
 })
@@ -82,7 +80,6 @@ export function trimDetails(details: ShippingDetails): ShippingDetails {
     firstName: details.firstName.trim(),
     lastName: details.lastName.trim(),
     notes: details.notes.trim(),
-    phone: details.phone.trim(),
     postalCode: details.postalCode.trim(),
     region: details.region.trim(),
   }
