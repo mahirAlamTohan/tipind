@@ -1,3 +1,11 @@
+> **Status: superseded.** Everything actionable in this audit has been
+> implemented — see [`IMPLEMENTATION-REPORT.md`](./IMPLEMENTATION-REPORT.md) for
+> what was changed and measured, and [`README.md`](./README.md) for the
+> Cloudflare dashboard steps that still need doing by hand.
+> This document is kept as the original evidence trail.
+
+---
+
 # tipind — Full Audit & Optimization Report
 
 **Repo:** `mahirAlamTohan/tipind` · **Branch:** `arena/cd754b2a-tipind` (up to date with `origin/main` @ `f89d8c5`)

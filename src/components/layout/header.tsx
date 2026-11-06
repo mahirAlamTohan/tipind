@@ -1,15 +1,9 @@
 "use client"
 
 import { ArrowUpRight, MessageCircle } from "lucide-react"
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react"
 import Link from "next/link"
-import { useState, type MouseEvent } from "react"
+import { usePathname } from "next/navigation"
+import type { MouseEvent } from "react"
 
 import { BrandLogo } from "@/components/layout/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
@@ -18,18 +12,11 @@ import { ButtonLink } from "@/components/ui/button"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { CartTrigger } from "@/features/cart/components/cart-trigger"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { scrollToSection } from "@/lib/scroll"
-import { CartTrigger } from "@/features/cart/components/cart-trigger"
-import { usePathname } from "next/navigation"
 
-const STRIP_HEIGHT = 36 // px, matches h-9 in TopStrip
-const FLOAT_GAP = 10 // px, keep in sync with --float-gap below
-const FLOAT_AFTER = 64 // px of scroll until fully floating
-const MAX_WIDTH = "75rem"
 const HOME_ID = "home"
-
-const navSpring = { type: "spring", stiffness: 500, damping: 36 } as const
 
 const NAV_ITEMS = siteConfig.navigation.map((item) => ({
   ...item,
@@ -47,45 +34,21 @@ interface NavProps {
 }
 
 function DesktopNav({ activeId, onSelect }: NavProps) {
-  const reduceMotion = useReducedMotion()
-  const [hovered, setHovered] = useState<string | null>(null)
-  const highlighted = hovered ?? activeId
-
   return (
     <nav
       aria-label={siteContent.ui.mainNavigationLabel}
       className="hidden flex-1 items-center justify-center gap-1 md:flex"
-      onMouseLeave={() => {
-        setHovered(null)
-      }}
     >
       {NAV_ITEMS.map((item) => (
         <Link
           aria-current={item.id === activeId ? "location" : undefined}
-          className="relative isolate inline-flex min-h-10 items-center rounded-full px-3.5 text-[0.78rem] font-semibold text-neutral-600 transition-colors duration-150 hover:text-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-[current=location]:text-primary-700 dark:text-neutral-300 dark:hover:text-primary-100 dark:aria-[current=location]:text-primary-200"
+          className="nav-link relative isolate inline-flex min-h-10 items-center rounded-full px-3.5 text-[0.78rem] font-semibold text-neutral-600 transition-colors duration-150 hover:text-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-[current=location]:text-primary-700 dark:text-neutral-300 dark:hover:text-primary-100 dark:aria-[current=location]:text-primary-200"
           href={`/#${item.id}`}
           key={item.id}
-          onBlur={() => {
-            setHovered(null)
-          }}
           onClick={(event) => {
             onSelect(item.id, event)
           }}
-          onFocus={() => {
-            setHovered(item.id)
-          }}
-          onMouseEnter={() => {
-            setHovered(item.id)
-          }}
         >
-          {highlighted === item.id && (
-            <motion.span
-              aria-hidden="true"
-              className="absolute inset-0 -z-10 rounded-full bg-primary-100 dark:bg-primary-900/50"
-              layoutId="nav-pill"
-              transition={reduceMotion ? { duration: 0 } : navSpring}
-            />
-          )}
           {item.label}
         </Link>
       ))}
@@ -118,10 +81,18 @@ function MobileNav({ activeId, onSelect }: NavProps) {
   )
 }
 
+/**
+ * Sticky header.
+ *
+ * The docked→floating transition, the reading-progress bar and the floating
+ * gap all run on CSS scroll-driven animations (`.site-header*` in main.css).
+ * They used to be `motion` springs driven by a scroll listener, which cost a
+ * 95 kB animation runtime plus a JS scroll handler on every page. See the
+ * `.site-header` block for the fallback story: browsers without
+ * `animation-timeline` simply get the docked header, which is the pre-scroll
+ * state and fully usable.
+ */
 export function SiteHeader() {
-  const reduceMotion = useReducedMotion()
-  const { scrollY, scrollYProgress } = useScroll()
-
   const pathname = usePathname()
   const onHome = pathname === "/"
   const { activeId: spyId, lock } = useActiveSection(SECTION_IDS, HOME_ID)
@@ -132,91 +103,32 @@ export function SiteHeader() {
     scrollToSection(event, id)
   }
 
-  // Page progress bar (transform only)
-  const barSpring = useSpring(scrollYProgress, {
-    damping: 30,
-    restDelta: 0.001,
-    stiffness: 120,
-  })
-
-  // 0 = docked, 1 = floating. Drives the background layer only.
-  const rawProgress = useTransform(scrollY, [0, FLOAT_AFTER], [0, 1], {
-    clamp: true,
-  })
-  const springProgress = useSpring(rawProgress, {
-    damping: 32,
-    mass: 0.6,
-    stiffness: 220,
-  })
-  const progress = reduceMotion ? rawProgress : springProgress
-
-  // Outer layer: glued to the strip's bottom edge until it scrolls away,
-  // then pinned to the very top (this alone is the mobile behavior).
-  const y = useTransform(scrollY, (value) =>
-    Math.min(STRIP_HEIGHT, Math.max(0, STRIP_HEIGHT - value))
-  )
-  // Inner layer: adds the floating gap once the strip is gone.
-  // --float-gap is 0px on mobile, so it does nothing there.
-  const gapProgress = useTransform(
-    scrollY,
-    [STRIP_HEIGHT - FLOAT_GAP, STRIP_HEIGHT],
-    [0, 1]
-  )
-  const gapY = useTransform(
-    gapProgress,
-    (v) => `calc(${v.toFixed(3)} * var(--float-gap))`
-  )
-
-  // Desktop: floating gutter, capped at MAX_WIDTH. Mobile: both vars are 0,
-  // so the shell stays edge to edge with square corners.
-  const inset = useTransform(
-    progress,
-    (v) =>
-      `calc(${v.toFixed(3)} * max(var(--float-gutter), (100% - ${MAX_WIDTH}) / 2))`
-  )
-  const radius = useTransform(
-    progress,
-    (v) => `calc(${v.toFixed(3)} * var(--float-radius))`
-  )
-  const hairlineOpacity = useTransform(progress, [0, 1], [1, 0])
-
   return (
     <>
       <TopStrip />
 
-      <motion.div
+      <div
         aria-hidden="true"
-        className="fixed top-0 right-(--cart-w) left-0 z-60 h-0.75 origin-left bg-linear-to-r from-primary to-highlight-300 transition-[right] duration-300 ease-out motion-reduce:transition-none"
-        style={{ scaleX: reduceMotion ? scrollYProgress : barSpring }}
+        className="site-progress fixed top-0 right-(--cart-w) left-0 z-60 h-0.75 origin-left bg-linear-to-r from-primary to-highlight-300 transition-[right] duration-300 ease-out motion-reduce:transition-none"
       />
 
-      {/* Reserves the space the fixed header occupies: 56 + 48 on mobile, 72 on desktop */}
+      {/* Reserves the space the fixed header occupies: 64 + 48 on mobile, 72 on desktop */}
       <div aria-hidden="true" className="h-26 md:h-18" />
 
-      <motion.div
-        className="pointer-events-none fixed top-0 right-(--cart-w) left-0 z-50 transition-[right] duration-300 ease-out [--float-gap:0px] [--float-gutter:0px] [--float-radius:0px] motion-reduce:transition-none md:[--float-gap:10px] md:[--float-gutter:1rem] md:[--float-radius:24px]"
-        style={{ y }}
-      >
-        <motion.div className="relative" style={{ y: gapY }}>
+      <div className="site-header pointer-events-none fixed top-0 right-(--cart-w) left-0 z-50 transition-[right] duration-300 ease-out [--float-gap:0px] [--float-gutter:0px] [--float-radius:0px] motion-reduce:transition-none md:[--float-gap:10px] md:[--float-gutter:1rem] md:[--float-radius:24px]">
+        <div className="site-header-gap relative">
           {/* Background shell: the only thing that changes size */}
-          <motion.div
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 bg-background/90 backdrop-blur-lg md:bg-background/85"
-            style={{ borderRadius: radius, left: inset, right: inset }}
+            className="site-header-shell pointer-events-none absolute inset-y-0 bg-background/90 backdrop-blur-lg md:bg-background/85"
           >
             {/* Desktop: floating border + shadow fade in */}
-            <motion.div
-              className="absolute inset-0 rounded-[inherit] border border-primary-200/80 shadow-header-floating max-md:hidden dark:border-primary/50"
-              style={{ opacity: progress }}
-            />
+            <div className="site-header-border absolute inset-0 rounded-[inherit] border border-primary-200/80 shadow-header-floating max-md:hidden dark:border-primary/50" />
             {/* Desktop: docked hairline fades out as it floats */}
-            <motion.div
-              className="absolute inset-x-0 bottom-0 h-px bg-border max-md:hidden"
-              style={{ opacity: hairlineOpacity }}
-            />
+            <div className="site-header-hairline absolute inset-x-0 bottom-0 h-px bg-border max-md:hidden" />
             {/* Mobile: always docked, permanent hairline */}
             <div className="absolute inset-x-0 bottom-0 h-px bg-border md:hidden" />
-          </motion.div>
+          </div>
 
           <header className="pointer-events-auto relative">
             <Container className="flex h-14 items-center gap-2 md:h-18 md:gap-4 lg:gap-6">
@@ -247,8 +159,8 @@ export function SiteHeader() {
             </Container>
             <MobileNav activeId={activeId} onSelect={handleSelect} />
           </header>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </>
   )
 }

@@ -6,13 +6,21 @@
  *   node scripts/build-catalog.mjs -i <source.json> [-o public/data] [--clean] [--write-env]
  *   node scripts/build-catalog.mjs --sheet <apps-script-url> [-o public/data] [--clean] [--write-env]
  *
- * Output: <output>/catalog.<hash>.dat = MAGIC + XOR(gzip(JSON))
- * JSON:   { format: 4, priceBounds: [minMills, maxMills], manufacturers: string[],
+ * Output: <output>/catalog.<hash>.json = plain, uncompressed JSON.
+ * JSON:   { format: 5, priceBounds: [minMills, maxMills], manufacturers: string[],
  *           packaging: string[], types: string[],
  *           products: [name, ingredient, manufacturerIdx, packagingIdx, typeIdx, priceMills][] }
  * A mill is 1/1000 USD, so "$0.665" is stored as 665 (3 decimals, exact).
- * Missing index/price is -1. Keep FORMAT/MAGIC in sync with
+ * Missing index/price is -1. Keep FORMAT in sync with
  * src/features/catalog/constants.ts (and check the product tuple matches the reader).
+ *
+ * Why plain JSON and not gzip+XOR: the artifact used to be pre-compressed and
+ * masked, which made it opaque to the CDN -- Cloudflare cannot re-compress a
+ * .dat that is already gzip inside, so it was stuck at gzip's ratio forever.
+ * Plain JSON costs the same over gzip and ~26% less over Brotli (Cloudflare
+ * applies Brotli automatically), drops the NEXT_PUBLIC_CATALOG_XOR_KEY secret,
+ * and lets the browser decode with response.json() instead of a hand-built
+ * DecompressionStream pipeline. Inspect it with: jq . catalog.<hash>.json
  *
  * Rows whose "status" column is "needs review" are held out of the published
  * catalog and are reported in the stats.
@@ -27,13 +35,10 @@ import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
-import { gzipSync } from "node:zlib"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const KEY_NAME = "NEXT_PUBLIC_CATALOG_XOR_KEY"
 const URL_NAME = "NEXT_PUBLIC_CATALOG_DATA_URL"
-const FORMAT = 4
-const MAGIC = Buffer.from("TIPCAT4:", "ascii")
+const FORMAT = 5
 const NONE = -1
 const MAX_UNIT_PRICE_MILLS = 100_000_000
 /** Status value that holds a product out of the published catalog. */
@@ -246,15 +251,8 @@ function build(json) {
   }
 }
 
-const encode = (artifact, keyBytes) => {
-  const gzipped = gzipSync(Buffer.from(JSON.stringify(artifact), "utf8"), {
-    level: 9,
-  })
-  const masked = gzipped.map(
-    (byte, index) => byte ^ keyBytes[index % keyBytes.length]
-  )
-  return Buffer.concat([MAGIC, masked])
-}
+/** Plain UTF-8 JSON. The CDN and the browser own the compression. */
+const encode = (artifact) => Buffer.from(JSON.stringify(artifact), "utf8")
 
 /* ── Google Apps Script support ─────────────────────────────────────── */
 
@@ -428,6 +426,17 @@ async function updateEnv(file, name, value) {
   await writeFile(file, next)
 }
 
+async function removeEnv(file, name) {
+  let content = ""
+  try {
+    content = await readFile(file, "utf8")
+  } catch {
+    return
+  }
+  const pattern = new RegExp(`^${name}=.*(?:\\r?\\n)?`, "m")
+  if (pattern.test(content)) await writeFile(file, content.replace(pattern, ""))
+}
+
 function loadEnvFiles() {
   for (const name of [".env", ".env.production"]) {
     try {
@@ -471,11 +480,6 @@ async function main() {
 
   // Existing environment variables win; .env then .env.production fill gaps.
   loadEnvFiles()
-  const xorKey = process.env[KEY_NAME]?.trim()
-  if (!xorKey)
-    throw new Error(
-      `Missing ${KEY_NAME} (set it in .env or .env.production). Note: it ships in the browser bundle, so it only obfuscates.`
-    )
 
   let json
   if (values.sheet) {
@@ -487,9 +491,9 @@ async function main() {
 
   const outputDir = path.resolve(ROOT, values.output)
   const { artifact, stats } = build(json)
-  const payload = encode(artifact, Buffer.from(xorKey, "utf8"))
+  const payload = encode(artifact)
   const hash = createHash("sha256").update(payload).digest("hex").slice(0, 8)
-  const fileName = `catalog.${hash}.dat`
+  const fileName = `catalog.${hash}.json`
 
   await mkdir(outputDir, { recursive: true })
   await writeFile(path.join(outputDir, fileName), payload)
@@ -507,7 +511,7 @@ async function main() {
     const removed =
       (await removeStale(
         outputDir,
-        /^(catalog|manufacturers|packaging)\.[\w-]+\.dat$/,
+        /^(catalog|manufacturers|packaging)\.[\w-]+\.(?:dat|json)$/,
         fileName
       )) + (await removeStale(extrasDir, /^source\.[\w-]+\.json$/, sourceName))
     if (removed > 0) console.log(`Removed ${removed.toString()} stale file(s).`)
@@ -516,6 +520,8 @@ async function main() {
   const dataUrl = `/${path.relative(path.join(ROOT, "public"), path.join(outputDir, fileName)).split(path.sep).join("/")}`
   if (values["write-env"]) {
     await updateEnv(path.join(ROOT, ".env.production"), URL_NAME, dataUrl)
+    // The XOR key is gone: the artifact is plain JSON now, nothing to configure.
+    await removeEnv(path.join(ROOT, ".env.production"), "NEXT_PUBLIC_CATALOG_XOR_KEY")
     console.log("Updated .env.production")
   }
 

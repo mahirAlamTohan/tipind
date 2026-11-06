@@ -5,11 +5,12 @@ import { siteConfig } from "@/config/site"
 import "@/styles/main.css"
 
 import { OfflineStatus } from "@/components/layout/offline-status"
+import { StructuredData } from "@/components/layout/structured-data"
 import { SiteHeader } from "@/components/layout/header"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CartRoot } from "@/features/cart/components/cart-root"
-import { Toaster } from "@/components/ui/sonner"
+import { LazyToaster } from "@/components/ui/lazy-toaster"
 
 const bodyFont = localFont({
   display: "swap",
@@ -86,7 +87,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       className={`${bodyFont.variable} ${headingFont.variable} min-w-80 scroll-pt-32 scroll-smooth motion-reduce:scroll-auto`}
@@ -95,12 +98,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased selection:bg-primary-200 selection:text-ink">
+        <StructuredData />
+        {/* First tab stop: keyboard users can jump past the header and nav. */}
+        <a className="skip-link" href="#catalog">
+          Skip to catalog
+        </a>
         <ThemeProvider>
           <TooltipProvider>
             <OfflineStatus />
             <SiteHeader />
             {children}
-            <Toaster className="hidden lg:block" />
+            <LazyToaster className="hidden lg:block" />
             <CartRoot />
           </TooltipProvider>
         </ThemeProvider>

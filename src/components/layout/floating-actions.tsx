@@ -1,6 +1,5 @@
 "use client"
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
   ArrowUpRight,
   ShoppingCart,
@@ -64,7 +63,6 @@ function CartButton({
 
 export function FloatingActions() {
   const [isOpen, setIsOpen] = useState(false)
-  const reduceMotion = useReducedMotion()
   const hasContactGap = !siteConfig.contact.phone || !siteConfig.contact.email
   const hasWhatsapp = Boolean(siteConfig.contact.whatsappNumber)
 
@@ -91,48 +89,20 @@ export function FloatingActions() {
   return (
     // z-60 is below the cart sidebar (z-70), so the sidebar covers this stack.
     <div className="fixed right-4 bottom-5 z-60 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6">
-      {/* Row 1 */}
-      <AnimatePresence initial={false}>
-        {showCount ? (
-          <motion.div
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: 12 }}
-            id="floating-cart"
-            initial={
-              reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }
-            }
-            role="region"
-            transition={
-              reduceMotion
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 360, damping: 30, mass: 0.72 }
-            }
-          >
-            <CartButton count={count} showCount={showCount} />
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {/* Row 1. Entrance is CSS (.float-pop); it mounts once the cart hydrates. */}
+      {showCount && (
+        <div className="float-pop" id="floating-cart" role="region">
+          <CartButton count={count} showCount={showCount} />
+        </div>
+      )}
       {/* Row 2. The panel is anchored to this row and opens upward over row 1. */}
       <div className="relative flex items-center gap-3">
-        <AnimatePresence initial={false}>
-          {isOpen ? (
-            <motion.div
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+        {isOpen && (
+            <div
               aria-label={ui.contactOptionsLabel}
-              className="absolute right-0 bottom-full z-10 mb-3 w-[min(19rem,calc(100vw-2rem))] origin-bottom-right rounded-2xl border border-border bg-card p-3 shadow-2xl shadow-neutral-950/25"
-              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              className="float-pop absolute right-0 bottom-full z-10 mb-3 w-[min(19rem,calc(100vw-2rem))] origin-bottom-right rounded-2xl border border-border bg-card p-3 shadow-2xl shadow-neutral-950/25"
               id="floating-contact-options"
-              initial={
-                reduceMotion
-                  ? { opacity: 0 }
-                  : { opacity: 0, scale: 0.94, y: 16 }
-              }
               role="region"
-              transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : { type: "spring", stiffness: 360, damping: 30, mass: 0.72 }
-              }
             >
               <div className="mb-2.5 flex items-center gap-2 px-1.5 py-1">
                 <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary-text">
@@ -194,9 +164,8 @@ export function FloatingActions() {
                   {siteContent.contact.description}
                 </p>
               )}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+            </div>
+        )}
 
         <Tooltip
           content={

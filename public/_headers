@@ -1,27 +1,78 @@
+# Cloudflare Workers static assets: response headers.
+# https://developers.cloudflare.com/workers/static-assets/headers/
+#
+# Rules match the REQUEST path (not the file that answers), and a header set by
+# two matching rules is comma-joined — so the catch-all at the bottom sets no
+# Cache-Control at all. Each path owns its own.
+#
+# `immutable` is a browser directive; Cloudflare's edge obeys max-age/s-maxage.
+# Hashed assets get 1 year, entry points get must-revalidate so a deploy lands
+# immediately.
+
+# ── Fingerprinted build output: the filename changes whenever the bytes do ──
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
 
+# ── Versioned catalog artifact ──
+/data/catalog.*.json
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/json; charset=utf-8
+  X-Content-Type-Options: nosniff
+
+# Legacy .dat artifacts (catalogs built before format 5).
 /data/*.dat
   Cache-Control: public, max-age=31536000, immutable
   Content-Type: application/octet-stream
   X-Content-Type-Options: nosniff
 
-/sw.js
-  Cache-Control: no-cache
-  Content-Type: text/javascript; charset=utf-8
-  Service-Worker-Allowed: /
-
-/precache-manifest.json
-  Cache-Control: no-cache
-  Content-Type: application/json; charset=utf-8
-
-/opengraph-image*
+# ── Generated icons: stable URLs, so cache but allow a refresh ──
+/icon
+  Cache-Control: public, max-age=86400
   Content-Type: image/png
 
+/apple-icon
+  Cache-Control: public, max-age=86400
+  Content-Type: image/png
+
+/opengraph-image
+  Cache-Control: public, max-age=86400
+  Content-Type: image/png
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=3600
+  Content-Type: application/manifest+json; charset=utf-8
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+# ── Entry points: never stale, so a deploy is visible on the next request ──
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/checkout/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# ── Every response ──
+# CSP note: 'unsafe-inline' is required for script-src because Next.js inlines
+# its bootstrap and next-themes inlines the anti-FOUC snippet. Everything else
+# is locked down; style-src needs it for Tailwind's runtime-injected custom
+# properties on the cart sidebar.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Strict-Transport-Security: max-age=31536000
-  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-DNS-Prefetch-Control: off
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me https://t.me; object-src 'none'; upgrade-insecure-requests

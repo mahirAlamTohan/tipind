@@ -27,6 +27,29 @@
  *   --json                Machine-readable output
  *
  * Exit codes: 0 pass, 1 threshold breached, 2 usage/connection error.
+ *
+ * WHAT THIS CANNOT TELL YOU (read before trusting a number)
+ * ---------------------------------------------------------
+ * Pointing this at a local static server is a smoke test, not a benchmark. A
+ * localhost run has no TLS handshake, no DNS, no geographic RTT, no CDN cache
+ * and no cold start, so it reports single-digit milliseconds and passes every
+ * threshold. The only runs that mean anything are against the deployed URL:
+ *
+ *     npm run loadtest -- --target https://tipind.mahiralamtohan.workers.dev
+ *
+ * And even then, remember the deployment is an assets-only Worker: Cloudflare
+ * serves the bytes and the real ceiling is the visitor's connection, not this
+ * machine. What these scenarios are actually good for:
+ *
+ *   - catching a cache-header regression (a burst that suddenly logs
+ *     cf-cache-status: MISS shows up as a latency cliff),
+ *   - confirming the 404/error rate stays at zero under concurrency,
+ *   - measuring the real cold-visit transfer from a real edge location,
+ *   - proving a deploy did not break a route.
+ *
+ * A localhost run is only useful for "did I break the server", which is why
+ * the harness labels the target and refuses to present local results as a
+ * capacity number.
  */
 
 const DEFAULTS = {
@@ -299,6 +322,9 @@ async function runSoak(args) {
 const ms = (value) => `${value.toFixed(1).padStart(8)} ms`
 const pct = (value) => `${(value * 100).toFixed(2).padStart(6)}%`
 
+const isLocal = (target) =>
+  /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])/i.test(target)
+
 function report(result, args) {
   const stats = summarize(result.samples)
   const verdict =
@@ -314,6 +340,7 @@ function report(result, args) {
           extra: result.extra,
           scenario: args.scenario,
           stats,
+          localTarget: isLocal(args.target),
           target: args.target,
           title: result.title,
           verdict,
@@ -327,6 +354,12 @@ function report(result, args) {
 
   console.log(`\n  ${result.title}`)
   console.log(`  target          ${args.target}`)
+  if (isLocal(args.target)) {
+    console.log(
+      "  ⚠ LOCAL TARGET: no TLS, no CDN, no network latency. These numbers are a\n" +
+        "    smoke test only. Re-run against the deployed URL for anything real."
+    )
+  }
   console.log(`  requests        ${stats.samples.toString()}`)
   console.log(`  failures        ${stats.failures.toString()}  (${pct(stats.errorRate)})`)
   console.log(`  transferred     ${(stats.bytes / 1024 / 1024).toFixed(2)} MiB`)

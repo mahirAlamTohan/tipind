@@ -38,7 +38,3 @@ export function scrollToSection(event: MouseEvent<HTMLElement>, id: string) {
   window.scrollTo({ top, behavior: "auto" })
   window.history.replaceState(null, "", id === HOME_ID ? "/" : `/#${id}`)
 }
-
-export function scrollToTop(event: MouseEvent<HTMLElement>) {
-  scrollToSection(event, HOME_ID)
-}

@@ -1,6 +1,9 @@
 "use client"
+import { useEffect, useRef, useState } from "react"
+
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
+import { siteConfig } from "@/config/site"
 import { siteContent } from "@/config/content"
 import { formatNumber, pluralize } from "@/lib/format"
 
@@ -14,15 +17,38 @@ import { CatalogFilters } from "./catalog-filters"
 import { CatalogStat, CatalogStatusBar } from "./catalog-status"
 import { CatalogTable } from "./catalog-table"
 import { CatalogToolbar } from "./catalog-toolbar"
-import { useRef } from "react"
 
-interface CatalogExplorerProps {
-  catalogDataUrl?: string | undefined
-}
+/** Load the catalog once the section is this close to the viewport. */
+const PRELOAD_MARGIN = "600px"
 
-export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
+export function CatalogExplorer() {
   const copy = siteContent.catalog
-  const status = useCatalogLoader(catalogDataUrl)
+  const sectionRef = useRef<HTMLElement>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
+
+  // The catalog is the largest transfer on the page and it sits well below the
+  // fold, so it must not compete with the first paint. Fetch it when the
+  // section gets close instead of on mount.
+  useEffect(() => {
+    const element = sectionRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: PRELOAD_MARGIN }
+    )
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  const status = useCatalogLoader(shouldLoad ? siteConfig.catalog.dataUrl : "")
   const dataset = useCatalogStore((state) => state.dataset)
   const loadError = useCatalogStore((state) => state.error)
   const loadMore = useCatalogStore((state) => state.actions.loadMore) // ← new
@@ -51,6 +77,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     <section
       className="bg-linear-to-b from-surface-tint to-background py-16 sm:py-20 lg:py-24"
       id="catalog"
+      ref={sectionRef}
     >
       <Container>
         <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-9">

@@ -1,7 +1,5 @@
 "use client"
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-
 import { siteContent } from "@/config/content"
 import { formatMessage, formatNumber, pluralize } from "@/lib/format"
 
@@ -22,22 +20,10 @@ export function CatalogFilters({ dataset, matchCount }: CatalogFiltersProps) {
   const selectedCount = useCatalogStore(
     (state) => state.manufacturer.size + state.packaging.size
   )
-  const reduceMotion = useReducedMotion()
-
   return (
-    <AnimatePresence initial={false}>
+    <>
       {open && dataset && (
-        <motion.div
-          animate={{ height: "auto", opacity: 1 }}
-          className="overflow-hidden"
-          exit={{ height: 0, opacity: 0 }}
-          initial={{ height: 0, opacity: 0 }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 0.32, ease: [0.22, 1, 0.36, 1] }
-          }
-        >
+        <div className="filters-panel overflow-hidden">
           <div
             aria-label={copy.filtersAction}
             className="space-y-5 border-y border-border bg-neutral-50/80 p-5 sm:px-7 dark:bg-neutral-950/30"
@@ -85,8 +71,8 @@ export function CatalogFilters({ dataset, matchCount }: CatalogFiltersProps) {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   )
 }

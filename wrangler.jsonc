@@ -1,13 +1,18 @@
 {
+  // Assets-only Worker: there is no `main`, so every request is answered by
+  // the static files in ./out and never invokes a script. That keeps requests
+  // free and unlimited (no 100k/day Worker quota, no CPU limit) — see
+  // README.md → "Cloudflare edge setup" before adding `main` or
+  // `run_worker_first`, because both change the billing model.
   "name": "tipind",
   "compatibility_date": "2026-10-02",
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page",
   },
-  "vars": {
-    "NEXT_PUBLIC_CATALOG_DATA_URL": "/data/catalog.e0a00877.dat",
-  },
+  // No `vars`: the build reads .env.production, which `npm run catalog:build`
+  // keeps in sync. Two sources of truth for the catalog URL is how you ship a
+  // site that requests a file that does not exist.
   "observability": {
     "logs": {
       "enabled": true,

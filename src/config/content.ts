@@ -59,7 +59,7 @@ export const siteContent = {
     fullCatalogLabel: "full catalog",
     searchNowLabel: "loading catalog",
     loadErrorAdvice:
-      "Check the catalog URL, XOR key, CORS headers and file format.",
+      "Check the catalog URL in .env.production and rebuild with `npm run catalog:build`.",
     paginationLabel: "Catalog pagination",
     filtersAction: "Filters",
     closeFiltersAction: "Close filters",

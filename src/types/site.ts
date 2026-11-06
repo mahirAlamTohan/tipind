@@ -26,6 +26,5 @@ export interface SiteConfig {
   }
   catalog: {
     dataUrl: string
-    xorKey: string
   }
 }

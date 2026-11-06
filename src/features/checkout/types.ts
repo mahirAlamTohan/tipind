@@ -62,11 +62,6 @@ interface FieldCopy {
   readonly placeholder: string
 }
 
-interface ChannelCopy {
-  readonly title: string
-  readonly description: string
-}
-
 export interface CheckoutContent {
   readonly eyebrow: string
   readonly title: string

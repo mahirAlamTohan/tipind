@@ -17,7 +17,7 @@ export function TopStrip() {
         <p className="hidden items-center gap-2 text-primary-50 md:flex dark:text-neutral-300">
           <span
             aria-hidden="true"
-            className="size-1.5 animate-pulsing rounded-full bg-success-300 ring-4 ring-success-300/20 animate-delay-250 animate-duration-1000 animate-fill-mode-forwards animate-iteration-count-infinite animate-steps-modern dark:bg-success-400 dark:ring-success-400/15"
+            className="status-dot size-1.5 rounded-full bg-success-300 ring-4 ring-success-300/20 dark:bg-success-400 dark:ring-success-400/15"
           />
           {siteContent.ui.headerIntro} {siteConfig.founded}
         </p>

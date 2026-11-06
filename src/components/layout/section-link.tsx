@@ -1,25 +1,19 @@
-"use client"
-
-import Link from "next/link"
 import type { ComponentProps } from "react"
 
-import { scrollToSection } from "@/lib/scroll"
-
-type SectionLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
+type SectionLinkProps = Omit<ComponentProps<"a">, "href"> & {
   /** Section id without the hash, e.g. "contact". */
   id: string
 }
 
-/** In-page link that scrolls the same way as the header nav. */
-export function SectionLink({ id, onClick, ...props }: SectionLinkProps) {
-  return (
-    <Link
-      href={`/#${id}`}
-      onClick={(event) => {
-        onClick?.(event)
-        if (!event.defaultPrevented) scrollToSection(event, id)
-      }}
-      {...props}
-    />
-  )
+/**
+ * In-page link to a section of the home page.
+ *
+ * A plain anchor is enough: `<html>` already carries `scroll-smooth` and
+ * `scroll-pt-32`, so the browser scrolls to the right offset with the user's
+ * motion preference respected. This used to be a client component wrapping
+ * `next/link` with a click handler, which shipped JavaScript and, once the
+ * sections became server components, had to go.
+ */
+export function SectionLink({ id, ...props }: SectionLinkProps) {
+  return <a href={`/#${id}`} {...props} />
 }

@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode } from "react"
 
 import { formatMessage } from "@/lib/format"
 import type { RichTip, TipContent } from "@/types/tooltip"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 type Side = "top" | "right" | "bottom" | "left"
 
