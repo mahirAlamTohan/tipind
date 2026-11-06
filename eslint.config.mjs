@@ -28,6 +28,10 @@ export default defineConfig([
     "scripts/**/*.mjs",
     "scripts/**/*.k6.js",
     "eslint.config.mjs",
+    // Next regenerates this file on every dev/build; it references .next/dev
+    // type stubs that only exist during `next dev`, which makes
+    // import-x/no-unresolved flap between runs.
+    "next-env.d.ts",
   ]),
 
   // Base ESLint + TypeScript

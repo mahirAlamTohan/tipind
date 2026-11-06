@@ -20,7 +20,7 @@ way before and after.
 | Largest single transfer | 204 KB | 152 KB | −25% |
 | Resources without a cache policy | 3 (`/icon`, `/apple-icon`, `/manifest.webmanifest`) | **0** | — |
 | ESLint | 3 errors | **0 errors, 0 warnings** | — |
-| Tests / CI / deploy script | none | **CI + budget gate + deploy** | — |
+| Tests / CI / deploy script | none | **`ci.sh` + budget gate + `npm run deploy`** | — |
 | `motion` on the home page | yes (95 KB gz) | **no** — `/checkout` only | **−95 KB gz** |
 | First-load transfer (gzip est.) | ~700 KB | **418 KB** | **−40%** |
 
@@ -225,7 +225,8 @@ Two bugs were found while writing the verifier:
 | Added | What it does |
 |---|---|
 | `scripts/verify-export.mjs` (`npm run verify`) | Post-build gate: catalog URL exists **and** format matches; every required `Cache-Control` + security header present; first-load budget (JS ≤ 420 KB gz, ≤ 24 requests, ≤ 900 KB gz total); `robots.txt`, `sitemap.xml`, manifest, JSON-LD and skip link present. Fails the build, exit 1. |
-| `.github/workflows/ci.yml` | typecheck → lint → build → verify on every push/PR; deploys `main` via `wrangler-action`. Uses the committed catalog, so CI never depends on Google Sheets. |
+| `scripts/ci.sh` | typecheck → lint → build → verify in one command. This is the same gate a CI job would run. |
+| GitHub Actions workflow | **Not committed** — the GitHub App on this repo cannot write to `.github/workflows/`. The complete YAML is in README → "Adding GitHub Actions"; paste it via the GitHub UI to enable auto-deploy on `main`. |
 | `scripts/loadtest.mjs` | 4 scenarios (`cold`, `catalog`, `burst`, `soak`), thresholds, `--json`, CI exit codes. |
 | `npm run deploy` | `catalog:build && build && verify && wrangler deploy`, stops before upload if any check fails. |
 
@@ -293,7 +294,15 @@ catalog fetch a `BYPASS`.
 - Security → Bots → **Bot Fight Mode: leave Off** unless you are actually being
   scraped; it challenges legitimate crawlers too
 
-### 3.6 Could not verify from here
+### 3.6 GitHub Actions
+
+The workflow file could not be pushed: the repository's GitHub App lacks the
+`workflows` permission, so GitHub rejects any push that creates
+`.github/workflows/*`. The full YAML is in README → "Adding GitHub Actions" —
+paste it once in the GitHub UI and auto-deploy on `main` is live. Until then,
+`./scripts/ci.sh` locally and `npm run deploy` do the same job.
+
+### 3.7 Could not verify from here
 
 - **No browser in this sandbox**, so I could not run a real Chromium/Lighthouse
   pass. Playwright's browser download is blocked by the network policy. Instead

@@ -43,12 +43,71 @@ npx wrangler login
 
 ### Option B — CI (push to `main`)
 
-`.github/workflows/ci.yml` runs typecheck → lint → build → verify on every push
-and pull request, and deploys `main` to Workers. CI uses the catalog artifact
-already committed in the repo, so it never depends on Google Sheets being
-reachable.
+`scripts/ci.sh` is the whole gate — typecheck → lint → build → verify. Run it
+locally and you get exactly what CI would run:
 
-Add these repository secrets (**Settings → Secrets and variables → Actions**):
+```bash
+./scripts/ci.sh
+```
+
+#### Adding GitHub Actions
+
+The workflow file is **not committed** (the repo's GitHub App cannot write to
+`.github/workflows/`). To enable it, create
+`.github/workflows/ci.yml` in the GitHub web UI (**Add file → Create new
+file**, path `.github/workflows/ci.yml`) and paste:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: ./scripts/ci.sh
+
+  deploy:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Builds with the catalog artifact committed to the repo, so CI never
+      # depends on the Google Sheet being reachable.
+      - run: npm run build
+      - run: npm run verify
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --minify
+```
+
+Then add these repository secrets (**Settings → Secrets and variables →
+Actions**):
 
 | Secret | Where to get it |
 |---|---|
@@ -323,6 +382,10 @@ threshold breached, `2` usage error. `--json` for CI.
 ## Checks before you ship
 
 ```bash
+./scripts/ci.sh     # all of the below, in order
+```
+
+```bash
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint, strict + type-aware
 npm run build       # static export
@@ -353,6 +416,7 @@ src/styles/main.css      Tailwind theme + the handful of custom classes
 scripts/build-catalog.mjs  sheet → catalog.json
 scripts/verify-export.mjs  post-build gate
 scripts/loadtest.mjs       load/stress harness
+scripts/ci.sh              typecheck + lint + build + verify
 public/_headers          Cloudflare response headers
 public/data/             the committed catalog artifact
 ```
