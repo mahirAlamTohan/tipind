@@ -75,8 +75,11 @@ export function CatalogExplorer() {
 
   return (
     <section
-      className="bg-linear-to-b from-surface-tint to-background py-16 sm:py-20 lg:py-24"
+      className="bg-linear-to-b from-surface-tint to-background py-16 outline-none sm:py-20 lg:py-24"
       id="catalog"
+      // tabIndex lets the skip link move keyboard focus here, not just the
+      // scroll position — without it focus falls back to <body>.
+      tabIndex={-1}
       ref={sectionRef}
     >
       <Container>

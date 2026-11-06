@@ -88,7 +88,9 @@ export function FloatingActions() {
 
   return (
     // z-60 is below the cart sidebar (z-70), so the sidebar covers this stack.
-    <div className="fixed right-4 bottom-5 z-60 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6">
+    // Hidden below `sm`: the header already carries chat + cart on phones, and
+    // the fixed stack covered the hero contact card there.
+    <div className="fixed right-4 bottom-5 z-60 hidden flex-col items-end gap-3 sm:right-6 sm:bottom-6 sm:flex">
       {/* Row 1. Entrance is CSS (.float-pop); it mounts once the cart hydrates. */}
       {showCount && (
         <div className="float-pop" id="floating-cart" role="region">

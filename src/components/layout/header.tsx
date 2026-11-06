@@ -115,7 +115,7 @@ export function SiteHeader() {
       {/* Reserves the space the fixed header occupies: 64 + 48 on mobile, 72 on desktop */}
       <div aria-hidden="true" className="h-26 md:h-18" />
 
-      <div className="site-header pointer-events-none fixed top-0 right-(--cart-w) left-0 z-50 transition-[right] duration-300 ease-out [--float-gap:0px] [--float-gutter:0px] [--float-radius:0px] motion-reduce:transition-none md:[--float-gap:10px] md:[--float-gutter:1rem] md:[--float-radius:24px]">
+      <div className="site-header pointer-events-none fixed top-9 right-(--cart-w) left-0 z-50 transition-[right] duration-300 ease-out [--float-gap:0px] [--float-gutter:0px] [--float-radius:0px] motion-reduce:transition-none md:[--float-gap:10px] md:[--float-gutter:1rem] md:[--float-radius:24px]">
         <div className="site-header-gap relative">
           {/* Background shell: the only thing that changes size */}
           <div

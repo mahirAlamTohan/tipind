@@ -32,7 +32,7 @@ export function FAQSection() {
             {faq.description}
           </p>
           <SectionLink
-            className="group mt-5 inline-flex items-center gap-2 text-xs font-bold text-primary-text transition-colors hover:text-primary-600 dark:hover:text-primary-200"
+            className="group mt-5 inline-flex min-h-6 items-center gap-2 py-1 text-xs font-bold text-primary-text transition-colors hover:text-primary-600 dark:hover:text-primary-200"
             id="contact"
           >
             {faq.contactPrompt}

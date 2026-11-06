@@ -6,7 +6,7 @@ export const cartContent = {
   description:
     "Review your selected products and quantities before proceeding to checkout.",
   cartNotice:
-    "Prices are based on the listed catalog rates. Product availability, final pricing, shipping costs, and payment options will be confirmed during order conformation.",
+    "Prices are based on the listed catalog rates. Product availability, final pricing, shipping costs, and payment options will be confirmed during order confirmation.",
   emptyTitle: "Your cart is empty",
   emptyDescription:
     "Browse our product catalog and add items to your cart to get started.",

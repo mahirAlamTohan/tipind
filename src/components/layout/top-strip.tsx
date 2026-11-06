@@ -5,7 +5,7 @@ import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 
 const linkClass =
-  "inline-flex min-w-0 items-center gap-1.5 transition-colors hover:text-white dark:hover:text-primary-300"
+  "inline-flex min-h-6 min-w-0 items-center gap-1.5 py-0.5 transition-colors hover:text-white dark:hover:text-primary-300"
 const iconClass = "size-3.5 shrink-0 text-primary-200 dark:text-primary-300"
 
 export function TopStrip() {
