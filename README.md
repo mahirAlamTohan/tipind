@@ -442,7 +442,7 @@ threshold breached, `2` usage error. `--json` for CI.
 
 ```bash
 npm run typecheck   # tsc --noEmit
-npm run lint        # eslint, strict + type-aware
+npm run lint        # eslint, type-aware, fails on any warning
 npm run build       # static export
 npm run verify      # catalog / headers / budget / SEO gate
 npm run security    # XSS / input-handling / build-leak regressions
