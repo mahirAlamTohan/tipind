@@ -13,17 +13,15 @@
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
 
-# ── Versioned catalog artifact ──
-/data/catalog.*.json
+# ── Versioned catalog artifact (format 6: masked .dat) ──
+# The file name carries a content hash, so it is safe to cache forever.
+# `text/plain` rather than a binary type: the payload is base64 text, and a
+# text type means Cloudflare's Brotli still applies to the envelope.
+/data/catalog.*.dat
   Cache-Control: public, max-age=31536000, immutable
-  Content-Type: application/json; charset=utf-8
+  Content-Type: text/plain; charset=utf-8
   X-Content-Type-Options: nosniff
-
-# Legacy .dat artifacts (catalogs built before format 5).
-/data/*.dat
-  Cache-Control: public, max-age=31536000, immutable
-  Content-Type: application/octet-stream
-  X-Content-Type-Options: nosniff
+  Cross-Origin-Resource-Policy: same-origin
 
 # ── Generated icons: stable URLs, so cache but allow a refresh ──
 /icon

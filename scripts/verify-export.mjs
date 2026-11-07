@@ -20,7 +20,7 @@
 import { readFile, readdir, stat } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { gzipSync } from "node:zlib"
+import { gunzipSync, gzipSync } from "node:zlib"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 
@@ -38,6 +38,30 @@ const args = process.argv.slice(2)
 const dirIndex = args.indexOf("--dir")
 const OUT = path.resolve(ROOT, dirIndex >= 0 ? args[dirIndex + 1] : "out")
 const skipBudget = args.includes("--no-budget")
+
+const CATALOG_MAGIC = "TIPCAT6:"
+
+/**
+ * Mirrors src/features/catalog/lib/catalog-mask.ts, synchronously for Node.
+ * Kept as a copy rather than an import because this script runs outside the
+ * bundler and the app module is TypeScript. The build's own round-trip check
+ * (`scripts/build-catalog.mjs`) proves the two implementations agree.
+ */
+function decodeCatalog(payload) {
+  const text = payload.trim()
+  if (!text.startsWith(CATALOG_MAGIC)) {
+    throw new Error("missing TIPCAT6 signature")
+  }
+  const key =
+    process.env.NEXT_PUBLIC_CATALOG_XOR_KEY?.trim() || "tipind-catalog-mask-v6"
+  const xored = Buffer.from(text.slice(CATALOG_MAGIC.length), "base64")
+  const keyBytes = Buffer.from(key, "utf8")
+  const plain = Buffer.allocUnsafe(xored.length)
+  for (let index = 0; index < xored.length; index += 1) {
+    plain[index] = xored[index] ^ keyBytes[index % keyBytes.length]
+  }
+  return JSON.parse(gunzipSync(plain).toString("utf8"))
+}
 
 const failures = []
 const notes = []
@@ -123,18 +147,25 @@ async function checkCatalog() {
   const formatMatch = /CATALOG_FORMAT = (\d+)/.exec(expected)
   const expectedFormat = formatMatch ? Number(formatMatch[1]) : null
 
-  if (catalogUrl.endsWith(".json")) {
-    const data = await readJson(artifact)
-    if (expectedFormat !== null && data.format !== expectedFormat) {
-      fail(
-        `catalog format is ${String(data.format)} but the app expects ${String(expectedFormat)} — rebuild the catalog`
-      )
-    } else {
-      pass(`catalog ${catalogUrl} (format ${String(data.format)}, ${(data.products?.length ?? 0).toLocaleString()} products)`)
-    }
+  // Format 6: the artifact is masked (TIPCAT6: + base64(xor(gzip(json)))).
+  // Decode it so the gate checks the real payload, not just that a file exists
+  // — a wrong key or a stale artifact has to fail here, not in a browser.
+  if (!catalogUrl.endsWith(".dat")) {
+    fail(`catalog URL must point at a masked .dat artifact, got ${catalogUrl}`)
   } else {
-    notes.push(`  note  ${catalogUrl} is a legacy .dat build; rebuild to get the compressible .json`)
-    pass(`catalog ${catalogUrl} exists`)
+    try {
+      const data = decodeCatalog(await readFile(artifact, "utf8"))
+      if (expectedFormat !== null && data.format !== expectedFormat) {
+        fail(
+          `catalog format is ${String(data.format)} but the app expects ${String(expectedFormat)} — rebuild the catalog`
+        )
+      }
+      pass(
+        `catalog ${catalogUrl} (format ${String(data.format)}, ${(data.products?.length ?? 0).toLocaleString()} products, masked)`
+      )
+    } catch (error) {
+      fail(`catalog ${catalogUrl} could not be decoded: ${error.message}`)
+    }
   }
 
   const stale = (await readdir(path.join(OUT, "data"))).filter((name) =>

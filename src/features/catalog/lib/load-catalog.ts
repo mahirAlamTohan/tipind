@@ -1,7 +1,33 @@
+import { siteConfig } from "@/config/site"
 import { isRecord } from "@/lib/guards"
 
 import { CATALOG_FORMAT, NO_VALUE } from "../constants"
+import { unwrapMasked } from "./catalog-mask"
 import type { CatalogDataset, CatalogProduct, PriceRange } from "../types"
+
+/**
+ * Turns a masked artifact back into catalog JSON text.
+ *
+ * `unwrapMasked` is synchronous; gunzip is not, because browsers only expose
+ * `DecompressionStream`. The error messages deliberately never mention the key
+ * value — this code runs in the visitor's browser.
+ */
+async function decodeMasked(payload: string, key: string): Promise<string> {
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error("This browser can't open the catalog. Please update it.")
+  }
+  const compressed = unwrapMasked(payload, key)
+  try {
+    const stream = new Blob([compressed])
+      .stream()
+      .pipeThrough(new DecompressionStream("gzip"))
+    return await new Response(stream).text()
+  } catch {
+    throw new Error(
+      "The catalog could not be decoded. The masking key may not match the key it was built with."
+    )
+  }
+}
 
 const corrupt = (detail: string) =>
   new Error(
@@ -144,10 +170,16 @@ export async function fetchCatalog(
     )
   }
 
+  // The artifact is masked, not JSON: fetch text, unmask, then parse.
+  const payload = await response.text()
+
   let parsed: unknown
   try {
-    parsed = await response.json()
+    parsed = JSON.parse(await decodeMasked(payload, siteConfig.catalog.xorKey))
   } catch (error) {
+    // A masking/parse failure is a build problem, not a user problem; surface
+    // the specific reason rather than a generic "not valid JSON".
+    if (error instanceof Error) throw error
     throw new Error(
       "The catalog file is not valid JSON. Rebuild and redeploy it.",
       { cause: error }

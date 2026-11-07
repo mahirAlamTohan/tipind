@@ -14,7 +14,7 @@
  *   3. It logs every request, which makes hydration observable without a
  *      browser: the catalog is fetched ONLY from client JavaScript (an
  *      IntersectionObserver fires after React hydrates), so a
- *      `GET /data/catalog.*.json` line is proof that the client bundle loaded,
+ *      `GET /data/catalog.*.dat` line is proof that the client bundle loaded,
  *      parsed and executed.
  *
  * Exits non-zero on a port conflict rather than silently serving nothing.

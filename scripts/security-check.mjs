@@ -106,6 +106,7 @@ check(
 console.log("\n  build output")
 
 let built = false
+let files = []
 try {
   statSync("out/index.html")
   built = true
@@ -122,7 +123,7 @@ if (built) {
     }
     return out
   }
-  const files = walk("out")
+  files = walk("out")
 
   check("no source maps shipped", !files.some((f) => f.endsWith(".map")))
   check(
@@ -172,6 +173,69 @@ if (built) {
     "_headers exists in out/ (applied by Cloudflare, never served)",
     files.some((f) => f.endsWith("_headers"))
   )
+}
+
+/* ── 3b. The catalog artifact must stay masked ───────────────────────────
+   Requirement: the data may be public, but a bare GET must not hand it over.
+   These checks fail the build if the artifact is ever written as plain JSON
+   again, which is exactly what happened once before. */
+console.log("\n  catalog artifact")
+
+const maskSrc = readFileSync(
+  "src/features/catalog/lib/catalog-mask.ts",
+  "utf8"
+)
+check(
+  "masking key is wired through config, not hardcoded in the loader",
+  readFileSync("src/config/site.ts", "utf8").includes("xorKey") &&
+    readFileSync("src/features/catalog/lib/load-catalog.ts", "utf8").includes(
+      "decodeMasked"
+    ),
+  "loader decodes through the mask"
+)
+check(
+  "artifact format is the masked envelope",
+  maskSrc.includes('"TIPCAT6:"') && maskSrc.includes("xorBytes"),
+  "TIPCAT6 + XOR"
+)
+check(
+  "build script emits the same envelope",
+  readFileSync("scripts/build-catalog.mjs", "utf8").includes('"TIPCAT6:"'),
+  "build-catalog.mjs matches"
+)
+
+if (built) {
+  const catalogFiles = files.filter((f) => /[\\/]data[\\/]catalog\./.test(f))
+  check(
+    "no plain-JSON catalog in the export",
+    !catalogFiles.some((f) => f.endsWith(".json")),
+    `${catalogFiles.map((f) => f.split("/").pop()).join(", ") || "none"}`
+  )
+  check(
+    "catalog artifact is a .dat envelope",
+    catalogFiles.length > 0 && catalogFiles.every((f) => f.endsWith(".dat")),
+    `${catalogFiles.length.toString()} file(s)`
+  )
+  for (const file of catalogFiles) {
+    const head = readFileSync(file, "utf8").slice(0, 8)
+    check(
+      `${file.split("/").pop() ?? "artifact"} starts with TIPCAT6:`,
+      head === "TIPCAT6:",
+      "masked"
+    )
+    check(
+      `${file.split("/").pop() ?? "artifact"} is not parseable JSON`,
+      !(() => {
+        try {
+          JSON.parse(readFileSync(file, "utf8"))
+          return true
+        } catch {
+          return false
+        }
+      })(),
+      "raw GET yields nothing"
+    )
+  }
 }
 
 /* ── 4. Links opening a new tab must not leak the opener ────────────────── */

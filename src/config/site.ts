@@ -93,5 +93,16 @@ export const siteConfig = {
   },
   catalog: {
     dataUrl: publicValue(process.env.NEXT_PUBLIC_CATALOG_DATA_URL),
+    /**
+     * Repeating-XOR key used to mask the catalog artifact.
+     *
+     * This is *not* a secret and must not be treated as one: it is inlined
+     * into the public JS bundle by definition. Its job is to make the artifact
+     * useless to anyone who does not run the site's code.
+     */
+    xorKey: publicValue(
+      process.env.NEXT_PUBLIC_CATALOG_XOR_KEY,
+      "tipind-catalog-mask-v6"
+    ),
   },
 } satisfies SiteConfig

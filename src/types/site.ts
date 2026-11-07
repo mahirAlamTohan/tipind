@@ -26,5 +26,7 @@ export interface SiteConfig {
   }
   catalog: {
     dataUrl: string
+    /** Public XOR mask for the artifact. Not a secret — see config/site.ts. */
+    xorKey: string
   }
 }

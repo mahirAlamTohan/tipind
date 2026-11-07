@@ -27,7 +27,7 @@ bun.lockb
 /out
 # The published catalog artifact IS committed: CI builds with it and the site
 # would 404 without it. Only the raw source snapshots (extras/) stay out.
-!/public/data/catalog.*.json
+!/public/data/catalog.*.dat
 /public/data/source.*.json
 /.next/
 /.nuxt/

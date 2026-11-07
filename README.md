@@ -29,7 +29,7 @@ the same thing.
 ### Option A — one command (recommended)
 
 ```bash
-npm run catalog:build   # pull the sheet, rebuild public/data/catalog.<hash>.json
+npm run catalog:build   # pull the sheet, rebuild public/data/catalog.<hash>.dat
 npm run deploy          # catalog:build + build + verify + wrangler deploy
 ```
 
@@ -166,11 +166,17 @@ Name`, `Active Ingredient`, `Manufacturer`, `Packaging`, `Type`, `Rate (USD)`,
 
 ### Format
 
-Format **5**: plain JSON, no compression wrapper, no obfuscation.
+Format **6**: a masked envelope, not a readable file.
+
+```
+catalog.<hash>.dat  =  "TIPCAT6:" + base64( xor( gzip( JSON ) ) )
+```
+
+The JSON inside is unchanged from format 5:
 
 ```jsonc
 {
-  "format": 5,
+  "format": 6,
   "priceBounds": [9, 1557300],           // mills, [min, max]
   "manufacturers": ["…"],                 // dictionary
   "packaging": ["…"],
@@ -184,14 +190,43 @@ Format **5**: plain JSON, no compression wrapper, no obfuscation.
 
 `-1` means "no value". `CATALOG_FORMAT` in
 `src/features/catalog/constants.ts` must match `FORMAT` in
-`scripts/build-catalog.mjs`; `npm run verify` fails the build if it drifts.
+`scripts/build-catalog.mjs`; `npm run verify` fails the build if it drifts, and
+it decodes the artifact to check the format inside it.
 
-> **Why plain JSON and not the old `.dat`?** The previous format was
-> `MAGIC + XOR(gzip(JSON))`. Pre-compressing made the file opaque, so
-> Cloudflare could not re-compress it and it was stuck at gzip's ratio forever.
-> Plain JSON is the same size over gzip and ~26% smaller over Brotli, removes a
-> build secret, and lets the browser decode with `response.json()` instead of a
-> hand-built `DecompressionStream`. Inspect it with `jq . catalog.*.json`.
+#### Why the catalog is masked
+
+The data is scraped from public supplier sites, so it is not a secret. The
+requirement is narrower: **opening a URL should not hand it over.** A plain
+`.json` file is harvestable with one `curl`; a masked file is not.
+
+The mask is repeating-key XOR with a key that ships in the JS bundle. That is
+not encryption and should never be called encryption — anyone willing to read
+our JavaScript can decrypt the file in about a minute. What it does change is
+the cost of harvesting: from *open a URL* to *study and run the site's code*.
+
+Verify it yourself:
+
+```bash
+curl -s https://tipind.com/data/catalog.<hash>.dat | head -c 40
+# TIPCAT6:a+J4aW5kLWNjd83RhBWOp9ddkwdvuOwaydMK820h9onCT38lPwgPYPtCTcD73fRE…
+```
+
+> **Trade-off, measured.** Masking costs bandwidth. XOR removes the redundancy
+> gzip and Brotli rely on, so the response size is gzip's output, not Brotli's:
+> about **205 KB** instead of **148 KB** over the wire (+57 KB, +38%).
+> If that ever becomes a problem, the lever is the artifact itself — dropping
+> rare fields, or paging the catalog — not removing the mask, which is a product
+> requirement.
+>
+> An earlier format (v4 and below) wrote binary `MAGIC + xor(gzip(JSON))`. That
+> could not be compressed by the CDN *at all*. Format 6 keeps the mask and makes
+> the payload base64 text, so Cloudflare can still apply Brotli to the envelope.
+
+To inspect a built artifact while developing:
+
+```bash
+node -e "const z=require('zlib'),f=require('fs');const b=f.readFileSync(process.argv[1],'utf8').trim().slice(8);const k=Buffer.from('tipind-catalog-mask-v6');const x=Buffer.from(b,'base64');const p=Buffer.allocUnsafe(x.length);for(let i=0;i<x.length;i++)p[i]=x[i]^k[i%k.length];console.log(JSON.parse(z.gunzipSync(p)).products.length)" public/data/catalog.<hash>.dat
+```
 
 ---
 
@@ -321,7 +356,7 @@ silently turns every catalog fetch into `cf-cache-status: BYPASS`.
 #### 6. Verify it took effect
 
 ```bash
-curl -sI https://tipind.com/data/catalog.c9720ce3.json | grep -iE 'cache-control|cf-cache-status|content-encoding'
+curl -sI https://tipind.com/data/catalog.<hash>.dat | grep -iE 'cache-control|cf-cache-status|content-encoding'
 curl -sI https://tipind.com/ | grep -i 'content-security-policy'
 curl -sI https://tipind.com/icon | grep -iE 'cache-control|content-type'
 ```
@@ -425,7 +460,8 @@ What was checked, and what it means:
 | Path traversal | Not applicable to the deployed site: Cloudflare maps URLs to asset keys and never touches the filesystem. `scripts/preview.mjs` is local-only and blocks `..` and the `_headers`, `_redirects`, `_routes.json` files that Cloudflare consumes. |
 | Source leaks | The export ships no maps, no TypeScript, no `.env`. Verified by `npm run security`. |
 | Dependencies | `next` is pinned to a patched 16.4.x. The three critical advisories (image-optimisation RCE, Server Actions DoS, `use cache` RCE) need a Node runtime; this is a static export with no server, no Server Actions and `images.unoptimized`, so they were not reachable — but pinning costs nothing. |
-| What the site cannot protect | Prices and product data are public and client-side: a determined visitor can edit their own cart in devtools. The order is a *request for a quote* that your team confirms, so the message is not a contract. Treat every incoming order as unverified. |
+| Catalog harvesting | The artifact is masked (format 6), so a bare `GET` returns an unreadable envelope. It is **not** encrypted: the key ships in the bundle, so someone determined enough to read the site's JS can extract the data. The goal is to stop casual scraping, not to make it impossible. |
+| What the site cannot protect | Prices and product data are client-side: a determined visitor can edit their own cart in devtools, and can recover the catalog by running our code. The order is a *request for a quote* that your team confirms, so the message is not a contract. Treat every incoming order as unverified. |
 
 ---
 
