@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "ESLINT_FULL_CHECK=true eslint .",
+    "lint": "ESLINT_FULL_CHECK=true eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "catalog:build": "node scripts/build-catalog.mjs --sheet \"https://script.google.com/macros/s/AKfycbzFRbjmjnm-n-BHTXiEo7FtPOJP0PyrEBx3bIz3QsAJLaq_UcyPj4bka96gis43mX0w/exec\" --clean --write-env",
     "verify": "node scripts/verify-export.mjs",

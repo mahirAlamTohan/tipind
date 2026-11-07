@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { ArrowLeft, Search } from "lucide-react"
 
 import { Container } from "@/components/ui/container"
@@ -36,20 +37,20 @@ export default function NotFound() {
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a
+          <Link
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             href="/#catalog"
           >
             <Search aria-hidden="true" className="size-4" />
             Browse the catalog
-          </a>
-          <a
+          </Link>
+          <Link
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border px-5 text-sm font-bold text-ink transition-colors hover:bg-primary-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:hover:bg-primary-950"
             href="/"
           >
             <ArrowLeft aria-hidden="true" className="size-4" />
             Back to home
-          </a>
+          </Link>
         </div>
 
         <p className="mt-10 text-xs text-muted-foreground">
