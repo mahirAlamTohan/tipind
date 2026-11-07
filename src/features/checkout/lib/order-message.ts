@@ -1,11 +1,25 @@
 import { cartLineSummary } from "@/features/cart/lib/summary"
 import type { CartLineItem } from "@/features/cart/types"
 import { formatMills } from "@/lib/format"
+import { toSingleLine } from "@/lib/sanitize"
 
 import { checkoutContent } from "../content"
 import type { OrderTotals, ShippingDetails } from "../types"
 import { findPayment } from "./details"
 import { findCountry } from "./countries"
+
+/**
+ * Last line of defence for the order message.
+ *
+ * The schema already strips control characters, but this string is assembled
+ * from several sources (cart, sanitised storage, live form state) and is read
+ * by a human as an instruction sheet. Flattening line breaks here means a
+ * field can never impersonate a section of the message, whatever path the
+ * value took to get here.
+ */
+function inline(value: string) {
+  return toSingleLine(value)
+}
 
 interface OrderMessageInput {
   details: ShippingDetails
@@ -15,7 +29,7 @@ interface OrderMessageInput {
 
 /** `Label: value`, or nothing when the value is empty. */
 const row = (label: string, value: string) =>
-  value ? [`${label}: ${value}`] : []
+  value ? [`${label}: ${inline(value)}`] : []
 
 export function buildOrderMessage({
   details,
@@ -42,15 +56,17 @@ export function buildOrderMessage({
     ...row(m.company, details.company),
     "",
     m.addressHeading,
-    details.addressLine1,
-    ...(details.addressLine2 ? [details.addressLine2] : []),
-    place,
+    inline(details.addressLine1),
+    ...(details.addressLine2 ? [inline(details.addressLine2)] : []),
+    inline(place),
     country?.name ?? "",
     "",
     m.itemsHeading,
     ...items.map(cartLineSummary),
     "",
-    ...(details.notes ? [m.notesHeading, details.notes] : []),
+    ...(details.notes
+      ? [m.notesHeading, details.notes.replace(/\n{3,}/g, "\n\n")]
+      : []),
     "",
     ...(m.email ? [m.email, details.email] : []),
     "",

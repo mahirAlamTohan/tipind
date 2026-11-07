@@ -24,4 +24,7 @@ npm run build
 step "Verify export"
 npm run verify
 
+step "Security checks"
+node scripts/security-check.mjs
+
 printf '\n\033[32m✓ all checks passed\033[0m\n'

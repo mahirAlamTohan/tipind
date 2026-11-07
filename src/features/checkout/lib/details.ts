@@ -11,6 +11,7 @@ import type {
   SERVICED_COUNTRY,
   ShippingDetails,
 } from "../types"
+import { stripControlChars } from "@/lib/sanitize"
 import { isCountryCode } from "./countries"
 
 export const EMPTY_DETAILS: ShippingDetails = {
@@ -37,7 +38,11 @@ export function fieldValue(details: ShippingDetails, field: FieldName) {
 }
 
 /** Lenient: a bad stored field becomes "", it never throws. */
-const short = z.string().max(MAX_FIELD_LENGTH).catch("")
+const short = z
+  .string()
+  .max(MAX_FIELD_LENGTH)
+  .transform((v) => stripControlChars(v))
+  .catch("")
 
 const storedSchema = z.object({
   addressLine1: short,
@@ -54,7 +59,11 @@ const storedSchema = z.object({
   email: short,
   firstName: short,
   lastName: short,
-  notes: z.string().max(MAX_NOTES_LENGTH).catch(""),
+  notes: z
+    .string()
+    .max(MAX_NOTES_LENGTH)
+    .transform((v) => stripControlChars(v, true))
+    .catch(""),
   paymentMethod: z
     .string()
     .catch("")

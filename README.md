@@ -390,6 +390,7 @@ npm run typecheck   # tsc --noEmit
 npm run lint        # eslint, strict + type-aware
 npm run build       # static export
 npm run verify      # catalog / headers / budget / SEO gate
+npm run security    # XSS / input-handling / build-leak regressions
 ```
 
 `npm run verify` (source: `scripts/verify-export.mjs`) fails the build when:
@@ -399,6 +400,32 @@ npm run verify      # catalog / headers / budget / SEO gate
 - any required `Cache-Control` or security header is missing from `_headers`
 - first-load JS > 420 KB gz, requests > 24, or total transfer > 900 KB gz
 - `robots.txt`, `sitemap.xml`, the manifest, JSON-LD or the skip link is gone
+
+`npm run security` (source: `scripts/security-check.mjs`) fails when:
+
+- the JSON-LD serializer stops escaping `<`, `>`, `&`, or anything writes raw
+  `JSON.stringify` into `dangerouslySetInnerHTML`
+- a checkout field loses its length cap or the shared control-character strip
+- the order message stops flattening line breaks in single-line fields
+- a build ships source maps, `.ts`/`.tsx`, or `.env` files
+- a `target="_blank"` link loses its `rel="noreferrer"`
+- `innerHTML`, `eval`, or `new Function` appears in `src/`
+
+### Security notes
+
+Everything is client-side, so the threat model is different from a server app.
+What was checked, and what it means:
+
+| Area | Status |
+|---|---|
+| XSS via JSON-LD | Values are serialised with `<`, `>`, `&` escaped to `\u003c` etc. Without this, a `</script>` in any config string closes the element and the rest is parsed as HTML. |
+| Order-message injection | Single-line fields cannot carry newlines, so a name cannot fake a `Preferred payment:` line in the WhatsApp message your team receives. `notes` keeps its paragraphs. |
+| Field length | Capped in the Zod schema, not only via the HTML `maxLength` attribute, which does not apply to programmatic values or stored data. |
+| Stored data | Re-read through a sanitizer on every load; a bad record is dropped rather than trusted. |
+| Path traversal | Not applicable to the deployed site: Cloudflare maps URLs to asset keys and never touches the filesystem. `scripts/preview.mjs` is local-only and blocks `..` and the `_headers`, `_redirects`, `_routes.json` files that Cloudflare consumes. |
+| Source leaks | The export ships no maps, no TypeScript, no `.env`. Verified by `npm run security`. |
+| Dependencies | `next` is pinned to a patched 16.4.x. The three critical advisories (image-optimisation RCE, Server Actions DoS, `use cache` RCE) need a Node runtime; this is a static export with no server, no Server Actions and `images.unoptimized`, so they were not reachable — but pinning costs nothing. |
+| What the site cannot protect | Prices and product data are public and client-side: a determined visitor can edit their own cart in devtools. The order is a *request for a quote* that your team confirms, so the message is not a contract. Treat every incoming order as unverified. |
 
 ---
 
@@ -412,11 +439,15 @@ src/components/ui/       primitives (button, tooltip, slider, combobox…)
 src/features/catalog/    data loading, search, filters, table
 src/features/cart/       cart store (localStorage, re-validated on read)
 src/features/checkout/   form, validation, order message
+src/lib/sanitize.ts      control-char / bidi / zero-width stripping
 src/styles/main.css      Tailwind theme + the handful of custom classes
 scripts/build-catalog.mjs  sheet → catalog.json
 scripts/verify-export.mjs  post-build gate
+scripts/security-check.mjs XSS / input / build-leak regressions
 scripts/loadtest.mjs       load/stress harness
-scripts/ci.sh              typecheck + lint + build + verify
+scripts/ci.sh              typecheck + lint + build + verify + security
+scripts/preview.mjs        local stand-in for the Cloudflare asset layer
+scripts/build-client-questionnaire.py  regenerates the client content questionnaire
 public/_headers          Cloudflare response headers
 public/data/             the committed catalog artifact
 ```

@@ -109,8 +109,19 @@ const rules = await loadRules()
 
 /* ── static file resolution ──────────────────────────────────────────── */
 
+/**
+ * Files that exist in `out/` but are NEVER served.
+ *
+ * Cloudflare consumes `_headers` and `_redirects` when it builds the asset
+ * manifest — a request for either gets a 404, not the file. Serving them in
+ * the preview leaks the header policy for no benefit and would hide a real
+ * mistake where something is meant to be public but is not.
+ */
+const NEVER_SERVED = new Set(["/_headers", "/_redirects", "/_routes.json"])
+
 async function resolve(pathname) {
   const clean = path.normalize(decodeURIComponent(pathname)).replace(/^(\.\.[/\\])+/, "")
+  if (NEVER_SERVED.has(clean.replace(/\/+$/, ""))) return null
   const target = path.join(DIR, clean)
   if (!target.startsWith(DIR)) return null
 
