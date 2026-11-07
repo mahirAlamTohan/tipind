@@ -20,7 +20,6 @@ export interface SiteContent {
     contactOptionsLabel: string
     offlineNotice: string
     cartAction: string
-    cartCountLabel: string
     cartOpenTooltip: string
     cartCloseTooltip: string
     contactOptionsTooltip: string

@@ -3,6 +3,7 @@ import { Mail, Phone } from "lucide-react"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 
 const linkClass =
   "inline-flex min-h-6 min-w-0 items-center gap-1.5 py-0.5 transition-colors hover:text-white dark:hover:text-primary-300"
@@ -22,13 +23,13 @@ export function TopStrip() {
           {siteContent.ui.headerIntro} {siteConfig.founded}
         </p>
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3 md:flex-none md:justify-end md:gap-6">
-          <a className={`${linkClass} shrink-0`} href={contact.phoneHref}>
+          <a className={`${linkClass} shrink-0`} href={contactLinks.phone()}>
             <Phone aria-hidden="true" className={iconClass} />
             <span className="whitespace-nowrap">
               {contact.phone || siteContent.ui.phoneFallback}
             </span>
           </a>
-          <a className={linkClass} href={contact.emailHref}>
+          <a className={linkClass} href={contactLinks.email()}>
             <Mail aria-hidden="true" className={iconClass} />
             <span className="truncate">
               {contact.email || siteContent.ui.emailFallback}

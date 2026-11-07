@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site"
 import { siteContent } from "@/config/content"
+import { contactLinks } from "@/config/links"
 
 /**
  * Escapes the three characters that can terminate a `<script>` element.
@@ -46,7 +47,7 @@ export function StructuredData() {
         ...(contact.phone
           ? { telephone: contact.phone.replace(/[^\d+]/g, "") }
           : {}),
-        sameAs: [contact.telegramHref].filter(
+        sameAs: [contactLinks.telegram()].filter(
           (href) => href !== "#contact"
         ),
       },

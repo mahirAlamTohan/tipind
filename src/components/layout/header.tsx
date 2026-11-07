@@ -12,16 +12,15 @@ import { ButtonLink } from "@/components/ui/button"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 import { CartTrigger } from "@/features/cart/components/cart-trigger"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { scrollToSection } from "@/lib/scroll"
 
 const HOME_ID = "home"
 
-const NAV_ITEMS = siteConfig.navigation.map((item) => ({
-  ...item,
-  id: item.href.replace("#", ""),
-}))
+/** `id` is the source of truth; links are derived, never stored. */
+const NAV_ITEMS = siteConfig.navigation
 const SECTION_IDS = NAV_ITEMS.map((item) => item.id)
 
 /** Sections left out of the mobile bar so it fits without scrolling. */
@@ -139,7 +138,7 @@ export function SiteHeader() {
                 <ButtonLink
                   aria-label={siteContent.ui.chatAction}
                   className="w-9 gap-2 px-0 shadow-md shadow-primary-900/15 min-[400px]:w-auto min-[400px]:px-3 sm:px-3.5 [&_svg]:size-3.5"
-                  href={siteConfig.contact.whatsappHref}
+                  href={contactLinks.whatsapp()}
                   rel="noreferrer"
                   size="sm"
                   target="_blank"

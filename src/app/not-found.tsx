@@ -3,6 +3,7 @@ import { ArrowLeft, Search } from "lucide-react"
 
 import { Container } from "@/components/ui/container"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 
 export const metadata: Metadata = {
   robots: { follow: false, index: false },
@@ -55,7 +56,7 @@ export default function NotFound() {
           Need help finding a product?{" "}
           <a
             className="font-semibold text-primary-text underline underline-offset-4"
-            href={siteConfig.contact.emailHref}
+            href={contactLinks.email()}
           >
             {siteConfig.contact.email}
           </a>

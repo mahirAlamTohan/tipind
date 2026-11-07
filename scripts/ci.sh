@@ -24,6 +24,9 @@ npm run build
 step "Verify export"
 npm run verify
 
+step "Content and config audit"
+node scripts/content-audit.mjs
+
 step "Security checks"
 node scripts/security-check.mjs
 

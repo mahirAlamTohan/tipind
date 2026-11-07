@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 import heroImage from "@/images/hero-visual.webp"
 
 export function HeroSection() {
@@ -64,7 +65,7 @@ export function HeroSection() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <ButtonLink
                 className="min-h-12 bg-linear-to-r from-primary to-primary-500 px-5 shadow-lg shadow-primary-700/25"
-                href={siteConfig.contact.whatsappHref}
+                href={contactLinks.whatsapp()}
                 rel="noreferrer"
                 size="lg"
                 target="_blank"
@@ -128,7 +129,7 @@ export function HeroSection() {
           <CardContent className="flex flex-nowrap items-center gap-2">
             <ButtonLink
               className="h-9 px-3"
-              href={siteConfig.contact.whatsappHref}
+              href={contactLinks.whatsapp()}
               rel="noreferrer"
               size="sm"
               target="_blank"
@@ -138,7 +139,7 @@ export function HeroSection() {
             </ButtonLink>
             <ButtonLink
               className="h-9 px-3"
-              href={siteConfig.contact.emailHref}
+              href={contactLinks.email()}
               size="sm"
               variant="outline"
             >

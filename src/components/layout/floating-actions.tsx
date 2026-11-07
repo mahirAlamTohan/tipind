@@ -15,6 +15,7 @@ import { Button, ButtonLink } from "@/components/ui/button"
 import { Tooltip } from "@/components/ui/tooltip"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 import { SIDEBAR_ID } from "@/features/cart/constants"
 import { selectPacketCount, useCartStore } from "@/features/cart/cart-store"
 import { scrollToSection } from "@/lib/scroll"
@@ -118,7 +119,7 @@ export function FloatingActions() {
               <div className="grid gap-2">
                 <ButtonLink
                   className="min-h-11 justify-start rounded-xl px-3.5"
-                  href={siteConfig.contact.phoneHref}
+                  href={contactLinks.phone()}
                   onClick={close}
                 >
                   <span className="grid size-7 place-items-center rounded-full bg-white/15">
@@ -132,7 +133,7 @@ export function FloatingActions() {
                 </ButtonLink>
                 <ButtonLink
                   className="min-h-11 justify-start rounded-xl bg-highlight-700 px-3.5 text-white shadow-highlight-950/15 hover:bg-highlight-800"
-                  href={siteConfig.contact.emailHref}
+                  href={contactLinks.email()}
                   onClick={close}
                 >
                   <span className="grid size-7 place-items-center rounded-full bg-white/15">
@@ -194,7 +195,7 @@ export function FloatingActions() {
           <ButtonLink
             aria-label={ui.chatAction}
             className="size-13 border border-white/20 bg-whatsapp text-white shadow-xl ring-4 shadow-success-700/30 ring-success-500/20 hover:bg-whatsapp-hover sm:size-14 [&_svg]:size-6"
-            href={siteConfig.contact.whatsappHref}
+            href={contactLinks.whatsapp()}
             rel={hasWhatsapp ? "noreferrer" : undefined}
             target={hasWhatsapp ? "_blank" : undefined}
           >

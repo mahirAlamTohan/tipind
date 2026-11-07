@@ -1,4 +1,13 @@
+import { siteConfig } from "@/config/site"
+
 import type { CheckoutContent } from "./types"
+
+/**
+ * Checkout copy.
+ *
+ * Same rules as `src/config/content.ts`: facts come from `site.ts`, never
+ * restated here. `{placeholders}` are runtime values only.
+ */
 
 export const checkoutContent = {
   eyebrow: "Secure checkout",
@@ -30,8 +39,7 @@ export const checkoutContent = {
     savedNotice: "Saved on this device as you type.",
     clearSaved: "Clear saved details",
     noResults: "No matches",
-    unservicedNotice:
-      "We currently ship to the USA, UK, New Zealand and Australia. Contact our team before ordering to another country.",
+    unservicedNotice: `We currently ship to ${siteConfig.shipping.countriesProse}. Contact our team before ordering to another country.`,
   },
   fields: {
     firstName: { label: "First name", placeholder: "Jane" },
@@ -88,7 +96,7 @@ export const checkoutContent = {
     copyAction: "Copy message",
     copiedAction: "Copied",
     copyFailed: "Couldn't copy. Select the text and copy it manually.",
-    emailSubject: "New order request — {name}",
+    emailSubject: `New order request — ${siteConfig.name}`,
     editAction: "Edit details",
     finishAction: "Clear cart and finish",
     closeAction: "Close",

@@ -234,19 +234,39 @@ node -e "const z=require('zlib'),f=require('fs');const b=f.readFileSync(process.
 
 All configuration is build-time. There are no runtime environment variables.
 
+**Where a value lives → [`src/config/README.md`](src/config/README.md).** That
+file is the map: every string and every setting, which file owns it, and a
+look-up table for "I want to change X, where do I edit?". Read it before
+searching the codebase.
+
+The rule in one line:
+
+> **Facts** (name, contact, countries, payment methods) → `src/config/site.ts`
+> **Words** (headlines, FAQ, notices) → `src/config/content.ts` or `src/features/<area>/content.ts`
+
 | File | Purpose |
 |---|---|
 | `.env.production` | Production values, committed on purpose. These end up in the browser bundle. |
-| `.env.example` | Template for a fresh checkout. |
+| `.env.example` | Template for a fresh checkout. Every `NEXT_PUBLIC_*` var must appear here. |
 | `wrangler.jsonc` | Worker name, assets directory, observability. **No `vars` block** — see below. |
 
 `NEXT_PUBLIC_*` values are inlined into the JS at build time and are visible to
 everyone. Never put a secret there.
 
+**Where we ship is defined once.** `NEXT_PUBLIC_DELIVERY_COUNTRIES` (ISO codes)
+feeds the checkout dropdown, the FAQ answer, the checkout notice, the about
+section and the footer. Everything else derives from it. Before this was
+centralised the list existed in five places and had already drifted — the
+dropdown offered India while every sentence said four countries.
+
 **The catalog URL lives in exactly one place:** `NEXT_PUBLIC_CATALOG_DATA_URL`
 in `.env.production`, written by `catalog:build`. Do not re-add it to
 `wrangler.jsonc` `vars` — that is how this project previously shipped a site
 pointing at a catalog file that did not exist.
+
+`npm run content:audit` enforces the rules above: no unused copy, no hardcoded
+country list, no retyped brand name, no business config leaking into a feature,
+and every env var documented.
 
 ---
 
@@ -476,10 +496,15 @@ src/features/catalog/    data loading, search, filters, table
 src/features/cart/       cart store (localStorage, re-validated on read)
 src/features/checkout/   form, validation, order message
 src/lib/sanitize.ts      control-char / bidi / zero-width stripping
+src/config/README.md     which file owns which content/config value
+src/config/site.ts       facts: identity, contact, countries, payments
+src/config/content.ts    site-wide copy
+src/config/links.ts      URLs derived from contact details
 src/styles/main.css      Tailwind theme + the handful of custom classes
 scripts/build-catalog.mjs  sheet → catalog.json
 scripts/verify-export.mjs  post-build gate
 scripts/security-check.mjs XSS / input / build-leak regressions
+scripts/content-audit.mjs  dead copy / duplicated facts / env docs
 scripts/loadtest.mjs       load/stress harness
 scripts/ci.sh              typecheck + lint + build + verify + security
 scripts/preview.mjs        local stand-in for the Cloudflare asset layer

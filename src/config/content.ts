@@ -1,5 +1,32 @@
 import type { SiteContent } from "@/types/content"
 
+import { siteConfig } from "./site"
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  VISIBLE COPY — every string the visitor reads.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Section copy is ordered the same way as the page: ui → hero → catalog → faq →
+ * about → contact → footer.
+ *
+ * Two rules keep this file honest:
+ *
+ *  1. Never restate a fact that lives in `site.ts`. Use the interpolation below
+ *     (`${siteConfig.name}`) rather than typing the name, the year or the list
+ *     of countries again. Five copies of the shipping list had already drifted.
+ *
+ *  2. `{placeholders}` are for *runtime* values only — counts, product names,
+ *     filter labels. Anything known at build time is interpolated here, so a
+ *     string that leaves this file is final and no component has to remember to
+ *     call a replace helper. (One component used to forget.)
+ */
+
+/** Country list as a sentence: "the United States, United Kingdom, …". */
+const SHIPS_TO = siteConfig.shipping.countriesProse
+/** Budget carriers change; keep the human wording in one place. */
+const ESTABLISHED = siteConfig.founded.toString()
+
 export const siteContent = {
   ui: {
     headerIntro: "Your trusted healthcare partner since",
@@ -18,7 +45,6 @@ export const siteContent = {
     offlineNotice:
       "You're offline. Pages and catalog data already saved on this device may still be available.",
     cartAction: "View cart",
-    cartCountLabel: "{count} items in your cart",
     cartOpenTooltip: "Open your cart",
     cartCloseTooltip: "Close your cart",
     contactOptionsTooltip: "Call or email our team",
@@ -226,7 +252,7 @@ export const siteContent = {
       {
         question: "Which countries are you currently shipping to?",
         answer:
-          "We currently ship only to the USA, UK, New Zealand, and Australia. At present, we do not ship to European countries or Canada.",
+          `We currently ship only to ${SHIPS_TO}.`,
       },
       {
         question: "How long does processing and delivery take?",
@@ -251,14 +277,14 @@ export const siteContent = {
     ],
   },
   about: {
-    eyebrow: "About {name}",
+    eyebrow: `About ${siteConfig.name}`,
     title: "Reliable healthcare supply, built on trust.",
     description:
-      "{name} has supplied generic medicines and ethical-brand medications from India since {founded}, with a focus on reliable service, competitive pricing and international shipping.",
+      `${siteConfig.name} has supplied generic medicines and ethical-brand medications from India since ${ESTABLISHED}, with a focus on reliable service, competitive pricing and international shipping.`,
     highlights: ["Quality focused", "International support"],
     sinceLabel: "Serving customers since",
     serviceTitle: "International shipping",
-    serviceRegions: "USA · UK · New Zealand · Australia",
+    serviceRegions: siteConfig.shipping.countriesCompact,
     serviceDescription: "Thoughtful service and dependable healthcare supply.",
   },
   contact: {
@@ -278,7 +304,7 @@ export const siteContent = {
   footer: {
     kicker: "Reliable Healthcare Supply",
     description:
-      "{name} has supplied generic medicines and ethical-brand medications from India since {founded}, with a focus on reliable service, competitive pricing and international shipping.",
+      `${siteConfig.name} has supplied generic medicines and ethical-brand medications from India since ${ESTABLISHED}, with a focus on reliable service, competitive pricing and international shipping.`,
     navigationHeading: "Quick links",
     contactHeading: "Contact us",
     serviceItems: [
@@ -288,7 +314,7 @@ export const siteContent = {
       },
       {
         title: "International Shipping",
-        description: "USA · UK · New Zealand · Australia",
+        description: siteConfig.shipping.countriesCompact,
       },
       {
         title: "Quality Focused",

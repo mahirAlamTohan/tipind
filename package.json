@@ -15,7 +15,8 @@
     "loadtest:burst": "node scripts/loadtest.mjs --scenario burst --requests 10000 --concurrency 200",
     "loadtest:soak": "node scripts/loadtest.mjs --scenario soak --duration 120 --rate 100",
     "security": "node scripts/security-check.mjs",
-    "preview": "node scripts/preview.mjs"
+    "preview": "node scripts/preview.mjs",
+    "content:audit": "node scripts/content-audit.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
