@@ -78,6 +78,7 @@ browser.
 | [Design system](./docs/engineering/design-system.md)       | Color tokens, typography, motion, component rules                     |
 | [Operations](./docs/engineering/operations.md)             | Environment variables, build/deploy, catalog refresh, troubleshooting |
 | [Decisions](./docs/decisions/README.md)                    | Why the site is static, obfuscated, custom-search, messenger-first    |
+| [Security & privacy review](./docs/security/README.md)     | Every known weakness, how it would be exploited, and how to fix it    |
 | [Cleanup log](./docs/changelog/cleanup-2026-11.md)         | Everything removed, fixed and modernised in this pass                 |
 
 ## Deploying a catalog update
