@@ -1,6 +1,7 @@
 import { allCountries } from "country-region-data"
-import type { SERVICED_COUNTRY } from "../types"
+
 import { SERVICED_COUNTRIES } from "../constants"
+import type { SERVICED_COUNTRY } from "../types"
 
 export interface Region {
   readonly code: string
@@ -35,7 +36,6 @@ export const isCountryCode = (code: SERVICED_COUNTRY) => BY_CODE.has(code)
 const REGION_LABELS = new Map<SERVICED_COUNTRY, string>([
   ["AU", "State / territory"],
   ["GB", "County / region"],
-  ["IN", "State"],
   ["NZ", "Region"],
   ["US", "State"],
 ])
@@ -43,7 +43,6 @@ const REGION_LABELS = new Map<SERVICED_COUNTRY, string>([
 const POSTAL_LABELS = new Map<SERVICED_COUNTRY, string>([
   ["AU", "Postcode"],
   ["GB", "Postcode"],
-  ["IN", "PIN code"],
   ["NZ", "Postcode"],
   ["US", "ZIP code"],
 ])

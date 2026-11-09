@@ -1,14 +1,14 @@
 "use client"
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { ShoppingBag } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { ShoppingBag } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
-import { useCartStore, selectTotalMills } from "@/features/cart/cart-store"
+import { selectTotalMills, useCartStore } from "@/features/cart/cart-store"
 
 import { useCheckoutStore } from "../checkout-store"
 import { checkoutContent } from "../content"

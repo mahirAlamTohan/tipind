@@ -1,12 +1,10 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tipind",
-  "compatibility_date": "2026-10-02",
+  "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page",
-  },
-  "vars": {
-    "NEXT_PUBLIC_CATALOG_DATA_URL": "/data/catalog.e0a00877.dat",
   },
   "observability": {
     "logs": {

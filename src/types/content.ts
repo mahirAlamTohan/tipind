@@ -20,7 +20,6 @@ export interface SiteContent {
     contactOptionsLabel: string
     offlineNotice: string
     cartAction: string
-    cartCountLabel: string
     cartOpenTooltip: string
     cartCloseTooltip: string
     contactOptionsTooltip: string
@@ -56,7 +55,6 @@ export interface SiteContent {
     fullCatalogLabel: string
     searchNowLabel: string
     loadErrorAdvice: string
-    paginationLabel: string
     filtersAction: string
     closeFiltersAction: string
     includedFiltersTitle: string
@@ -66,7 +64,6 @@ export interface SiteContent {
     facetCycleAriaLabel: string
     unselectedLabel: string
     priceRangeTitle: string
-    priceUnit: string
     minimumPriceLabel: string
     maximumPriceLabel: string
     minimumPriceAriaLabel: string
@@ -81,8 +78,6 @@ export interface SiteContent {
     noFacetValues: string
     noFacetMatches: string
     clearFiltersAction: string
-    downloadAction: string
-    openCatalogAction: string
     productSingular: string
     productPlural: string
     searchableProducts: string
@@ -100,8 +95,6 @@ export interface SiteContent {
       loading: string
       loaded: string
       error: string
-      indexing: string
-      searchError: string
     }
     addTip: {
       add: { title: string; note: string }
@@ -151,11 +144,12 @@ export interface SiteContent {
     noProducts: string
     summaryShowing: string
     summaryOf: string
-    previousPage: string
-    nextPage: string
-    previousPageAriaLabel: string
-    nextPageAriaLabel: string
-    sourceNote: string
+    summaryMatching: string
+    allLoadedLabel: string
+    loadMoreLabel: string
+    unavailablePriceLabel: string
+    addedToastTitle: string
+    addedToastDescription: string
     addToCartAriaLabel: string
     addedToCartAnnouncement: string
     unavailablePriceAriaLabel: string

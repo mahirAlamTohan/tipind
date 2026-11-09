@@ -2,14 +2,15 @@ import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 
 import { siteConfig } from "@/config/site"
+
 import "@/styles/main.css"
 
-import { OfflineStatus } from "@/components/layout/offline-status"
 import { SiteHeader } from "@/components/layout/header"
+import { OfflineStatus } from "@/components/layout/offline-status"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CartRoot } from "@/features/cart/components/cart-root"
-import { Toaster } from "@/components/ui/sonner"
 
 const bodyFont = localFont({
   display: "swap",

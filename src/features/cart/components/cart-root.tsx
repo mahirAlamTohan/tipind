@@ -1,14 +1,14 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 
+import { useCartStore } from "../cart-store"
 import { DEFAULT_WIDTH, STORAGE_KEY } from "../constants"
 import { isStorageWritable } from "../lib/store-storage"
 import { clampWidth, readStoredWidth } from "../lib/width"
-import { usePathname } from "next/navigation"
-import { useCartStore } from "../cart-store"
-import { CartSidebar } from "./cart-sidebar"
 import type { CartState } from "../types"
+import { CartSidebar } from "./cart-sidebar"
 
 /** Mount once in the layout: hydrates the cart, syncs tabs, drives the page offset. */
 export function CartRoot() {
@@ -36,11 +36,20 @@ export function CartRoot() {
     }
   }, [])
 
+  // The sidebar isn't rendered on checkout, so a cart left open there would
+  // keep the page offset for a panel that doesn't exist.
+  useEffect(() => {
+    if (!onCheckout) return
+    const { actions, isOpen } = useCartStore.getState()
+    if (isOpen) actions.setOpen(false)
+  }, [onCheckout])
+
   // main.css reads these to make room for the sidebar.
   useEffect(() => {
     const root = document.documentElement
     const apply = (state: CartState) => {
-      root.dataset.cart = state.isOpen ? "open" : "closed"
+      const open = state.isOpen && !onCheckout
+      root.dataset.cart = open ? "open" : "closed"
       root.style.setProperty("--cart-width", `${state.width.toString()}px`)
     }
 
@@ -55,7 +64,7 @@ export function CartRoot() {
       delete root.dataset.cart
       root.style.removeProperty("--cart-width")
     }
-  }, [])
+  }, [onCheckout])
 
   return onCheckout ? null : <CartSidebar />
 }

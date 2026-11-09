@@ -1,8 +1,9 @@
-// components/infinite-scroll-sentinel.tsx
 "use client"
 
 import { useEffect, useRef, type RefObject } from "react"
 import { Loader2 } from "lucide-react"
+
+import { siteContent } from "@/config/content"
 
 interface InfiniteScrollSentinelProps {
   hasMore: boolean
@@ -31,7 +32,7 @@ export function InfiniteScrollSentinel({
         }
       },
       {
-        root: scrollRef?.current ?? null, // ← key change
+        root: scrollRef?.current ?? null,
         rootMargin,
       }
     )
@@ -47,7 +48,7 @@ export function InfiniteScrollSentinel({
   return (
     <div ref={ref} className="flex items-center justify-center py-6">
       <Loader2
-        aria-label="Loading more products"
+        aria-label={siteContent.catalog.loadMoreLabel}
         className="size-5 animate-spin text-muted-foreground"
       />
     </div>

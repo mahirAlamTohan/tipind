@@ -1,11 +1,14 @@
 #!/usr/bin/env pwsh
-# deploy.ps1 - One-command deploy for tipind
+# deploy.ps1 - Catalog refresh + push helper for tipind
 #
 #   1. Rebuilds the catalog from the live Google Sheet (via Apps Script)
 #   2. Sets up git if needed (init, identity, remote)
 #   3. Stages all changes and commits
 #      (message defaults to "updated the catalog to catalog.<hash>.dat")
 #   4. Pushes, walking you through GitHub login / merging remote history if needed
+#
+# This does NOT publish to Cloudflare. After it finishes, run:
+#   npm run deploy
 #
 # Usage:
 #   ./deploy.ps1                      # auto commit message

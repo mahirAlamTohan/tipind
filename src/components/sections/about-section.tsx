@@ -18,7 +18,7 @@ export function AboutSection() {
         <Reveal>
           <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
             <Pill aria-hidden="true" className="size-4" />
-            {about.eyebrow.replace("{name}", siteConfig.name)}
+            {replaceSiteTokens(about.eyebrow)}
           </span>
           <h2 className="mt-3 max-w-xl font-display text-[clamp(2rem,4vw,2.9rem)] leading-tight font-extrabold tracking-[-0.045em] text-ink">
             {about.title}

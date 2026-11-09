@@ -3,22 +3,21 @@ import type { PersistStorage } from "zustand/middleware"
 import { persist } from "zustand/middleware"
 
 import {
-  clampQuantity,
-  createLineItem,
-  packetCount,
-  totalMills,
-} from "./lib/line-items"
-import type { CartLineItem, CartState } from "./types"
-
-import {
   DEFAULT_WIDTH,
   MAX_LINE_ITEMS,
   MAX_QUANTITY,
   STORAGE_KEY,
   STORAGE_VERSION,
 } from "./constants"
-import { clampWidth } from "./lib/width"
+import {
+  clampQuantity,
+  createLineItem,
+  packetCount,
+  totalMills,
+} from "./lib/line-items"
 import { parseItems, serializeItems } from "./lib/store-storage"
+import { clampWidth } from "./lib/width"
+import type { CartLineItem, CartState } from "./types"
 
 interface PersistedCart {
   items: readonly CartLineItem[]

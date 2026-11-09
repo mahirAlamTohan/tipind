@@ -37,6 +37,7 @@ export function pluralize(word: string) {
  * `type` is the singular catalogue value; blank falls back to "unit".
  */
 export function unitWord(type: string | null | undefined, count: number) {
-  const single = type?.trim().toLowerCase() || FALLBACK_UNIT
-  return count === 1 ? single : pluralize(single)
+  const single = type?.trim().toLowerCase() ?? ""
+  const noun = single === "" ? FALLBACK_UNIT : single
+  return count === 1 ? noun : pluralize(noun)
 }

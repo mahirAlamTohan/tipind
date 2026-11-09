@@ -48,22 +48,15 @@ export interface CartContent {
   emptyTitle: string
   emptyDescription: string
   resizeAriaLabel: string
-  browseCatalogAction: string
   productsHeading: string
-  unitPriceLabel: string
-  quantityLabel: string
   lineTotalLabel: string
   totalLabel: string
   packPriceNote: string
   clearAction: string
   closeAction: string
-  continueBrowsingAction: string
   singlePacketPriceLabel: string
   packLabel: string
   packetCountLabel: string
-  copyAction: string
-  copiedMessage: string
-  copyFailureMessage: string
   loadingCartMessage: string
   storageUnavailableNotice: string
   removeItemAriaLabel: string
@@ -71,4 +64,11 @@ export interface CartContent {
   increaseQuantityAriaLabel: string
   setQuantityAriaLabel: string
   proceedToCheckoutAction: string
+  productSingular: string
+  productPlural: string
+  packetSingular: string
+  packetPlural: string
+  listedPackLabel: string
+  clearedToastTitle: string
+  packetTotalNote: string
 }

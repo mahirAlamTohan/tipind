@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "motion/react"
 import type { ReactNode } from "react"
+import { AnimatePresence, motion } from "motion/react"
 
 import { checkoutContent } from "../content"
 import type { FieldName } from "../types"

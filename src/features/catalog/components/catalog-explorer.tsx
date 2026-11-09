@@ -1,4 +1,7 @@
 "use client"
+
+import { useRef } from "react"
+
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
@@ -14,7 +17,6 @@ import { CatalogFilters } from "./catalog-filters"
 import { CatalogStat, CatalogStatusBar } from "./catalog-status"
 import { CatalogTable } from "./catalog-table"
 import { CatalogToolbar } from "./catalog-toolbar"
-import { useRef } from "react"
 
 interface CatalogExplorerProps {
   catalogDataUrl?: string | undefined
@@ -25,7 +27,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
   const status = useCatalogLoader(catalogDataUrl)
   const dataset = useCatalogStore((state) => state.dataset)
   const loadError = useCatalogStore((state) => state.error)
-  const loadMore = useCatalogStore((state) => state.actions.loadMore) // ← new
+  const loadMore = useCatalogStore((state) => state.actions.loadMore)
   const results = useCatalogResults()
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -44,7 +46,7 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     status === "unconfigured" || status === "error"
       ? copy.noCatalogRecordsTitle
       : results.isFiltered
-        ? `${formatNumber(results.total)} matching ${noun}`
+        ? `${formatNumber(results.total)} ${copy.summaryMatching} ${noun}`
         : `${formatNumber(results.total)} ${copy.searchableProducts}`
 
   return (
@@ -124,20 +126,21 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
             )}
           </div>
 
-          {/* ── Footer ── */}
           <div className="flex min-h-12 items-center justify-between border-t border-border bg-neutral-50/70 px-5 py-3 sm:px-7 dark:bg-neutral-950/25">
             <p className="m-0 text-[0.68rem] text-muted-foreground">
               {results.total > 0 ? (
                 <>
-                  Showing{" "}
+                  {copy.summaryShowing}{" "}
                   <strong className="text-ink-soft">
                     {formatNumber(results.loadedCount)}
                   </strong>{" "}
-                  of{" "}
+                  {copy.summaryOf}{" "}
                   <strong className="text-ink-soft">
                     {formatNumber(results.total)}
                   </strong>{" "}
-                  {results.isFiltered ? `matching ${noun}` : noun}
+                  {results.isFiltered
+                    ? `${copy.summaryMatching} ${noun}`
+                    : noun}
                 </>
               ) : (
                 copy.noProducts
@@ -145,17 +148,11 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
             </p>
             {!results.hasMore && results.total > 0 && (
               <span className="text-[0.62rem] font-semibold text-muted-foreground">
-                All loaded ✓
+                {copy.allLoadedLabel}
               </span>
             )}
           </div>
         </Card>
-
-        {copy.sourceNote && (
-          <p className="mt-3 text-right text-[0.62rem] leading-5 text-muted-foreground sm:px-1 sm:text-xs">
-            {copy.sourceNote}
-          </p>
-        )}
       </Container>
     </section>
   )

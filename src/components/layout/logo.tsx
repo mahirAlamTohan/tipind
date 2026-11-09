@@ -1,8 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { Pill } from "lucide-react"
 import { motion, useReducedMotion, type Variants } from "motion/react"
-import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
 import { scrollToTop } from "@/lib/scroll"

@@ -63,9 +63,7 @@
   --color-success-900: #064e3b;
   --color-success-950: #022c22;
 
-  /* status */
-  --color-danger-400: #f87171;
-  --color-danger-600: #dc2626;
+  /* channel brand */
   --color-whatsapp-500: #22c55e;
   --color-whatsapp-600: #16a34a;
 
@@ -322,24 +320,8 @@
   --shadow-card: var(--elevation-card);
 }
 
-/* cart sidebar: on lg+ the page shrinks to make room for it. */
-@media (min-width: 64rem) {
-  html[data-cart="open"] {
-    --cart-w: var(--cart-width);
-  }
-
-  body {
-    padding-right: var(--cart-w);
-    transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
-}
-
+/* Cart sidebar: on lg+ the page shrinks to make room for the docked panel.
+   `--cart-panel` clamps the saved width so the panel never takes >1/3 of the view. */
 @media (min-width: 64rem) {
   html[data-cart="open"] {
     --cart-w: var(--cart-panel);
@@ -351,7 +333,13 @@
   }
 }
 
-/* While dragging the handle, nothing may lag behind the pointer. */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
+
+/* While dragging the resize handle, nothing may lag behind the pointer. */
 html[data-resizing] {
   cursor: col-resize;
   user-select: none;
@@ -360,22 +348,11 @@ html[data-resizing] * {
   transition: none !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
-}
-
 /* Theme switch: only the circular reveal is visible */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
-}
-
-::selection {
-  background-color: yellow;
-  color: black;
 }
 
 /* Modern scrollbars: thin, translucent, theme-aware. */

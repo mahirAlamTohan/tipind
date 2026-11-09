@@ -1,5 +1,6 @@
+import { DELIVERY_COUNTRIES, NEED_OR_HAS_REGION } from "@/config/site"
+
 import type { PaymentMethod, SERVICED_COUNTRY } from "./types"
-import { DELIVERY_COUNTIES, NEED_OR_HAS_REGION } from "@/config/site"
 
 export const STORAGE_KEY = "tipind:checkout:v1"
 export const STORAGE_VERSION = 1
@@ -16,7 +17,7 @@ export const SHIPPING_MILLS: ReadonlyMap<string, number> = new Map<
 ])
 
 /** Countries you actively ship to. Others can order, but see a notice. */
-export const SERVICED_COUNTRIES = DELIVERY_COUNTIES
+export const SERVICED_COUNTRIES = DELIVERY_COUNTRIES
 
 /** Countries where an address needs a state or province. */
 export const REGION_REQUIRED = new Set<SERVICED_COUNTRY>(NEED_OR_HAS_REGION)

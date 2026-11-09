@@ -1,5 +1,8 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useState, type MouseEvent } from "react"
 import { ArrowUpRight, MessageCircle } from "lucide-react"
 import {
   motion,
@@ -8,8 +11,6 @@ import {
   useSpring,
   useTransform,
 } from "motion/react"
-import Link from "next/link"
-import { useState, type MouseEvent } from "react"
 
 import { BrandLogo } from "@/components/layout/logo"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
@@ -18,10 +19,9 @@ import { ButtonLink } from "@/components/ui/button"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { CartTrigger } from "@/features/cart/components/cart-trigger"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { scrollToSection } from "@/lib/scroll"
-import { CartTrigger } from "@/features/cart/components/cart-trigger"
-import { usePathname } from "next/navigation"
 
 const STRIP_HEIGHT = 36 // px, matches h-9 in TopStrip
 const FLOAT_GAP = 10 // px, keep in sync with --float-gap below

@@ -1,4 +1,5 @@
 "use client"
+
 import { useDeferredValue, useMemo } from "react"
 
 import { filterProducts } from "../lib/filters"

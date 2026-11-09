@@ -11,10 +11,10 @@
 !.yarn/sdks
 !.yarn/versions
 
-# Lockfiles (Uncomment ONLY if you explicitly want to ignore them)
+# npm's lockfile is committed (deploy.ps1 and CI use npm). Bun re-resolves
+# from package.json, so its lockfile stays out of git.
 pnpm-lock.yaml
 pnpm-workspace.yaml
-package-lock.json
 yarn.lock
 bun.lock
 bun.lockb
@@ -41,6 +41,7 @@ bun.lockb
 /.turbo
 /.vercel
 /.netlify
+/.wrangler
 /.next/cache
 *.tsbuildinfo
 *.swp

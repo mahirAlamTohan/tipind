@@ -1,10 +1,11 @@
+import { ImageResponse } from "next/og"
+
 import { siteConfig } from "@/config/site"
 import {
   BRAND_SURFACE_GRADIENT,
   BRAND_TILE_GRADIENT,
   PILL_PATHS,
 } from "@/lib/brand-image"
-import { ImageResponse } from "next/og"
 
 export const alt = `${siteConfig.name} — quality medicines for better healthcare`
 export const size = {

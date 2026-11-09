@@ -1,7 +1,7 @@
 "use client"
 
-import { WifiOff } from "lucide-react"
 import { useSyncExternalStore } from "react"
+import { WifiOff } from "lucide-react"
 
 import { siteContent } from "@/config/content"
 

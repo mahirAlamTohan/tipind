@@ -4,8 +4,8 @@ import { formatMills } from "@/lib/format"
 
 import { checkoutContent } from "../content"
 import type { OrderTotals, ShippingDetails } from "../types"
-import { findPayment } from "./details"
 import { findCountry } from "./countries"
+import { findPayment } from "./details"
 
 interface OrderMessageInput {
   details: ShippingDetails

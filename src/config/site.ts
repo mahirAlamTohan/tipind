@@ -1,5 +1,6 @@
-import type { SiteConfig } from "@/types/site"
 import type { CountryCode } from "libphonenumber-js"
+
+import type { SiteConfig } from "@/types/site"
 
 const DEFAULT_SITE_NAME = "tipind"
 const DEFAULT_SITE_URL = "https://tipind.mahiralamtohan.workers.dev"
@@ -28,16 +29,19 @@ const telegramUsername = publicValue(
   process.env.NEXT_PUBLIC_TELEGRAM_USERNAME
 ).replace(/^@/, "")
 
-/** Countries you actively ship to. */
-export const DELIVERY_COUNTIES = [
+/**
+ * Countries you actively ship to. Keep this in sync with the "Which countries
+ * are you currently shipping to?" FAQ answer.
+ */
+export const DELIVERY_COUNTRIES = [
   "US",
   "GB",
   "NZ",
-  "IN",
   "AU",
 ] satisfies CountryCode[]
 
-export const NEED_OR_HAS_REGION = ["US", "AU", "IN"] satisfies CountryCode[]
+/** Countries where a state/province is required on the address. */
+export const NEED_OR_HAS_REGION = ["US", "AU"] satisfies CountryCode[]
 
 export const siteConfig = {
   name: publicValue(process.env.NEXT_PUBLIC_SITE_NAME, DEFAULT_SITE_NAME),

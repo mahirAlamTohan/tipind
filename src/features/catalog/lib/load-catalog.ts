@@ -156,7 +156,8 @@ export async function fetchCatalog(
   } catch (error) {
     if (signal?.aborted) throw error
     throw new Error(
-      "The catalog could not be downloaded. Check your connection and try again."
+      "The catalog could not be downloaded. Check your connection and try again.",
+      { cause: error }
     )
   }
   if (!response.ok) {

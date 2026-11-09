@@ -1,23 +1,23 @@
 "use client"
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useEffect, useState } from "react"
 import {
   ArrowUpRight,
-  ShoppingCart,
   Headset,
   Mail,
   MessageCircle,
   Phone,
+  ShoppingCart,
   X,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Tooltip } from "@/components/ui/tooltip"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
-import { SIDEBAR_ID } from "@/features/cart/constants"
 import { selectPacketCount, useCartStore } from "@/features/cart/cart-store"
+import { SIDEBAR_ID } from "@/features/cart/constants"
 import { scrollToSection } from "@/lib/scroll"
 
 const ui = siteContent.ui

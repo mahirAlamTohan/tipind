@@ -25,13 +25,11 @@ export const checkoutContent = {
     addressHeading: "Shipping address",
     extraHeading: "Preferences",
     optional: "Optional",
-    selectPlaceholder: "Select…",
     paymentNone: "Decide with the team",
     savedNotice: "Saved on this device as you type.",
     clearSaved: "Clear saved details",
     noResults: "No matches",
-    unservicedNotice:
-      "We currently ship to the USA, UK, New Zealand and Australia. Contact our team before ordering to another country.",
+    showOptionsLabel: "Show options",
   },
   fields: {
     firstName: { label: "First name", placeholder: "Jane" },
@@ -83,12 +81,18 @@ export const checkoutContent = {
     description:
       "Follow the steps below to finalize and send your order details.",
     optionsHeading: "ORDERING INSTRUCTIONS",
-    pasteHint: "Message copied. Paste it into the message box.",
+    stepCopyTemplate:
+      "Click “Copy message” below to copy your pre-filled order template.",
+    stepSend: "Send your copied details through our official channels:",
+    emailLabel: "Email (Preferred):",
+    telegramLabel: "Telegram:",
+    safetyTitle: "Telegram Safety Tip:",
+    safetyBody:
+      "Beware of fake impersonator accounts with subtle typos. Double-check the handle, or use Email for maximum security.",
     messageHeading: "Your message",
     copyAction: "Copy message",
     copiedAction: "Copied",
     copyFailed: "Couldn't copy. Select the text and copy it manually.",
-    emailSubject: "New order request — {name}",
     editAction: "Edit details",
     finishAction: "Clear cart and finish",
     closeAction: "Close",
@@ -100,7 +104,6 @@ export const checkoutContent = {
     name: "Name",
     email: "Main email",
     company: "Company",
-    payment: "Preferred payment",
     subtotalLabel: "order subtotal",
     shippingLabel: "order+shipping",
     shippingText:

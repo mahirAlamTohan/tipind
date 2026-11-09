@@ -4,7 +4,10 @@
  * web app that reads the live Google Sheet.
  *
  *   node scripts/build-catalog.mjs -i <source.json> [-o public/data] [--clean] [--write-env]
- *   node scripts/build-catalog.mjs --sheet <apps-script-url> [-o public/data] [--clean] [--write-env]
+ *   node scripts/build-catalog.mjs [--sheet <apps-script-url>] [-o public/data] [--clean] [--write-env]
+ *
+ * Without -i or --sheet, the sheet URL comes from CATALOG_SHEET_URL in the
+ * environment or in .env / .env.production.
  *
  * Output: <output>/catalog.<hash>.dat = MAGIC + XOR(gzip(JSON))
  * JSON:   { format: 4, priceBounds: [minMills, maxMills], manufacturers: string[],
@@ -462,15 +465,20 @@ async function main() {
     },
   })
 
-  if (values.help || (!values.input && !values.sheet)) {
+  // Existing environment variables win; .env then .env.production fill gaps.
+  loadEnvFiles()
+  const sheetUrl = values.sheet?.trim() || process.env.CATALOG_SHEET_URL?.trim()
+
+  if (values.help || (!values.input && !sheetUrl)) {
     console.log(
-      "Usage: node scripts/build-catalog.mjs -i <source.json> | --sheet <apps-script-url> [-o public/data] [--clean] [--write-env]"
+      "Usage: node scripts/build-catalog.mjs -i <source.json> | [--sheet <apps-script-url>] [-o public/data] [--clean] [--write-env]"
+    )
+    console.log(
+      "Without -i/--sheet, the sheet URL is read from CATALOG_SHEET_URL."
     )
     return
   }
 
-  // Existing environment variables win; .env then .env.production fill gaps.
-  loadEnvFiles()
   const xorKey = process.env[KEY_NAME]?.trim()
   if (!xorKey)
     throw new Error(
@@ -478,8 +486,8 @@ async function main() {
     )
 
   let json
-  if (values.sheet) {
-    json = await fetchSheetRows(values.sheet)
+  if (sheetUrl) {
+    json = await fetchSheetRows(sheetUrl)
   } else {
     const input = path.resolve(ROOT, values.input)
     json = JSON.parse((await readFile(input, "utf8")).replace(/^\uFEFF/, ""))

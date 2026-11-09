@@ -1,18 +1,23 @@
 {
   "cSpell.words": [
+    "base-ui",
     "bunx",
-    "Fira",
-    "frontmost",
-    "ianvs",
-    "Merriweather",
+    "dmsans",
+    "libphonenumber",
+    "manrope",
     "oklch",
     "opengraph",
     "partialize",
     "shadcn",
-    "Stylesheet",
+    "sonner",
     "tipind",
+    "TIPCAT",
     "unconfigured",
-    "unserviced"
+    "workerd",
+    "wrangler",
+    "zustand"
   ],
-  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

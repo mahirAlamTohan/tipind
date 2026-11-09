@@ -1,5 +1,6 @@
 import { create } from "zustand"
 
+import { PAGE_SIZE } from "../constants"
 import type {
   CatalogDataset,
   CatalogLoadStatus,
@@ -8,7 +9,6 @@ import type {
   FilterMode,
   PriceRange,
 } from "../types"
-import { PAGE_SIZE } from "../constants"
 
 interface CatalogActions {
   loadStarted: () => void
@@ -91,7 +91,8 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
       set({ dataset: null, error: message, status: "error" })
     },
     setQuery: (query) => {
-      set({ loadedCount: PAGE_SIZE, query }) // ← reset on search
+      // A new query starts the result list from the top.
+      set({ loadedCount: PAGE_SIZE, query })
     },
     loadMore: () => {
       set((state) => ({ loadedCount: state.loadedCount + PAGE_SIZE }))
@@ -118,7 +119,10 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
         const bounds = state.dataset?.priceBounds
         const isFull =
           !bounds || (range[0] <= bounds[0] && range[1] >= bounds[1])
-        return { page: 1, priceRange: isFull ? null : range }
+        return {
+          loadedCount: PAGE_SIZE,
+          priceRange: isFull ? null : range,
+        }
       })
     },
     clearFilters: () => {

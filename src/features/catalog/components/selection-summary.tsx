@@ -1,15 +1,15 @@
 "use client"
 
+import { useMemo } from "react"
 import { cva } from "class-variance-authority"
 import { CircleCheck, CircleMinus, X } from "lucide-react"
-import { useMemo } from "react"
 
+import { formatTip, Tooltip } from "@/components/ui/tooltip"
 import { siteContent } from "@/config/content"
 import { formatMessage, formatNumber } from "@/lib/format"
 
 import { useCatalogStore } from "../store/catalog-store"
 import type { FacetKind, FacetSelection, FilterMode } from "../types"
-import { formatTip, Tooltip } from "@/components/ui/tooltip"
 
 const chipStyles = cva(
   "inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 text-left text-[0.65rem] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-ring",

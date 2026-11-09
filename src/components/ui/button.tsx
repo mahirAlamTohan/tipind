@@ -1,10 +1,10 @@
 "use client"
 
+import Link from "next/link"
+import type { ComponentProps } from "react"
 import { Button as BaseButton } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { motion, useReducedMotion } from "motion/react"
-import Link from "next/link"
-import type { ComponentProps } from "react"
 
 import { cn } from "@/lib/utils"
 

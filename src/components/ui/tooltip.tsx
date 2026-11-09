@@ -1,11 +1,11 @@
 "use client"
 
-import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip"
 import type { ReactElement, ReactNode } from "react"
+import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip"
 
 import { formatMessage } from "@/lib/format"
+import { cn } from "@/lib/utils"
 import type { RichTip, TipContent } from "@/types/tooltip"
-import { cn } from "cn"
 
 type Side = "top" | "right" | "bottom" | "left"
 
