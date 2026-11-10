@@ -26,7 +26,9 @@ export const checkoutContent = {
     extraHeading: "Preferences",
     optional: "Optional",
     paymentNone: "Decide with the team",
-    savedNotice: "Saved on this device as you type.",
+    savedNotice: "Saved on this device as you type, cleared when you finish.",
+    notesHint:
+      "Delivery instructions only — please don’t include medical or prescription details.",
     clearSaved: "Clear saved details",
     noResults: "No matches",
     showOptionsLabel: "Show options",
@@ -53,8 +55,8 @@ export const checkoutContent = {
       placeholder: "Select…",
     },
     notes: {
-      label: "Delivery notes",
-      placeholder: "Anything our team should know",
+      label: "Delivery instructions",
+      placeholder: "e.g. leave with the concierge, gate code",
     },
   },
   errors: {

@@ -89,6 +89,7 @@ export interface CheckoutContent {
     readonly optional: string
     readonly paymentNone: string
     readonly savedNotice: string
+    readonly notesHint: string
     readonly clearSaved: string
     readonly noResults: string
     readonly showOptionsLabel: string

@@ -22,6 +22,23 @@ export const siteContent = {
     cartCloseTooltip: "Close your cart",
     contactOptionsTooltip: "Call or email our team",
     whatsappTooltip: "Chat with us on WhatsApp",
+    errorTitle: "Something went wrong",
+    errorDescription:
+      "This page hit an unexpected error. Your cart and any saved details are still on this device.",
+    errorRetry: "Try again",
+    errorHome: "Back to the catalog",
+    notFoundTitle: "This page doesn’t exist",
+    notFoundDescription:
+      "The link may be old or mistyped. The catalog and contact details are on the home page.",
+    catalogCrashedTitle: "The catalog didn’t load",
+    catalogCrashedDescription:
+      "Something broke while showing the products. Try again, or reload the page if it keeps happening.",
+    cartCrashedTitle: "Your cart couldn’t open",
+    cartCrashedDescription:
+      "Your items are still saved on this device. Reload the page to use the cart again.",
+    checkoutCrashedTitle: "Checkout hit a problem",
+    checkoutCrashedDescription:
+      "Your cart is safe on this device. Reload the page, or go back to the catalog and try again.",
   },
   hero: {
     eyebrow: "Trusted healthcare partner since",

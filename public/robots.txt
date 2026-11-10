@@ -1,0 +1,7 @@
+# tipind - the catalog is public, the checkout step is not.
+User-agent: *
+Allow: /
+Disallow: /checkout/
+
+# /checkout/ also sends `X-Robots-Tag: noindex, nofollow, noarchive`
+# (public/_headers); this file covers crawlers that never read headers.

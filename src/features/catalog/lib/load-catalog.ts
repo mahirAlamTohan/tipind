@@ -49,7 +49,8 @@ function readProduct(
   id: number,
   manufacturers: readonly string[],
   packaging: readonly string[],
-  types: readonly string[]
+  types: readonly string[],
+  priceBounds: PriceRange
 ): CatalogProduct {
   if (!Array.isArray(row) || row.length !== 6) {
     throw corrupt(`row ${id.toString()}`)
@@ -75,6 +76,19 @@ function readProduct(
     throw corrupt(`row ${id.toString()}`)
   }
 
+  const priceMills = price === NO_VALUE ? null : price
+  // The artifact's own price bounds are part of the contract; a row outside
+  // them means the file (or the build that wrote it) is wrong. Failing closed
+  // is better than rendering a price the cart will silently refuse.
+  if (
+    priceMills !== null &&
+    (priceMills <= 0 ||
+      priceMills < priceBounds[0] ||
+      priceMills > priceBounds[1])
+  ) {
+    throw corrupt(`price in row ${id.toString()}`)
+  }
+
   return {
     id,
     name,
@@ -82,7 +96,7 @@ function readProduct(
     manufacturer: lookup(manufacturers, manufacturerIndex, "manufacturers"),
     packaging: lookup(packaging, packagingIndex, "packaging"),
     type: lookup(types, typeIndex, "types"),
-    priceMills: price === NO_VALUE ? null : price,
+    priceMills,
   }
 }
 
@@ -96,6 +110,7 @@ export function parseCatalog(value: unknown): CatalogDataset {
   const manufacturers = readStrings(value.manufacturers, "manufacturers")
   const packaging = readStrings(value.packaging, "packaging")
   const types = readStrings(value.types, "types")
+  const priceBounds = readBounds(value.priceBounds)
   if (!Array.isArray(value.products)) throw corrupt("products")
   const rows: unknown[] = value.products
 
@@ -103,9 +118,9 @@ export function parseCatalog(value: unknown): CatalogDataset {
     manufacturers,
     packaging,
     types,
-    priceBounds: readBounds(value.priceBounds),
+    priceBounds,
     products: rows.map((row, id) =>
-      readProduct(row, id, manufacturers, packaging, types)
+      readProduct(row, id, manufacturers, packaging, types, priceBounds)
     ),
   }
 }

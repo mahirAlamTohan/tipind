@@ -9,6 +9,25 @@ know it worked.
 Effort is calendar-realistic for one person who knows the codebase:
 **S** ≈ under 1 hour, **M** ≈ an afternoon, **L** ≈ a day or more.
 
+## Status (2026-11-09)
+
+Applied in code after the assessment, before any of the repository work below:
+
+| Finding | Change                                                                                                                                       | Where                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| F-03    | Saved checkout details are cleared when an order finishes                                                                                    | `checkout-page.tsx` `finish()`                                 |
+| F-03    | Form input capped so a long field is no longer dropped on reload; sanitiser truncates instead                                                | `details.ts`, `details-form.tsx`                               |
+| F-06    | Notes became "delivery instructions": 240 chars, no control characters, single line at compose, structural markers stripped from every value | `constants.ts`, `details.ts`, `order-message.ts`, `content.ts` |
+| F-09    | `robots.txt` + `X-Robots-Tag` on `/checkout/*`                                                                                               | `public/robots.txt`, `public/_headers`                         |
+| B-01    | Zero and negative prices rejected by the cart **and** by the catalog parser (rows outside the artifact's own `priceBounds` fail closed)      | `line-items.ts`, `load-catalog.ts`                             |
+| B-02    | Error boundaries: root, route, checkout, 404, catalog island, cart, order dialog                                                             | `src/app/*`, `src/components/error-*`, `cart-fallback.tsx`     |
+
+Still open and owned by the team: F-01 (endpoint rotation and history purge),
+F-02 (CSP), F-05 (integrity + cache policy), F-04 (privacy page), F-07/F-08/F-10
+(repository and CI posture), F-11, F-12, F-13. Item 1.9 (`deploy.ps1`) is now
+superseded by [ADR 0008](../decisions/0008-split-catalog-pipeline-from-site-repo.md),
+which removes the local push path entirely.
+
 ---
 
 ## Phase 0 — this week (do not skip)
@@ -97,8 +116,9 @@ resizes, and the catalogue search works.
 
 1. Fill the form, add an item, complete the order, click **Clear cart and finish**.
 2. Return to `/checkout/`.
-3. In the console: `localStorage.getItem("tipind:checkout:v1")` → `null` (or a
-   30-day-stamped entry if you added opt-in remembering), and the form is empty.
+3. In the console: `localStorage.getItem("tipind:checkout:v1")` → `null` right
+   after finishing (an empty `{ details: { … } }` on a later visit is also fine —
+   what must not survive is the name, address or email), and the form is empty.
 
 ### F-04 — privacy notice
 

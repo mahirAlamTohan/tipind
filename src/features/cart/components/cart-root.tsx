@@ -3,11 +3,14 @@
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 
+import { ErrorBoundary } from "@/components/error-boundary"
+
 import { useCartStore } from "../cart-store"
 import { DEFAULT_WIDTH, STORAGE_KEY } from "../constants"
 import { isStorageWritable } from "../lib/store-storage"
 import { clampWidth, readStoredWidth } from "../lib/width"
 import type { CartState } from "../types"
+import { CartFallback } from "./cart-fallback"
 import { CartSidebar } from "./cart-sidebar"
 
 /** Mount once in the layout: hydrates the cart, syncs tabs, drives the page offset. */
@@ -66,5 +69,9 @@ export function CartRoot() {
     }
   }, [onCheckout])
 
-  return onCheckout ? null : <CartSidebar />
+  return onCheckout ? null : (
+    <ErrorBoundary fallback={() => <CartFallback />} label="cart">
+      <CartSidebar />
+    </ErrorBoundary>
+  )
 }

@@ -7,6 +7,7 @@ import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 import { useCheckoutStore } from "../checkout-store"
 import {
   FORM_ID,
+  MAX_FIELD_LENGTH,
   MAX_NOTES_LENGTH,
   PAYMENT_METHODS,
   REGION_REQUIRED,
@@ -107,6 +108,7 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
       "aria-describedby": error ? `checkout-${name}-error` : undefined,
       "aria-invalid": error ? true : undefined,
       id: `checkout-${name}`,
+      maxLength: name === "notes" ? MAX_NOTES_LENGTH : MAX_FIELD_LENGTH,
       name,
       onBlur: () => {
         markTouched(name)
@@ -334,11 +336,22 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
           <FormField label={copy.fields.notes.label} name="notes" optional>
             <textarea
               {...bind("notes")}
-              className={`${controlClass} h-auto min-h-24 resize-y py-3`}
+              aria-describedby={
+                errorFor("notes")
+                  ? "checkout-notes-hint checkout-notes-error"
+                  : "checkout-notes-hint"
+              }
+              className={`${controlClass} h-auto min-h-20 resize-y py-3`}
               maxLength={MAX_NOTES_LENGTH}
               placeholder={copy.fields.notes.placeholder}
-              rows={3}
+              rows={2}
             />
+            <p
+              className="m-0 pt-1.5 text-[0.68rem] leading-5 text-muted-foreground"
+              id="checkout-notes-hint"
+            >
+              {copy.details.notesHint}
+            </p>
           </FormField>
         </div>
       </Section>

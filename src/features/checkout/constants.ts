@@ -6,7 +6,7 @@ export const STORAGE_KEY = "tipind:checkout:v1"
 export const STORAGE_VERSION = 1
 export const FORM_ID = "checkout-details-form"
 export const MAX_FIELD_LENGTH = 200
-export const MAX_NOTES_LENGTH = 1_000
+export const MAX_NOTES_LENGTH = 240
 
 /** Cargo fee by ISO country code, in mills (15_000 = $15.000). Missing = "To be confirmed". */
 export const SHIPPING_MILLS: ReadonlyMap<string, number> = new Map<

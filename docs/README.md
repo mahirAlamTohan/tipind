@@ -6,20 +6,21 @@ document answers one question, and the whole set can be read in about 35 minutes
 
 ## Read it in this order
 
-| #   | Document                                               | Question it answers                                                 |
-| --- | ------------------------------------------------------ | ------------------------------------------------------------------- |
-| 1   | [Product brief](./product/brief.md)                    | What is tipind, who is it for, how is it made — in one page         |
-| 2   | [Requirements & scope](./product/requirements.md)      | What does success look like, and what did we decide not to build    |
-| 3   | [User flows](./product/user-flows.md)                  | What does a visitor actually do, screen by screen                   |
-| 4   | [Architecture](./engineering/architecture.md)          | How do the pieces fit together at runtime                           |
-| 5   | [Catalog pipeline](./engineering/catalog-pipeline.md)  | How do prices get from a Google Sheet into 8,500 searchable rows    |
-| 6   | [Data & state](./engineering/data-and-state.md)        | What is stored, where, and what is trusted                          |
-| 7   | [Design system](./engineering/design-system.md)        | How colors, type, spacing and motion are decided                    |
-| 8   | [Operations](./engineering/operations.md)              | How to run, configure, release and debug it                         |
-| 9   | [Decisions](./decisions/README.md)                     | Why these choices and not the obvious alternatives                  |
-| 10  | [Roadmap](./product/roadmap.md)                        | What shipped, what is next, what is intentionally out of scope      |
-| 11  | [Cleanup log, 2026-11](./changelog/cleanup-2026-11.md) | What changed in the November 2026 tidy-up                           |
-| 12  | [Security & privacy](./security/README.md)             | What is exposed today, how it would be exploited, and the fix order |
+| #   | Document                                               | Question it answers                                                  |
+| --- | ------------------------------------------------------ | -------------------------------------------------------------------- |
+| 1   | [Product brief](./product/brief.md)                    | What is tipind, who is it for, how is it made — in one page          |
+| 2   | [Requirements & scope](./product/requirements.md)      | What does success look like, and what did we decide not to build     |
+| 3   | [User flows](./product/user-flows.md)                  | What does a visitor actually do, screen by screen                    |
+| 4   | [Architecture](./engineering/architecture.md)          | How do the pieces fit together at runtime                            |
+| 5   | [Catalog pipeline](./engineering/catalog-pipeline.md)  | How do prices get from a Google Sheet into 8,500 searchable rows     |
+| 6   | [Data & state](./engineering/data-and-state.md)        | What is stored, where, and what is trusted                           |
+| 7   | [Design system](./engineering/design-system.md)        | How colors, type, spacing and motion are decided                     |
+| 8   | [Operations](./engineering/operations.md)              | How to run, configure, release and debug it                          |
+| 9   | [Decisions](./decisions/README.md)                     | Why these choices and not the obvious alternatives                   |
+| 10  | [Roadmap](./product/roadmap.md)                        | What shipped, what is next, what is intentionally out of scope       |
+| 11  | [Cleanup log, 2026-11](./changelog/cleanup-2026-11.md) | What changed in the November 2026 tidy-up                            |
+| 12  | [Security & privacy](./security/README.md)             | What is exposed today, how it would be exploited, and the fix order  |
+| 13  | [Error handling](./engineering/error-handling.md)      | Where failures are caught, what the buyer sees, and the notes policy |
 
 The security section (`security/`) is an **assessment**, not a plan for work
 already done: it was written in November 2026 at the owner's request, and no

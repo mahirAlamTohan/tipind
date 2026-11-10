@@ -24,6 +24,18 @@ export interface SiteContent {
     cartCloseTooltip: string
     contactOptionsTooltip: string
     whatsappTooltip: string
+    errorTitle: string
+    errorDescription: string
+    errorRetry: string
+    errorHome: string
+    notFoundTitle: string
+    notFoundDescription: string
+    catalogCrashedTitle: string
+    catalogCrashedDescription: string
+    cartCrashedTitle: string
+    cartCrashedDescription: string
+    checkoutCrashedTitle: string
+    checkoutCrashedDescription: string
   }
   hero: {
     eyebrow: string

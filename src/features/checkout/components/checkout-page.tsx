@@ -5,9 +5,12 @@ import { useEffect, useMemo, useState } from "react"
 import { ShoppingBag } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
+import { ErrorBoundary } from "@/components/error-boundary"
+import { ErrorPanel } from "@/components/error-fallback"
 import { ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
+import { siteContent } from "@/config/content"
 import { selectTotalMills, useCartStore } from "@/features/cart/cart-store"
 
 import { useCheckoutStore } from "../checkout-store"
@@ -63,6 +66,7 @@ export function CheckoutPage() {
   const details = useCheckoutStore((state) => state.details)
   const step = useCheckoutStore((state) => state.step)
   const formReady = useCheckoutStore((state) => state.isHydrated)
+  const clearDetails = useCheckoutStore((state) => state.actions.clearDetails)
   const setStep = useCheckoutStore((state) => state.actions.setStep)
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -85,8 +89,14 @@ export function CheckoutPage() {
 
   function finish() {
     clearCart()
+    // The buyer is done: do not leave their name, address and email sitting in
+    // localStorage on a device we no longer need them on (see the privacy review).
+    clearDetails()
     setStep("review")
     setDialogOpen(false)
+    // Remove the record itself, not just its fields: an empty envelope left in
+    // localStorage is still a hint that someone checked out on this device.
+    useCheckoutStore.persist.clearStorage()
     router.push("/")
   }
 
@@ -160,15 +170,39 @@ export function CheckoutPage() {
       </Container>
 
       {dialogOpen && (
-        <OrderDialog
-          details={details}
-          items={items}
-          onClose={() => {
-            setDialogOpen(false)
-          }}
-          onFinish={finish}
-          totals={totals}
-        />
+        <ErrorBoundary
+          fallback={(reset) => (
+            <div className="fixed inset-0 z-90 grid place-items-center overflow-y-auto bg-neutral-950/55 p-4 backdrop-blur-xs">
+              <div className="w-full max-w-md rounded-3xl border border-border bg-background p-5 shadow-2xl">
+                <ErrorPanel
+                  description={siteContent.ui.checkoutCrashedDescription}
+                  onRetry={reset}
+                  title={siteContent.ui.checkoutCrashedTitle}
+                />
+                <button
+                  className="mx-auto mt-4 block text-xs font-semibold text-primary-text underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+                  onClick={() => {
+                    setDialogOpen(false)
+                  }}
+                  type="button"
+                >
+                  {checkoutContent.dialog.closeAction}
+                </button>
+              </div>
+            </div>
+          )}
+          label="order-dialog"
+        >
+          <OrderDialog
+            details={details}
+            items={items}
+            onClose={() => {
+              setDialogOpen(false)
+            }}
+            onFinish={finish}
+            totals={totals}
+          />
+        </ErrorBoundary>
       )}
     </main>
   )
