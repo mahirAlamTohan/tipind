@@ -15,7 +15,7 @@
 
 import { test, expect } from "@playwright/test";
 
-const BASE_URL = process.env.BASE_URL ?? "http://localhost:3001";
+const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 
 test.describe("DOM-XSS surface", () => {
   test("homepage has no inline event handlers", async ({ page }) => {
