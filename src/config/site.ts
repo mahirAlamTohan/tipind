@@ -71,6 +71,62 @@ function publicCountryCodes(value: string | undefined, fallback: readonly Countr
     .filter(Boolean) as CountryCode[]
 }
 
+
+
+/* ── stored-XSS guardrails ───────────────────────────────────────────────── */
+/*
+ * Everything in siteConfig is compiled into the static HTML/JS at build time.
+ * If `.env.production` is ever compromised (MITM on your machine, or a GitHub
+ * / Cloudflare account takeover), an attacker could inject HTML or script
+ * through any env-driven value. These validators run at build time and fail
+ * the build before anything dangerous ships.
+ *
+ * React auto-escapes JSX text and attribute values, but defense in depth means
+ * rejecting the value at the source rather than trusting every render site.
+ */
+
+const HTML_SCRIPT_RE = /[<>&"']/  // any character that can break out of HTML text or an attribute
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/  // eslint-disable-line regexp/no-super-linear-backtracking
+// Telegram usernames: 5–32 chars, alphanumeric + underscores only
+const TELEGRAM_RE = /^\w{5,32}$/
+
+/** Rejects any value that could break out of HTML text or an attribute. */
+function noHtml(value: string | undefined, label: string) {
+  const raw = publicValue(value)
+  if (raw && HTML_SCRIPT_RE.test(raw)) {
+    throw new Error(
+      `${label} contains HTML-breaking characters (<, >, &, ", '). Refusing to build.`
+    )
+  }
+  return raw
+}
+
+/** Validates an email address shape; rejects anything that could inject into a mailto: href. */
+function safeEmail(value: string | undefined, label: string) {
+  const raw = publicValue(value)
+  if (!raw) return raw
+  if (!EMAIL_RE.test(raw) || HTML_SCRIPT_RE.test(raw)) {
+    throw new Error(
+      `${label} is not a safe email address: "${raw}". Refusing to build.`
+    )
+  }
+  return raw
+}
+
+/** Validates a Telegram username shape; rejects anything that could inject into a t.me/ href. */
+function safeTelegram(value: string | undefined, label: string) {
+  const raw = publicValue(value)
+  if (!raw) return raw
+  // Strip a single leading "@" — the same normalization the raw value had before.
+  const username = raw.replace(/^@/, "")
+  if (!TELEGRAM_RE.test(username)) {
+    throw new Error(
+      `${label} is not a safe Telegram username: "${raw}". Refusing to build.`
+    )
+  }
+  return username
+}
+
 /* ── raw env ──────────────────────────────────────────────────────────────── */
 
 const DEFAULTS = {
@@ -78,14 +134,15 @@ const DEFAULTS = {
   url: "https://tipind.mahiralamtohan.workers.dev",
 } as const
 
-const contactPhone = publicValue(process.env.NEXT_PUBLIC_CONTACT_PHONE)
+const contactPhone = noHtml(process.env.NEXT_PUBLIC_CONTACT_PHONE, "NEXT_PUBLIC_CONTACT_PHONE")
 const whatsappNumber = publicValue(
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
 ).replace(/\D/g, "")
-const contactEmail = publicValue(process.env.NEXT_PUBLIC_CONTACT_EMAIL)
-const telegramUsername = publicValue(
-  process.env.NEXT_PUBLIC_TELEGRAM_USERNAME
-).replace(/^@/, "")
+const contactEmail = safeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "NEXT_PUBLIC_CONTACT_EMAIL")
+const telegramUsername = safeTelegram(
+  process.env.NEXT_PUBLIC_TELEGRAM_USERNAME,
+  "NEXT_PUBLIC_TELEGRAM_USERNAME"
+)
 
 /* ── where we ship ─────────────────────────────────────────────────────────
  * ONE list. The checkout dropdown, the FAQ answer, the checkout notice, the
@@ -153,7 +210,7 @@ export const PAYMENT_METHODS = [
 
 export const siteConfig = {
   /* — identity: env-driven, shown everywhere — */
-  name: publicValue(process.env.NEXT_PUBLIC_SITE_NAME, DEFAULTS.name),
+  name: noHtml(process.env.NEXT_PUBLIC_SITE_NAME, "NEXT_PUBLIC_SITE_NAME") || DEFAULTS.name,
   url: publicSiteUrl(process.env.NEXT_PUBLIC_SITE_URL, DEFAULTS.url),
   founded: publicYear(process.env.NEXT_PUBLIC_FOUNDED_YEAR, 2012),
 
@@ -194,10 +251,10 @@ export const siteConfig = {
     whatsappNumber,
     email: contactEmail,
     telegramUsername,
-    supportHours: publicValue(
+    supportHours: noHtml(
       process.env.NEXT_PUBLIC_SUPPORT_HOURS,
-      "Monday – Saturday · 9:00 AM – 8:00 PM IST"
-    ),
+      "NEXT_PUBLIC_SUPPORT_HOURS"
+    ) || "Monday – Saturday · 9:00 AM – 8:00 PM IST",
   },
 
   /* — shipping + payment: structural — */

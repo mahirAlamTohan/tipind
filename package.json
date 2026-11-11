@@ -2,6 +2,9 @@
   "name": "tipind",
   "version": "0.1.0",
   "private": true,
+  "overrides": {
+    "minimatch": "^11.0.1"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,6 +22,8 @@
     "loadtest:soak": "node scripts/loadtest.mjs --scenario soak --duration 120 --rate 100",
     "security": "node scripts/security-check.mjs",
     "security:audit": "node scripts/security-audit.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ci": "playwright test --reporter=list",
     "post-deploy-audit": "node scripts/post-deploy-audit.mjs",
     "preview": "node scripts/preview.mjs",
     "content:audit": "node scripts/content-audit.mjs"
@@ -69,7 +74,9 @@
     "tailwindcss": "^4",
     "typescript": "^5.9.0",
     "typescript-eslint": "^8.70.0",
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.0.0",
+    "@playwright/test": "^1.52.0",
+    "playwright": "^1.52.0"
   },
   "packageManager": "bun@1.4.2",
   "ignoreScripts": [
