@@ -19,6 +19,7 @@
     "loadtest:soak": "node scripts/loadtest.mjs --scenario soak --duration 120 --rate 100",
     "security": "node scripts/security-check.mjs",
     "security:audit": "node scripts/security-audit.mjs",
+    "post-deploy-audit": "node scripts/post-deploy-audit.mjs",
     "preview": "node scripts/preview.mjs",
     "content:audit": "node scripts/content-audit.mjs"
   },
