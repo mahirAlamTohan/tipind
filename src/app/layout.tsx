@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 
+import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 
 import "@/styles/main.css"
 
 import { SiteHeader } from "@/components/layout/header"
 import { OfflineStatus } from "@/components/layout/offline-status"
+import { StructuredData } from "@/components/layout/structured-data"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -96,6 +98,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased selection:bg-primary-200 selection:text-ink">
+        <a
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-background focus:shadow-lg"
+          href="#main"
+        >
+          {siteContent.ui.skipToContent}
+        </a>
+        <StructuredData />
         <ThemeProvider>
           <TooltipProvider>
             <OfflineStatus />

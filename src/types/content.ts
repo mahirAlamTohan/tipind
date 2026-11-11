@@ -5,6 +5,7 @@ export interface FAQItem {
 
 export interface SiteContent {
   ui: {
+    skipToContent: string
     headerIntro: string
     phoneFallback: string
     emailFallback: string

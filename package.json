@@ -10,12 +10,13 @@
     "dev": "next dev",
     "build": "next build",
     "preview": "wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "next build && wrangler deploy",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint .",
     "lint:diff": "ESLINT_DIFF=1 eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "verify": "next typegen && tsc --noEmit && eslint . && prettier --check . && next build && node scripts/verify-export.mjs",
     "catalog:build": "node scripts/build-catalog.mjs --clean --write-env"
   },
   "dependencies": {

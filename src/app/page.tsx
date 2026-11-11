@@ -15,7 +15,7 @@ import { CatalogExplorer } from "@/features/catalog/components/catalog-explorer"
 
 export default function Home() {
   return (
-    <main>
+    <main id="main">
       <HeroSection />
       <ErrorBoundary
         fallback={(reset) => (

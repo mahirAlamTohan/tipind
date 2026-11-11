@@ -2,6 +2,7 @@ import type { SiteContent } from "@/types/content"
 
 export const siteContent = {
   ui: {
+    skipToContent: "Skip to content",
     headerIntro: "Your trusted healthcare partner since",
     phoneFallback: "Call our team",
     emailFallback: "Email our team",

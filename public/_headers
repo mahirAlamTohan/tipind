@@ -17,6 +17,7 @@
   Content-Type: image/png
 
 /manifest.webmanifest
+  Cache-Control: public, max-age=3600
   Content-Type: application/manifest+json
 
 # Checkout holds whatever the buyer typed; keep it out of search and archives.
@@ -24,6 +25,7 @@
   X-Robots-Tag: noindex, nofollow, noarchive
 
 /*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me https://t.me; object-src 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
