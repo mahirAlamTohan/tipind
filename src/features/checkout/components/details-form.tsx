@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type ReactNode } from "react"
-import { motion, useReducedMotion } from "motion/react"
+import { Info } from "lucide-react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { Card } from "@/components/ui/card"
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
@@ -11,6 +12,7 @@ import {
   MAX_NOTES_LENGTH,
   PAYMENT_METHODS,
   REGION_REQUIRED,
+  SERVICED_COUNTRIES,
 } from "../constants"
 import { checkoutContent } from "../content"
 import { hasPostalSystem } from "../lib/address"
@@ -89,6 +91,8 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
     [country]
   )
   const hasRegionList = regionOptions.length > 0
+  const showNotice =
+    country !== undefined && !SERVICED_COUNTRIES.includes(country.code)
 
   function errorFor(name: FieldName) {
     const kind = errors.get(name)
@@ -132,7 +136,6 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
       onBlur: () => {
         markTouched(name)
       },
-      triggerLabel: copy.details.showOptionsLabel,
       value: fieldValue(details, name),
     }
   }
@@ -228,6 +231,25 @@ export function DetailsForm({ onValid }: { onValid: () => void }) {
               placeholder={copy.fields.country.placeholder}
             />
           </FormField>
+          <AnimatePresence initial={false}>
+            {showNotice && (
+              <motion.p
+                animate={{ height: "auto", opacity: 1 }}
+                className="m-0 overflow-hidden text-xs leading-5 text-warning-800 dark:text-warning-200"
+                exit={{ height: 0, opacity: 0 }}
+                initial={{ height: 0, opacity: 0 }}
+                role="status"
+              >
+                <span className="flex items-start gap-2 pt-2">
+                  <Info
+                    aria-hidden="true"
+                    className="mt-0.5 size-3.5 shrink-0"
+                  />
+                  {copy.details.unservicedNotice}
+                </span>
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
         <div className="sm:col-span-2">
           <FormField

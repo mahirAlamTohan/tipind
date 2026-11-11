@@ -18,7 +18,6 @@ interface ComboboxProps {
   inputClassName?: string
   items: readonly ComboboxOption[]
   placeholder?: string
-  triggerLabel: string
   value: string
   onBlur?: () => void
   onValueChange: (value: string) => void
@@ -35,7 +34,6 @@ export function Combobox({
   onBlur,
   onValueChange,
   placeholder,
-  triggerLabel,
   value,
 }: ComboboxProps) {
   const selected = items.find((item) => item.value === value) ?? null
@@ -62,7 +60,7 @@ export function Combobox({
           placeholder={placeholder}
         />
         <Base.Trigger
-          aria-label={triggerLabel}
+          aria-label="Show options"
           className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
         >
           <ChevronDown aria-hidden="true" className="size-4" />

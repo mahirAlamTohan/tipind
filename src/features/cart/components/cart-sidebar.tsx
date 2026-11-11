@@ -1,28 +1,22 @@
 "use client"
-
+import { ShoppingCart, Trash2, X, ArrowRight, CircleCheck } from "lucide-react"
 import { useEffect, useRef } from "react"
-import { ArrowRight, CircleCheck, ShoppingCart, Trash2, X } from "lucide-react"
-import { toast } from "sonner"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Tooltip } from "@/components/ui/tooltip"
-import {
-  formatMessage,
-  formatMills,
-  formatNumber,
-  pluralize,
-} from "@/lib/format"
+import { formatMills, formatNumber, pluralize } from "@/lib/format"
 
+import { SIDEBAR_ID } from "../constants"
 import {
   selectPacketCount,
   selectTotalMills,
   useCartStore,
 } from "../cart-store"
-import { SIDEBAR_ID } from "../constants"
 import { cartContent as copy } from "../content"
-import { CartLineCard } from "./cart-line-card"
 import { CartResizeHandle } from "./cart-resize-handle"
+import { CartLineCard } from "./cart-line-card"
+import { Tooltip } from "@/components/ui/tooltip"
+import { toast } from "sonner"
 
 /**
  * Docked panel, not a modal: the page behind it stays usable.
@@ -60,11 +54,7 @@ export function CartSidebar() {
     }
   }, [isOpen])
 
-  const packetsLabel = `${formatNumber(packets)} ${pluralize(
-    packets,
-    copy.packetSingular,
-    copy.packetPlural
-  )}`
+  const packetsLabel = `${formatNumber(packets)} ${pluralize(packets, "packet", "packets")}`
 
   return (
     <aside
@@ -105,7 +95,7 @@ export function CartSidebar() {
               onClick={() => {
                 clear()
                 if (items.length > 0)
-                  toast.success(copy.clearedToastTitle, {
+                  toast.success("Cart cleared", {
                     position: "bottom-left",
                     dismissible: true,
                     closeButton: true,
@@ -195,12 +185,8 @@ export function CartSidebar() {
               </h3>
               <span className="shrink-0 text-xs font-semibold text-muted-foreground">
                 {formatNumber(items.length)}{" "}
-                {pluralize(
-                  items.length,
-                  copy.productSingular,
-                  copy.productPlural
-                )}{" "}
-                · {packetsLabel}
+                {pluralize(items.length, "product", "products")} ·{" "}
+                {packetsLabel}
               </span>
             </div>
             <div className="space-y-3">
@@ -223,7 +209,7 @@ export function CartSidebar() {
             </p>
           </div>
           <p className="mt-1 mb-0 text-xs text-muted-foreground">
-            {formatMessage(copy.packetTotalNote, { count: packetsLabel })}
+            {packetsLabel} total
           </p>
           <ButtonLink
             className="mt-4 w-full"

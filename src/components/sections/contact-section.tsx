@@ -12,6 +12,7 @@ import { Container } from "@/components/ui/container"
 import { Reveal } from "@/components/ui/reveal"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 
 const rowClass = "group -mx-3 flex min-w-0 items-center gap-3 rounded-2xl p-3"
 const rowHoverClass =
@@ -82,7 +83,7 @@ export function ContactSection() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <ButtonLink
                 className="min-h-11 w-full bg-white px-4 text-primary-800 shadow-lg shadow-primary-950/20 hover:bg-primary-50 sm:w-auto"
-                href={siteConfig.contact.whatsappHref}
+                href={contactLinks.whatsapp()}
                 rel="noreferrer"
                 size="sm"
                 target="_blank"
@@ -94,7 +95,7 @@ export function ContactSection() {
               </ButtonLink>
               <a
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-xs font-semibold text-primary-100 ring-1 ring-white/20 transition-colors hover:bg-white/10 hover:text-white hover:ring-white/40 focus-visible:outline-2 focus-visible:outline-white/60"
-                href={siteConfig.contact.emailHref}
+                href={contactLinks.email()}
               >
                 <Mail aria-hidden="true" className="size-4 shrink-0" />
                 <span className="wrap-anywhere">
@@ -106,13 +107,13 @@ export function ContactSection() {
 
           <div className="relative z-10 mt-6 grid gap-1 border-t border-white/20 pt-5 sm:grid-cols-2 lg:mt-0 lg:grid-cols-1 lg:content-center lg:border-t-0 lg:border-l lg:py-4 lg:pl-8">
             <ContactDetail
-              href={siteConfig.contact.phoneHref}
+              href={contactLinks.phone()}
               icon={Phone}
               label={contact.phoneLabel}
               value={siteConfig.contact.phone || contact.phoneFallback}
             />
             <ContactDetail
-              href={siteConfig.contact.emailHref}
+              href={contactLinks.email()}
               icon={Mail}
               label={contact.emailLabel}
               value={siteConfig.contact.email || contact.emailFallback}

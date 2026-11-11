@@ -14,7 +14,7 @@ import { SectionLink } from "@/components/layout/section-link"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
-import { replaceSiteTokens } from "@/lib/site-tokens"
+import { contactLinks } from "@/config/links"
 
 const SERVICE_ICONS: readonly LucideIcon[] = [
   MessageCircle,
@@ -102,7 +102,7 @@ export default function FooterSection() {
             {footer.kicker}
           </span>
           <p className="mt-2 max-w-md text-xs leading-6 text-footer-muted">
-            {replaceSiteTokens(footer.description)}
+            {footer.description}
           </p>
         </div>
 
@@ -112,8 +112,8 @@ export default function FooterSection() {
             {siteConfig.navigation.map((item) => (
               <SectionLink
                 className={pillLinkClass}
-                id={item.href.replace("#", "")}
-                key={item.href}
+                id={item.id}
+                key={item.id}
               >
                 {item.footerLabel}
               </SectionLink>
@@ -125,13 +125,13 @@ export default function FooterSection() {
           <span className={headingClass}>{footer.contactHeading}</span>
           <div className="grid gap-1 sm:grid-cols-3 lg:grid-cols-1">
             <FooterContact
-              href={siteConfig.contact.phoneHref}
+              href={contactLinks.phone()}
               icon={Phone}
               label={contact.phoneLabel}
               value={siteConfig.contact.phone || contact.phoneFallback}
             />
             <FooterContact
-              href={siteConfig.contact.emailHref}
+              href={contactLinks.email()}
               icon={Mail}
               label={contact.emailLabel}
               value={siteConfig.contact.email || contact.emailFallback}
@@ -146,7 +146,7 @@ export default function FooterSection() {
           </div>
           <a
             className="-mx-2 inline-flex items-center gap-2 self-start rounded-full px-3 py-2 text-[0.7rem] font-extrabold text-footer-accent transition-colors hover:bg-footer-accent hover:text-footer-start focus-visible:outline-2 focus-visible:outline-footer-accent"
-            href={siteConfig.contact.whatsappHref}
+            href={contactLinks.whatsapp()}
             rel="noreferrer"
             target="_blank"
           >

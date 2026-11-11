@@ -4,10 +4,4 @@ node_modules/
 .turbo/
 coverage/
 pnpm-lock.yaml
-.pnpm-store/out/
-.wrangler/
-bun.lock
-bun.lockb
-public/data/
-extras/
-next-env.d.ts
+.pnpm-store/

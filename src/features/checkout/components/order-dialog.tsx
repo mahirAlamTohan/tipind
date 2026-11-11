@@ -1,18 +1,17 @@
 "use client"
-
-import { useMemo } from "react"
 import { Dialog } from "@base-ui/react/dialog"
 import { Check, Copy, X } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/config/site"
 import type { CartLineItem } from "@/features/cart/types"
-import { useCopy } from "@/hooks/use-copy"
 
 import { checkoutContent } from "../content"
 import { trimDetails } from "../lib/details"
 import { buildOrderMessage } from "../lib/order-message"
+import { useCopy } from "@/hooks/use-copy"
 import type { OrderTotals, ShippingDetails } from "../types"
 
 const list = {
@@ -137,7 +136,11 @@ export function OrderDialog({
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-200/60 text-xs font-bold dark:bg-primary-800/60">
                     1
                   </span>
-                  <p className="leading-relaxed">{copy.stepCopyTemplate}</p>
+                  <p className="leading-relaxed">
+                    Click{" "}
+                    <strong className="font-semibold">"Copy message"</strong>{" "}
+                    below to copy your pre-filled order template.
+                  </p>
                 </div>
 
                 {/* Step 2 */}
@@ -146,14 +149,16 @@ export function OrderDialog({
                     2
                   </span>
                   <div className="w-full space-y-1.5">
-                    <p className="leading-relaxed">{copy.stepSend}</p>
+                    <p className="leading-relaxed">
+                      Send your copied details through our official channels:
+                    </p>
 
                     <div className="flex flex-col gap-1.5 pl-1">
                       {email && (
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <span>✉️</span>
                           <span className="text-primary-700 dark:text-primary-300">
-                            {copy.emailLabel}
+                            Email (Preferred):
                           </span>
                           <code className="rounded bg-primary-200/40 px-1.5 py-0.5 dark:bg-primary-900/50">
                             {email}
@@ -164,7 +169,7 @@ export function OrderDialog({
                         <div className="flex items-center gap-2 text-xs font-medium">
                           <span>✈️</span>
                           <span className="text-primary-700 dark:text-primary-300">
-                            {copy.telegramLabel}
+                            Telegram:
                           </span>
                           <code className="rounded bg-primary-200/40 px-1.5 py-0.5 dark:bg-primary-900/50">
                             {telegramUsername}
@@ -182,9 +187,12 @@ export function OrderDialog({
                   <span className="shrink-0 text-sm">📌</span>
                   <p>
                     <strong className="font-semibold">
-                      {copy.safetyTitle}
+                      Telegram Safety Tip:
                     </strong>{" "}
-                    {copy.safetyBody}
+                    Beware of fake impersonator accounts with subtle typos.
+                    Double-check the handle, or use{" "}
+                    <strong className="font-semibold">Email</strong> for maximum
+                    security.
                   </p>
                 </div>
               )}

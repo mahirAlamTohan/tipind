@@ -9,7 +9,7 @@ import { useCatalogStore } from "../store/catalog-store"
 import type { CatalogLoadStatus } from "../types"
 
 /** Loads the catalog into the store; returns the effective status. */
-export function useCatalogLoader(url: string | undefined): CatalogLoadStatus {
+export function useCatalogLoader(url: string): CatalogLoadStatus {
   const status = useCatalogStore((state) => state.status)
 
   useEffect(() => {

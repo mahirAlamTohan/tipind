@@ -1,6 +1,3 @@
-"use client"
-
-import Image from "next/image"
 import {
   ArrowDown,
   ArrowRight,
@@ -8,18 +5,17 @@ import {
   MessageCircle,
   ShieldCheck,
 } from "lucide-react"
-import { motion, useReducedMotion } from "motion/react"
+import Image from "next/image"
 
 import { ButtonLink } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
+import { contactLinks } from "@/config/links"
 import heroImage from "@/images/hero-visual.webp"
-import { scrollToSection } from "@/lib/scroll"
 
 export function HeroSection() {
-  const reduceMotion = useReducedMotion()
   const content = siteContent.hero
 
   return (
@@ -31,7 +27,9 @@ export function HeroSection() {
       <div className="relative isolate h-[clamp(510px,72svh,610px)] min-h-125 w-full overflow-hidden bg-hero-image-surface md:h-[clamp(500px,68svh,650px)]">
         <Image
           alt={content.imageAlt}
+          blurDataURL="data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA" // tiny 1×1 version
           className="object-cover object-[68%_center] md:object-[center_52%] dark:brightness-65 dark:saturate-80"
+          fetchPriority="high"
           fill
           placeholder="blur"
           priority
@@ -44,12 +42,9 @@ export function HeroSection() {
         />
 
         <Container className="relative z-10 flex h-full items-center pb-4">
-          <motion.div
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            className="max-w-172.5 py-8 md:py-11"
-            initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          >
+          {/* Entrance animation is CSS (see .hero-enter) so this stays a server
+              component and nothing hydrates for a decorative fade. */}
+          <div className="hero-enter max-w-172.5 py-8 md:py-11">
             <span className="hidden min-h-9 items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3.5 py-2 text-[0.62rem] font-extrabold tracking-widest text-primary-text shadow-sm backdrop-blur-xl sm:inline-flex sm:text-[0.68rem]">
               <ShieldCheck aria-hidden="true" className="size-4 shrink-0" />
               {content.eyebrow} {siteConfig.founded}
@@ -70,7 +65,7 @@ export function HeroSection() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <ButtonLink
                 className="min-h-12 bg-linear-to-r from-primary to-primary-500 px-5 shadow-lg shadow-primary-700/25"
-                href={siteConfig.contact.whatsappHref}
+                href={contactLinks.whatsapp()}
                 rel="noreferrer"
                 size="lg"
                 target="_blank"
@@ -82,9 +77,6 @@ export function HeroSection() {
               <ButtonLink
                 className="min-h-12 border-neutral-300/80 bg-white/65 px-5 text-primary-950 backdrop-blur-lg hover:bg-white dark:border-neutral-600 dark:bg-neutral-950/45 dark:text-primary-100 dark:hover:bg-neutral-900/80"
                 href="/#catalog"
-                onClick={(event) => {
-                  scrollToSection(event, "catalog")
-                }}
                 size="lg"
                 variant="outline"
               >
@@ -109,7 +101,7 @@ export function HeroSection() {
               </span>
               <span>{content.proofSecondary}</span>
             </div>
-          </motion.div>
+          </div>
         </Container>
 
         <div className="absolute right-4 bottom-4 z-10 hidden min-h-9 items-center gap-2 rounded-full border border-primary-100/90 bg-white/80 px-3 text-[0.62rem] font-semibold text-primary-800 shadow-lg shadow-primary-950/10 backdrop-blur-xl sm:right-6 md:inline-flex dark:border-primary-900 dark:bg-neutral-950/80 dark:text-primary-200">
@@ -137,7 +129,7 @@ export function HeroSection() {
           <CardContent className="flex flex-nowrap items-center gap-2">
             <ButtonLink
               className="h-9 px-3"
-              href={siteConfig.contact.whatsappHref}
+              href={contactLinks.whatsapp()}
               rel="noreferrer"
               size="sm"
               target="_blank"
@@ -147,7 +139,7 @@ export function HeroSection() {
             </ButtonLink>
             <ButtonLink
               className="h-9 px-3"
-              href={siteConfig.contact.emailHref}
+              href={contactLinks.email()}
               size="sm"
               variant="outline"
             >

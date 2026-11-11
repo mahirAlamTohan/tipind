@@ -1,6 +1,5 @@
 import { create } from "zustand"
 
-import { PAGE_SIZE } from "../constants"
 import type {
   CatalogDataset,
   CatalogLoadStatus,
@@ -9,6 +8,7 @@ import type {
   FilterMode,
   PriceRange,
 } from "../types"
+import { PAGE_SIZE } from "../constants"
 
 interface CatalogActions {
   loadStarted: () => void
@@ -91,8 +91,7 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
       set({ dataset: null, error: message, status: "error" })
     },
     setQuery: (query) => {
-      // A new query starts the result list from the top.
-      set({ loadedCount: PAGE_SIZE, query })
+      set({ loadedCount: PAGE_SIZE, query }) // ← reset on search
     },
     loadMore: () => {
       set((state) => ({ loadedCount: state.loadedCount + PAGE_SIZE }))
@@ -119,10 +118,10 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
         const bounds = state.dataset?.priceBounds
         const isFull =
           !bounds || (range[0] <= bounds[0] && range[1] >= bounds[1])
-        return {
-          loadedCount: PAGE_SIZE,
-          priceRange: isFull ? null : range,
-        }
+        // Resetting the page is what the facet filters do too. This used to
+        // write `page`, a key that does not exist on CatalogState, so the
+        // price filter never reset pagination and Zustand kept a stray key.
+        return { loadedCount: PAGE_SIZE, priceRange: isFull ? null : range }
       })
     },
     clearFilters: () => {

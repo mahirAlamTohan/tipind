@@ -4,18 +4,26 @@
  * web app that reads the live Google Sheet.
  *
  *   node scripts/build-catalog.mjs -i <source.json> [-o public/data] [--clean] [--write-env]
- *   node scripts/build-catalog.mjs [--sheet <apps-script-url>] [-o public/data] [--clean] [--write-env]
+ *   node scripts/build-catalog.mjs --sheet <apps-script-url> [-o public/data] [--clean] [--write-env]
  *
- * Without -i or --sheet, the sheet URL comes from CATALOG_SHEET_URL in the
- * environment or in .env / .env.production.
- *
- * Output: <output>/catalog.<hash>.dat = MAGIC + XOR(gzip(JSON))
- * JSON:   { format: 4, priceBounds: [minMills, maxMills], manufacturers: string[],
+ * Output: <output>/catalog.<hash>.dat = "TIPCAT6:" + base64(xor(gzip(JSON))).
+ * JSON:   { format: 6, priceBounds: [minMills, maxMills], manufacturers: string[],
  *           packaging: string[], types: string[],
  *           products: [name, ingredient, manufacturerIdx, packagingIdx, typeIdx, priceMills][] }
  * A mill is 1/1000 USD, so "$0.665" is stored as 665 (3 decimals, exact).
- * Missing index/price is -1. Keep FORMAT/MAGIC in sync with
+ * Missing index/price is -1. Keep FORMAT in sync with
  * src/features/catalog/constants.ts (and check the product tuple matches the reader).
+ *
+ * The artifact is deliberately masked, not plain JSON. The data is public
+ * (scraped from supplier sites) but it must not be harvestable with a bare
+ * GET: see src/features/catalog/lib/catalog-mask.ts.
+ *
+ * Note on compression: the payload is base64 *text*, not raw binary. An earlier
+ * format wrote binary magic+xor+gzip, which the CDN cannot compress at all, so
+ * the artifact was stuck at gzip's ratio forever. Base64 costs ~33% before
+ * compression and Brotli wins most of it back.
+ *
+ * Inspect a built artifact with: node -e "..." or `npm run catalog:inspect`.
  *
  * Rows whose "status" column is "needs review" are held out of the published
  * catalog and are reported in the stats.
@@ -30,13 +38,11 @@ import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
-import { gzipSync } from "node:zlib"
+import { gunzipSync, gzipSync } from "node:zlib"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const KEY_NAME = "NEXT_PUBLIC_CATALOG_XOR_KEY"
 const URL_NAME = "NEXT_PUBLIC_CATALOG_DATA_URL"
-const FORMAT = 4
-const MAGIC = Buffer.from("TIPCAT4:", "ascii")
+const FORMAT = 6
 const NONE = -1
 const MAX_UNIT_PRICE_MILLS = 100_000_000
 /** Status value that holds a product out of the published catalog. */
@@ -249,14 +255,45 @@ function build(json) {
   }
 }
 
-const encode = (artifact, keyBytes) => {
-  const gzipped = gzipSync(Buffer.from(JSON.stringify(artifact), "utf8"), {
-    level: 9,
-  })
-  const masked = gzipped.map(
-    (byte, index) => byte ^ keyBytes[index % keyBytes.length]
-  )
-  return Buffer.concat([MAGIC, masked])
+/** Plain UTF-8 JSON. The CDN and the browser own the compression. */
+/**
+ * Packs the artifact into the transport format:
+ *
+ *     "TIPCAT6:" + base64( xor( gzip( json ) ) )
+ *
+ * Must stay byte-for-byte compatible with src/features/catalog/lib/catalog-mask.ts.
+ * The key is public by design (it ships in the bundle) — see that file's header
+ * for why this is masking, not encryption.
+ */
+const MAGIC = "TIPCAT6:"
+const XOR_KEY_NAME = "NEXT_PUBLIC_CATALOG_XOR_KEY"
+const DEFAULT_XOR_KEY = "tipind-catalog-mask-v6"
+
+function encode(artifact, key) {
+  const json = Buffer.from(JSON.stringify(artifact), "utf8")
+  const compressed = gzipSync(json, { level: 9 })
+  const keyBytes = Buffer.from(key, "utf8")
+  const xored = Buffer.allocUnsafe(compressed.length)
+  for (let index = 0; index < compressed.length; index += 1) {
+    xored[index] = compressed[index] ^ keyBytes[index % keyBytes.length]
+  }
+  return Buffer.from(MAGIC + xored.toString("base64"), "utf8") + Buffer.from("\n")
+}
+
+/**
+ * Decodes what `encode` produced. Used by the build's self-check so a mismatch
+ * with the browser decoder fails the build instead of the customer's catalog.
+ */
+function decodeMasked(payload, key) {
+  const text = Buffer.isBuffer(payload) ? payload.toString("utf8").trim() : String(payload).trim()
+  if (!text.startsWith(MAGIC)) throw new Error("missing TIPCAT6 signature")
+  const xored = Buffer.from(text.slice(MAGIC.length), "base64")
+  const keyBytes = Buffer.from(key, "utf8")
+  const plain = Buffer.allocUnsafe(xored.length)
+  for (let index = 0; index < xored.length; index += 1) {
+    plain[index] = xored[index] ^ keyBytes[index % keyBytes.length]
+  }
+  return gunzipSync(plain).toString("utf8")
 }
 
 /* ── Google Apps Script support ─────────────────────────────────────── */
@@ -431,6 +468,8 @@ async function updateEnv(file, name, value) {
   await writeFile(file, next)
 }
 
+
+
 function loadEnvFiles() {
   for (const name of [".env", ".env.production"]) {
     try {
@@ -465,29 +504,19 @@ async function main() {
     },
   })
 
-  // Existing environment variables win; .env then .env.production fill gaps.
-  loadEnvFiles()
-  const sheetUrl = values.sheet?.trim() || process.env.CATALOG_SHEET_URL?.trim()
-
-  if (values.help || (!values.input && !sheetUrl)) {
+  if (values.help || (!values.input && !values.sheet)) {
     console.log(
-      "Usage: node scripts/build-catalog.mjs -i <source.json> | [--sheet <apps-script-url>] [-o public/data] [--clean] [--write-env]"
-    )
-    console.log(
-      "Without -i/--sheet, the sheet URL is read from CATALOG_SHEET_URL."
+      "Usage: node scripts/build-catalog.mjs -i <source.json> | --sheet <apps-script-url> [-o public/data] [--clean] [--write-env]"
     )
     return
   }
 
-  const xorKey = process.env[KEY_NAME]?.trim()
-  if (!xorKey)
-    throw new Error(
-      `Missing ${KEY_NAME} (set it in .env or .env.production). Note: it ships in the browser bundle, so it only obfuscates.`
-    )
+  // Existing environment variables win; .env then .env.production fill gaps.
+  loadEnvFiles()
 
   let json
-  if (sheetUrl) {
-    json = await fetchSheetRows(sheetUrl)
+  if (values.sheet) {
+    json = await fetchSheetRows(values.sheet)
   } else {
     const input = path.resolve(ROOT, values.input)
     json = JSON.parse((await readFile(input, "utf8")).replace(/^\uFEFF/, ""))
@@ -495,7 +524,16 @@ async function main() {
 
   const outputDir = path.resolve(ROOT, values.output)
   const { artifact, stats } = build(json)
-  const payload = encode(artifact, Buffer.from(xorKey, "utf8"))
+  const key = (process.env[XOR_KEY_NAME] || DEFAULT_XOR_KEY).trim()
+  const payload = encode(artifact, key)
+
+  // Round-trip before writing: a decoder mismatch must fail here, not in the
+  // browser of someone trying to buy medicine.
+  const roundTrip = decodeMasked(payload, key)
+  if (roundTrip !== JSON.stringify(artifact)) {
+    throw new Error("Catalog self-check failed: encode/decode round trip mismatch.")
+  }
+
   const hash = createHash("sha256").update(payload).digest("hex").slice(0, 8)
   const fileName = `catalog.${hash}.dat`
 
@@ -515,7 +553,7 @@ async function main() {
     const removed =
       (await removeStale(
         outputDir,
-        /^(catalog|manufacturers|packaging)\.[\w-]+\.dat$/,
+        /^(catalog|manufacturers|packaging)\.[\w-]+\.(?:dat|json)$/,
         fileName
       )) + (await removeStale(extrasDir, /^source\.[\w-]+\.json$/, sourceName))
     if (removed > 0) console.log(`Removed ${removed.toString()} stale file(s).`)
@@ -524,6 +562,9 @@ async function main() {
   const dataUrl = `/${path.relative(path.join(ROOT, "public"), path.join(outputDir, fileName)).split(path.sep).join("/")}`
   if (values["write-env"]) {
     await updateEnv(path.join(ROOT, ".env.production"), URL_NAME, dataUrl)
+    // Keep the key in .env.production: the browser needs the same value to
+    // unmask the artifact.
+    await updateEnv(path.join(ROOT, ".env.production"), XOR_KEY_NAME, key)
     console.log("Updated .env.production")
   }
 

@@ -3,15 +3,14 @@
 import type { ThemeProviderProps } from "next-themes"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 
+/**
+ * next-themes writes a tiny blocking script into <head> that applies the saved
+ * theme before first paint. It needs to stay a real, executable <script>: an
+ * earlier version of this file set `type="application/json"` on the server to
+ * silence a React 19 warning, which would have stopped the script from running
+ * and caused a light-mode flash on every dark-mode visit. Do not reintroduce it.
+ */
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  // React 19 / Next 16 fix: suppress the <script> tag warning by
-  // telling next-themes to use type="application/json" instead of
-  // type="text/javascript", which React won't try to execute
-  const scriptProps =
-    typeof window === "undefined"
-      ? undefined
-      : ({ type: "application/json" } as const)
-
   return (
     <NextThemesProvider
       attribute="class"
@@ -19,7 +18,6 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       disableTransitionOnChange
       enableSystem
       {...props}
-      scriptProps={scriptProps}
     >
       {children}
     </NextThemesProvider>

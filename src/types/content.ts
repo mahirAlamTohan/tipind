@@ -5,7 +5,6 @@ export interface FAQItem {
 
 export interface SiteContent {
   ui: {
-    skipToContent: string
     headerIntro: string
     phoneFallback: string
     emailFallback: string
@@ -29,8 +28,6 @@ export interface SiteContent {
     errorDescription: string
     errorRetry: string
     errorHome: string
-    notFoundTitle: string
-    notFoundDescription: string
     catalogCrashedTitle: string
     catalogCrashedDescription: string
     cartCrashedTitle: string
@@ -68,6 +65,7 @@ export interface SiteContent {
     fullCatalogLabel: string
     searchNowLabel: string
     loadErrorAdvice: string
+    paginationLabel: string
     filtersAction: string
     closeFiltersAction: string
     includedFiltersTitle: string
@@ -77,6 +75,7 @@ export interface SiteContent {
     facetCycleAriaLabel: string
     unselectedLabel: string
     priceRangeTitle: string
+    priceUnit: string
     minimumPriceLabel: string
     maximumPriceLabel: string
     minimumPriceAriaLabel: string
@@ -91,6 +90,8 @@ export interface SiteContent {
     noFacetValues: string
     noFacetMatches: string
     clearFiltersAction: string
+    downloadAction: string
+    openCatalogAction: string
     productSingular: string
     productPlural: string
     searchableProducts: string
@@ -108,6 +109,8 @@ export interface SiteContent {
       loading: string
       loaded: string
       error: string
+      indexing: string
+      searchError: string
     }
     addTip: {
       add: { title: string; note: string }
@@ -157,12 +160,11 @@ export interface SiteContent {
     noProducts: string
     summaryShowing: string
     summaryOf: string
-    summaryMatching: string
-    allLoadedLabel: string
-    loadMoreLabel: string
-    unavailablePriceLabel: string
-    addedToastTitle: string
-    addedToastDescription: string
+    previousPage: string
+    nextPage: string
+    previousPageAriaLabel: string
+    nextPageAriaLabel: string
+    sourceNote: string
     addToCartAriaLabel: string
     addedToCartAnnouncement: string
     unavailablePriceAriaLabel: string

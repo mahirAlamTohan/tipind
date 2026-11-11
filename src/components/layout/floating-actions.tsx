@@ -1,23 +1,23 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import {
   ArrowUpRight,
+  ShoppingCart,
   Headset,
   Mail,
   MessageCircle,
   Phone,
-  ShoppingCart,
   X,
 } from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useEffect, useState } from "react"
 
 import { Button, ButtonLink } from "@/components/ui/button"
 import { Tooltip } from "@/components/ui/tooltip"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
-import { selectPacketCount, useCartStore } from "@/features/cart/cart-store"
+import { contactLinks } from "@/config/links"
 import { SIDEBAR_ID } from "@/features/cart/constants"
+import { selectPacketCount, useCartStore } from "@/features/cart/cart-store"
 import { scrollToSection } from "@/lib/scroll"
 
 const ui = siteContent.ui
@@ -64,7 +64,6 @@ function CartButton({
 
 export function FloatingActions() {
   const [isOpen, setIsOpen] = useState(false)
-  const reduceMotion = useReducedMotion()
   const hasContactGap = !siteConfig.contact.phone || !siteConfig.contact.email
   const hasWhatsapp = Boolean(siteConfig.contact.whatsappNumber)
 
@@ -90,49 +89,23 @@ export function FloatingActions() {
 
   return (
     // z-60 is below the cart sidebar (z-70), so the sidebar covers this stack.
-    <div className="fixed right-4 bottom-5 z-60 flex flex-col items-end gap-3 sm:right-6 sm:bottom-6">
-      {/* Row 1 */}
-      <AnimatePresence initial={false}>
-        {showCount ? (
-          <motion.div
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: 12 }}
-            id="floating-cart"
-            initial={
-              reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 16 }
-            }
-            role="region"
-            transition={
-              reduceMotion
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 360, damping: 30, mass: 0.72 }
-            }
-          >
-            <CartButton count={count} showCount={showCount} />
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+    // Hidden below `sm`: the header already carries chat + cart on phones, and
+    // the fixed stack covered the hero contact card there.
+    <div className="fixed right-4 bottom-5 z-60 hidden flex-col items-end gap-3 sm:right-6 sm:bottom-6 sm:flex">
+      {/* Row 1. Entrance is CSS (.float-pop); it mounts once the cart hydrates. */}
+      {showCount && (
+        <div className="float-pop" id="floating-cart" role="region">
+          <CartButton count={count} showCount={showCount} />
+        </div>
+      )}
       {/* Row 2. The panel is anchored to this row and opens upward over row 1. */}
       <div className="relative flex items-center gap-3">
-        <AnimatePresence initial={false}>
-          {isOpen ? (
-            <motion.div
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+        {isOpen && (
+            <div
               aria-label={ui.contactOptionsLabel}
-              className="absolute right-0 bottom-full z-10 mb-3 w-[min(19rem,calc(100vw-2rem))] origin-bottom-right rounded-2xl border border-border bg-card p-3 shadow-2xl shadow-neutral-950/25"
-              exit={{ opacity: 0, scale: 0.94, y: 12 }}
+              className="float-pop absolute right-0 bottom-full z-10 mb-3 w-[min(19rem,calc(100vw-2rem))] origin-bottom-right rounded-2xl border border-border bg-card p-3 shadow-2xl shadow-neutral-950/25"
               id="floating-contact-options"
-              initial={
-                reduceMotion
-                  ? { opacity: 0 }
-                  : { opacity: 0, scale: 0.94, y: 16 }
-              }
               role="region"
-              transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : { type: "spring", stiffness: 360, damping: 30, mass: 0.72 }
-              }
             >
               <div className="mb-2.5 flex items-center gap-2 px-1.5 py-1">
                 <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary-text">
@@ -146,7 +119,7 @@ export function FloatingActions() {
               <div className="grid gap-2">
                 <ButtonLink
                   className="min-h-11 justify-start rounded-xl px-3.5"
-                  href={siteConfig.contact.phoneHref}
+                  href={contactLinks.phone()}
                   onClick={close}
                 >
                   <span className="grid size-7 place-items-center rounded-full bg-white/15">
@@ -160,7 +133,7 @@ export function FloatingActions() {
                 </ButtonLink>
                 <ButtonLink
                   className="min-h-11 justify-start rounded-xl bg-highlight-700 px-3.5 text-white shadow-highlight-950/15 hover:bg-highlight-800"
-                  href={siteConfig.contact.emailHref}
+                  href={contactLinks.email()}
                   onClick={close}
                 >
                   <span className="grid size-7 place-items-center rounded-full bg-white/15">
@@ -194,9 +167,8 @@ export function FloatingActions() {
                   {siteContent.contact.description}
                 </p>
               )}
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+            </div>
+        )}
 
         <Tooltip
           content={
@@ -223,7 +195,7 @@ export function FloatingActions() {
           <ButtonLink
             aria-label={ui.chatAction}
             className="size-13 border border-white/20 bg-whatsapp text-white shadow-xl ring-4 shadow-success-700/30 ring-success-500/20 hover:bg-whatsapp-hover sm:size-14 [&_svg]:size-6"
-            href={siteConfig.contact.whatsappHref}
+            href={contactLinks.whatsapp()}
             rel={hasWhatsapp ? "noreferrer" : undefined}
             target={hasWhatsapp ? "_blank" : undefined}
           >

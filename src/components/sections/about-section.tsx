@@ -4,7 +4,6 @@ import { Container } from "@/components/ui/container"
 import { Reveal } from "@/components/ui/reveal"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
-import { replaceSiteTokens } from "@/lib/site-tokens"
 
 export function AboutSection() {
   const about = siteContent.about
@@ -18,13 +17,13 @@ export function AboutSection() {
         <Reveal>
           <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
             <Pill aria-hidden="true" className="size-4" />
-            {replaceSiteTokens(about.eyebrow)}
+            {about.eyebrow}
           </span>
           <h2 className="mt-3 max-w-xl font-display text-[clamp(2rem,4vw,2.9rem)] leading-tight font-extrabold tracking-[-0.045em] text-ink">
             {about.title}
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground sm:text-[0.94rem] sm:leading-8">
-            {replaceSiteTokens(about.description)}
+            {about.description}
           </p>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
             {about.highlights.map((highlight, index) => (

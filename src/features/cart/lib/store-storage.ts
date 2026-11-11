@@ -1,3 +1,5 @@
+import type { CartLineItem } from "../types"
+
 import { isRecord } from "@/lib/guards"
 
 import {
@@ -6,7 +8,6 @@ import {
   STORAGE_KEY,
   STORAGE_VERSION,
 } from "../constants"
-import type { CartLineItem } from "../types"
 import { clampQuantity, clip, lineItemId } from "./line-items"
 
 function readItem(candidate: unknown): CartLineItem | null {

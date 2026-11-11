@@ -2,7 +2,6 @@ import {
   postcodeValidator,
   postcodeValidatorExistsForCountry,
 } from "postcode-validator"
-
 import type { SERVICED_COUNTRY } from "../types"
 
 /** False for countries without a known postal-code format (then it's optional). */

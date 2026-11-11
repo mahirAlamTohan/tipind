@@ -1,6 +1,15 @@
-import { DELIVERY_COUNTRIES, NEED_OR_HAS_REGION } from "@/config/site"
+/**
+ * Checkout tunables that are *implementation* concerns: storage keys, length
+ * limits, the form id.
+ *
+ * Business configuration is NOT here. Where we ship and how we get paid are
+ * facts about the business, so they live in `src/config/site.ts` and are merely
+ * re-exported below for the checkout's convenience. Before this, the payment
+ * list and the country list were duplicated in this file and in `site.ts`.
+ */
+import { siteConfig } from "@/config/site"
 
-import type { PaymentMethod, SERVICED_COUNTRY } from "./types"
+import type { SERVICED_COUNTRY } from "./types"
 
 export const STORAGE_KEY = "tipind:checkout:v1"
 export const STORAGE_VERSION = 1
@@ -17,15 +26,14 @@ export const SHIPPING_MILLS: ReadonlyMap<string, number> = new Map<
 ])
 
 /** Countries you actively ship to. Others can order, but see a notice. */
-export const SERVICED_COUNTRIES = DELIVERY_COUNTRIES
+export const SERVICED_COUNTRIES = siteConfig.shipping.countries
 
 /** Countries where an address needs a state or province. */
-export const REGION_REQUIRED = new Set<SERVICED_COUNTRY>(NEED_OR_HAS_REGION)
+export const REGION_REQUIRED = new Set<SERVICED_COUNTRY>(
+  siteConfig.shipping.regionRequired.filter((code) =>
+    SERVICED_COUNTRIES.includes(code)
+  )
+)
 
-export const PAYMENT_METHODS: readonly PaymentMethod[] = [
-  { id: "btc", label: "Bitcoin (BTC)" },
-  { id: "usdt-trc20", label: "USDT (TRC-20)" },
-  { id: "usdt-erc20", label: "USDT (ERC-20)" },
-  { id: "eth", label: "Ethereum (ETH)" },
-  { id: "usdc-erc20", label: "USDC (ERC-20)" },
-]
+/** How the visitor can pay. Defined once, in site.ts. */
+export const PAYMENT_METHODS = siteConfig.payments

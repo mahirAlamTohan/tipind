@@ -89,13 +89,12 @@ export function CheckoutPage() {
 
   function finish() {
     clearCart()
-    // The buyer is done: do not leave their name, address and email sitting in
-    // localStorage on a device we no longer need them on (see the privacy review).
+    // The buyer is done: do not leave their name, address and email in
+    // localStorage on a device we no longer need them on.
     clearDetails()
     setStep("review")
     setDialogOpen(false)
-    // Remove the record itself, not just its fields: an empty envelope left in
-    // localStorage is still a hint that someone checked out on this device.
+    // Remove the record itself, not just its fields.
     useCheckoutStore.persist.clearStorage()
     router.push("/")
   }

@@ -1,8 +1,9 @@
 import { z } from "zod"
 
 import { formatMessage } from "@/lib/format"
+import { stripControlChars } from "@/lib/sanitize"
 
-import { REGION_REQUIRED } from "../constants"
+import { MAX_FIELD_LENGTH, MAX_NOTES_LENGTH, REGION_REQUIRED } from "../constants"
 import { checkoutContent } from "../content"
 import type {
   ErrorKind,
@@ -14,8 +15,15 @@ import { hasPostalSystem, isValidPostal } from "./address"
 import { findCountry, isCountryCode } from "./countries"
 import { EMPTY_DETAILS } from "./details"
 
+const clean = (max: number, allowNewlines = false) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((v) => stripControlChars(v, allowNewlines))
+
 /** Zod messages are error kinds; the visible text comes from content.ts. */
-const required = () => z.string().trim().min(1, "required")
+const required = () => clean(MAX_FIELD_LENGTH).pipe(z.string().min(1, "required"))
 
 function buildSchema(code: SERVICED_COUNTRY) {
   const country = findCountry(code)
@@ -24,9 +32,9 @@ function buildSchema(code: SERVICED_COUNTRY) {
 
   return z.object({
     addressLine1: required(),
-    addressLine2: z.string().trim(),
+    addressLine2: clean(MAX_FIELD_LENGTH),
     city: required(),
-    company: z.string().trim(),
+    company: clean(MAX_FIELD_LENGTH),
     country: z
       .string()
       .trim()
@@ -38,13 +46,13 @@ function buildSchema(code: SERVICED_COUNTRY) {
     email: required().pipe(z.email("email")),
     firstName: required(),
     lastName: required(),
-    notes: z.string().trim(),
+    notes: clean(MAX_NOTES_LENGTH, true),
     paymentMethod: z.string(),
-    postalCode: (postalNeeded ? required() : z.string().trim()).refine(
+    postalCode: (postalNeeded ? required() : clean(MAX_FIELD_LENGTH)).refine(
       (value) => value === "" || !postalNeeded || isValidPostal(value, code),
       "postal"
     ),
-    region: (REGION_REQUIRED.has(code) ? required() : z.string().trim()).refine(
+    region: (REGION_REQUIRED.has(code) ? required() : clean(MAX_FIELD_LENGTH)).refine(
       (value) => value === "" || regions.size === 0 || regions.has(value),
       "region"
     ),

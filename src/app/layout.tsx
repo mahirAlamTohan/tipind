@@ -1,18 +1,16 @@
 import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 
-import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
-
 import "@/styles/main.css"
 
-import { SiteHeader } from "@/components/layout/header"
 import { OfflineStatus } from "@/components/layout/offline-status"
 import { StructuredData } from "@/components/layout/structured-data"
+import { SiteHeader } from "@/components/layout/header"
 import { ThemeProvider } from "@/components/providers/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { CartRoot } from "@/features/cart/components/cart-root"
+import { LazyToaster } from "@/components/ui/lazy-toaster"
 
 const bodyFont = localFont({
   display: "swap",
@@ -89,7 +87,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       className={`${bodyFont.variable} ${headingFont.variable} min-w-80 scroll-pt-32 scroll-smooth motion-reduce:scroll-auto`}
@@ -98,19 +98,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased selection:bg-primary-200 selection:text-ink">
-        <a
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-foreground focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-background focus:shadow-lg"
-          href="#main"
-        >
-          {siteContent.ui.skipToContent}
-        </a>
         <StructuredData />
+        {/* First tab stop: keyboard users can jump past the header and nav. */}
+        <a className="skip-link" href="#catalog">
+          Skip to catalog
+        </a>
         <ThemeProvider>
           <TooltipProvider>
             <OfflineStatus />
             <SiteHeader />
             {children}
-            <Toaster className="hidden lg:block" />
+            <LazyToaster className="hidden lg:block" />
             <CartRoot />
           </TooltipProvider>
         </ThemeProvider>

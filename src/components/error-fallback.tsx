@@ -16,7 +16,6 @@ const secondaryAction =
 interface ErrorPanelProps {
   description: string
   title: string
-  /** Omit when the caller only offers a link. */
   onRetry?: (() => void) | undefined
 }
 

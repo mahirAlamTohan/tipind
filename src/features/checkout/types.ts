@@ -3,8 +3,10 @@ import type { SERVICED_COUNTRIES } from "./constants"
 export type PaymentMethodId =
   "btc" | "usdt-erc20" | "usdt-trc20" | "eth" | "usdc-erc20"
 export type CheckoutStep = "review" | "details"
+export type ChannelId = "email" | "whatsapp" | "telegram"
 export type ErrorKind = "required" | "email" | "postal" | "region"
 
+export type SERVICED_COUNTRIES_TYPE = typeof SERVICED_COUNTRIES
 export type SERVICED_COUNTRY = (typeof SERVICED_COUNTRIES)[number]
 
 export interface PaymentMethod {
@@ -87,12 +89,13 @@ export interface CheckoutContent {
     readonly addressHeading: string
     readonly extraHeading: string
     readonly optional: string
+    readonly selectPlaceholder: string
     readonly paymentNone: string
     readonly savedNotice: string
     readonly notesHint: string
     readonly clearSaved: string
     readonly noResults: string
-    readonly showOptionsLabel: string
+    readonly unservicedNotice: string
   }
   readonly fields: Readonly<Record<FieldName, FieldCopy>>
   readonly errors: Readonly<Record<ErrorKind, string>>
@@ -113,16 +116,12 @@ export interface CheckoutContent {
     readonly title: string
     readonly description: string
     readonly optionsHeading: string
-    readonly stepCopyTemplate: string
-    readonly stepSend: string
-    readonly emailLabel: string
-    readonly telegramLabel: string
-    readonly safetyTitle: string
-    readonly safetyBody: string
+    readonly pasteHint: string
     readonly messageHeading: string
     readonly copyAction: string
     readonly copiedAction: string
     readonly copyFailed: string
+    readonly emailSubject: string
     readonly editAction: string
     readonly finishAction: string
     readonly closeAction: string
@@ -134,6 +133,7 @@ export interface CheckoutContent {
     readonly name: string
     readonly email: string
     readonly company: string
+    readonly payment: string
     readonly subtotalLabel: string
     readonly shippingLabel: string
     readonly shippingText: string

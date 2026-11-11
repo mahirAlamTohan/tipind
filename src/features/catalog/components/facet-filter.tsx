@@ -1,17 +1,18 @@
 "use client"
 
-import { useDeferredValue, useMemo, useState } from "react"
 import { cva } from "class-variance-authority"
-import { CircleCheck, CircleMinus, Info, Plus } from "lucide-react"
+import { CircleCheck, CircleMinus, Plus, Info } from "lucide-react"
+import { useDeferredValue, useMemo, useState } from "react"
 
 import { SearchField } from "@/components/ui/search-field"
-import { formatTip, Tooltip } from "@/components/ui/tooltip"
 import { VirtualList } from "@/components/ui/virtual-list"
 import { siteContent } from "@/config/content"
 import { compactText, formatMessage, formatNumber } from "@/lib/format"
 
 import { selectFacet, useCatalogStore } from "../store/catalog-store"
 import type { FacetKind, FilterMode } from "../types"
+
+import { formatTip, Tooltip } from "@/components/ui/tooltip"
 
 const ROW_HEIGHT = 44
 const LIST_HEIGHT = 288

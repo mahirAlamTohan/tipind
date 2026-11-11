@@ -24,8 +24,7 @@ export function lineItemId(details: LineItemDetails) {
 
 function toDetails(product: CatalogProduct): LineItemDetails | null {
   const price = product.priceMills
-  // Fail closed on anything that is not a sane positive price: a corrupt
-  // catalog row must never become a negative or zero line item.
+  // Fail closed on anything that is not a sane positive price.
   if (price === null || price <= 0 || price > MAX_UNIT_PRICE_MILLS) return null
 
   return {

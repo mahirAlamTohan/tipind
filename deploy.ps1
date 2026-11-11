@@ -1,14 +1,11 @@
 #!/usr/bin/env pwsh
-# deploy.ps1 - Catalog refresh + push helper for tipind
+# deploy.ps1 - One-command deploy for tipind
 #
 #   1. Rebuilds the catalog from the live Google Sheet (via Apps Script)
 #   2. Sets up git if needed (init, identity, remote)
 #   3. Stages all changes and commits
 #      (message defaults to "updated the catalog to catalog.<hash>.dat")
 #   4. Pushes, walking you through GitHub login / merging remote history if needed
-#
-# This does NOT publish to Cloudflare. After it finishes, run:
-#   npm run deploy
 #
 # Usage:
 #   ./deploy.ps1                      # auto commit message
@@ -139,7 +136,8 @@ if (-not $env:NEXT_PUBLIC_CATALOG_XOR_KEY) {
 
 # -- 1. Build catalog --
 Write-Host "`n[1/4] Building catalog from the live sheet..." -ForegroundColor Yellow
-Invoke-Native { npm run catalog:build } "Catalog build failed"
+$runner = if (Get-Command bun -ErrorAction SilentlyContinue) { "bun" } else { "npm" }
+Invoke-Native { & $runner run catalog:build } "Catalog build failed"
 
 # -- Commit message from the newest catalog file --
 if (-not $CommitMessage) {

@@ -4,10 +4,9 @@ import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 
 /**
- * Last-resort boundary: the root layout itself failed (fonts, theme provider,
- * a bad NEXT_PUBLIC_SITE_URL, …), so this replaces the whole document. It is
- * deliberately dependency-free — inline styles only, no providers — because
- * anything shared could be the thing that is broken.
+ * Last-resort boundary: the root layout itself failed, so this replaces the
+ * whole document. Inline styles only — anything shared could be the broken
+ * thing.
  */
 export default function GlobalError({
   reset,

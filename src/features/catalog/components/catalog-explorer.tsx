@@ -1,9 +1,9 @@
 "use client"
-
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
+import { siteConfig } from "@/config/site"
 import { siteContent } from "@/config/content"
 import { formatNumber, pluralize } from "@/lib/format"
 
@@ -18,16 +18,40 @@ import { CatalogStat, CatalogStatusBar } from "./catalog-status"
 import { CatalogTable } from "./catalog-table"
 import { CatalogToolbar } from "./catalog-toolbar"
 
-interface CatalogExplorerProps {
-  catalogDataUrl?: string | undefined
-}
+/** Load the catalog once the section is this close to the viewport. */
+const PRELOAD_MARGIN = "600px"
 
-export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
+export function CatalogExplorer() {
   const copy = siteContent.catalog
-  const status = useCatalogLoader(catalogDataUrl)
+  const sectionRef = useRef<HTMLElement>(null)
+  const [shouldLoad, setShouldLoad] = useState(false)
+
+  // The catalog is the largest transfer on the page and it sits well below the
+  // fold, so it must not compete with the first paint. Fetch it when the
+  // section gets close instead of on mount.
+  useEffect(() => {
+    const element = sectionRef.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: PRELOAD_MARGIN }
+    )
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  const status = useCatalogLoader(shouldLoad ? siteConfig.catalog.dataUrl : "")
   const dataset = useCatalogStore((state) => state.dataset)
   const loadError = useCatalogStore((state) => state.error)
-  const loadMore = useCatalogStore((state) => state.actions.loadMore)
+  const loadMore = useCatalogStore((state) => state.actions.loadMore) // ← new
   const results = useCatalogResults()
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -46,13 +70,17 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
     status === "unconfigured" || status === "error"
       ? copy.noCatalogRecordsTitle
       : results.isFiltered
-        ? `${formatNumber(results.total)} ${copy.summaryMatching} ${noun}`
+        ? `${formatNumber(results.total)} matching ${noun}`
         : `${formatNumber(results.total)} ${copy.searchableProducts}`
 
   return (
     <section
-      className="bg-linear-to-b from-surface-tint to-background py-16 sm:py-20 lg:py-24"
+      className="bg-linear-to-b from-surface-tint to-background py-16 outline-none sm:py-20 lg:py-24"
       id="catalog"
+      // tabIndex lets the skip link move keyboard focus here, not just the
+      // scroll position — without it focus falls back to <body>.
+      tabIndex={-1}
+      ref={sectionRef}
     >
       <Container>
         <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-9">
@@ -126,21 +154,20 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
             )}
           </div>
 
+          {/* ── Footer ── */}
           <div className="flex min-h-12 items-center justify-between border-t border-border bg-neutral-50/70 px-5 py-3 sm:px-7 dark:bg-neutral-950/25">
             <p className="m-0 text-[0.68rem] text-muted-foreground">
               {results.total > 0 ? (
                 <>
-                  {copy.summaryShowing}{" "}
+                  Showing{" "}
                   <strong className="text-ink-soft">
                     {formatNumber(results.loadedCount)}
                   </strong>{" "}
-                  {copy.summaryOf}{" "}
+                  of{" "}
                   <strong className="text-ink-soft">
                     {formatNumber(results.total)}
                   </strong>{" "}
-                  {results.isFiltered
-                    ? `${copy.summaryMatching} ${noun}`
-                    : noun}
+                  {results.isFiltered ? `matching ${noun}` : noun}
                 </>
               ) : (
                 copy.noProducts
@@ -148,11 +175,17 @@ export function CatalogExplorer({ catalogDataUrl }: CatalogExplorerProps) {
             </p>
             {!results.hasMore && results.total > 0 && (
               <span className="text-[0.62rem] font-semibold text-muted-foreground">
-                {copy.allLoadedLabel}
+                All loaded ✓
               </span>
             )}
           </div>
         </Card>
+
+        {copy.sourceNote && (
+          <p className="mt-3 text-right text-[0.62rem] leading-5 text-muted-foreground sm:px-1 sm:text-xs">
+            {copy.sourceNote}
+          </p>
+        )}
       </Container>
     </section>
   )

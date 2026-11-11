@@ -1,15 +1,14 @@
 "use client"
-
 import { Minus, Plus, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { formatMessage, formatMills, formatNumber } from "@/lib/format"
 
-import { useCartStore } from "../cart-store"
 import { MAX_QUANTITY } from "../constants"
-import { cartContent as copy } from "../content"
 import { lineTotalMills } from "../lib/line-items"
+import { useCartStore } from "../cart-store"
 import type { CartLineItem } from "../types"
+import { cartContent as copy } from "../content"
 
 const label =
   "mb-1.5 block text-[0.65rem] font-bold tracking-wide text-muted-foreground uppercase"
@@ -17,7 +16,7 @@ const label =
 function QuantityStepper({ item }: { item: CartLineItem }) {
   const setQuantity = useCartStore((state) => state.actions.setQuantity)
   const values = {
-    packSize: item.packaging || copy.listedPackLabel,
+    packSize: item.packaging || "listed pack",
     product: item.name,
   }
 

@@ -1,20 +1,19 @@
 "use client"
-
-import { useState, type RefObject } from "react"
 import { CircleCheck, Plus } from "lucide-react"
-import { toast } from "sonner"
+import { type RefObject, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { formatTip, Tooltip } from "@/components/ui/tooltip"
 import { siteContent } from "@/config/content"
-import { useCartStore } from "@/features/cart/cart-store"
-import { productLineId, quantityOf } from "@/features/cart/lib/line-items"
 import { formatMessage, formatMills, formatNumber } from "@/lib/format"
+import type { CatalogProduct, SearchQuery } from "../types"
 
 import { excerpt } from "../lib/search"
-import type { CatalogProduct, SearchQuery } from "../types"
 import { HighlightedText } from "./highlighted-text"
+import { formatTip, Tooltip } from "@/components/ui/tooltip"
 import { InfiniteScrollSentinel } from "./infinite-scroll-sentinel"
+import { useCartStore } from "@/features/cart/cart-store"
+import { productLineId, quantityOf } from "@/features/cart/lib/line-items"
+import { toast } from "sonner"
 
 const th =
   "px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
@@ -54,14 +53,8 @@ function AddToCartButton({
           const result = addProduct(product)
           if (result === "added" || result === "updated") {
             onAdded(product.name)
-            toast.success(copy.addedToastTitle, {
-              description: formatMessage(copy.addedToastDescription, {
-                price:
-                  product.priceMills === null
-                    ? copy.unavailablePriceLabel
-                    : formatMills(product.priceMills),
-                product: product.name,
-              }),
+            toast.success("item added", {
+              description: `${product.name} (${product.priceMills ? formatMills(product.priceMills) : ""}) added to cart`,
               position: "bottom-left",
               dismissible: true,
               closeButton: true,
@@ -100,13 +93,7 @@ function AddToCartButton({
 }
 
 function Price({ mills }: { mills: number | null }) {
-  return (
-    <>
-      {mills === null
-        ? siteContent.catalog.unavailablePriceLabel
-        : formatMills(mills)}
-    </>
-  )
+  return <>{mills === null ? "—" : formatMills(mills)}</>
 }
 
 interface CatalogTableProps {
@@ -148,6 +135,7 @@ export function CatalogTable({
       <ul className="divide-y divide-border/70 @4xl:hidden">
         {rows.map((product) => (
           <li className="space-y-2 px-5 py-4 sm:px-7" key={product.id}>
+            {/* … card content unchanged … */}
             <div className="flex items-start justify-between gap-3">
               <h4 className="m-0 min-w-0 text-sm font-bold text-primary-900 dark:text-primary-100">
                 <HighlightedText query={query} text={product.name} />

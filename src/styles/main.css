@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tailwind-animations";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -63,7 +62,9 @@
   --color-success-900: #064e3b;
   --color-success-950: #022c22;
 
-  /* channel brand */
+  /* status */
+  --color-danger-400: #f87171;
+  --color-danger-600: #dc2626;
   --color-whatsapp-500: #22c55e;
   --color-whatsapp-600: #16a34a;
 
@@ -320,8 +321,7 @@
   --shadow-card: var(--elevation-card);
 }
 
-/* Cart sidebar: on lg+ the page shrinks to make room for the docked panel.
-   `--cart-panel` clamps the saved width so the panel never takes >1/3 of the view. */
+/* Cart sidebar: on lg+ the page shrinks to make room for it. */
 @media (min-width: 64rem) {
   html[data-cart="open"] {
     --cart-w: var(--cart-panel);
@@ -333,13 +333,7 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
-}
-
-/* While dragging the resize handle, nothing may lag behind the pointer. */
+/* While dragging the handle, nothing may lag behind the pointer. */
 html[data-resizing] {
   cursor: col-resize;
   user-select: none;
@@ -348,11 +342,357 @@ html[data-resizing] * {
   transition: none !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
+
+/* ── Pop-in panels (floating actions, catalog filters) ────────────────────
+   Replaced motion's AnimatePresence springs. Entrance only: exit animations
+   need JS to keep an element mounted, and nobody misses them. */
+@keyframes float-pop {
+  from {
+    opacity: 0;
+    scale: 0.94;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+.float-pop {
+  animation: float-pop 260ms cubic-bezier(0.22, 1.36, 0.36, 1) both;
+}
+
+@keyframes filters-panel {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+/* Animating grid-template-rows 0fr -> 1fr animates "height: auto" in CSS. */
+.filters-panel {
+  display: grid;
+  animation: filters-panel 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-pop,
+  .filters-panel {
+    animation: none;
+  }
+}
+
+/* ── Sticky header (components/layout/header.tsx) ─────────────────────────
+   Three scroll-linked effects, all on CSS scroll timelines instead of motion
+   springs driven by a scroll listener:
+
+     .site-progress        reading progress bar (scaleX 0 -> 1)
+     .site-header          slides up by the top strip's height (36px) as it
+                           scrolls away, then pins to the top
+     .site-header-gap      adds --float-gap once the strip is gone
+     .site-header-shell    grows a border radius and inset gutter
+     .site-header-border   fades the floating shadow in
+     .site-header-hairline fades the docked hairline out
+
+   Without `animation-timeline` support every rule below is skipped and the
+   header stays docked, which is exactly its pre-scroll appearance. Nothing
+   here is load-bearing for layout. */
+@keyframes site-progress {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes site-header-lift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -36px; /* = TopStrip h-9 */
+  }
+}
+
+@keyframes site-header-gap {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 var(--float-gap);
+  }
+}
+
+@keyframes site-header-shell {
+  from {
+    border-radius: 0;
+    inset-inline: 0;
+  }
+  to {
+    border-radius: var(--float-radius);
+    inset-inline: max(var(--float-gutter), (100% - 75rem) / 2);
+  }
+}
+
+@keyframes site-header-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes site-header-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .site-progress {
+    animation: site-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  .site-header {
+    animation: site-header-lift linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 36px;
+  }
+
+  .site-header-gap {
+    animation: site-header-gap linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 26px 36px;
+  }
+
+  .site-header-shell {
+    animation: site-header-shell linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 64px;
+  }
+
+  .site-header-border {
+    animation: site-header-fade-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 64px;
+  }
+
+  .site-header-hairline {
+    animation: site-header-fade-out linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 64px;
+  }
+}
+
+/* ── Nav pill (components/layout/header.tsx DesktopNav) ───────────────────
+   The highlighted background used to be a motion `layoutId` element that flew
+   between links. A CSS ::before cross-fades per link instead. */
+.nav-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 9999px;
+  background: var(--color-primary-100);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.nav-link:hover::before,
+.nav-link:focus-visible::before {
+  opacity: 1;
+}
+
+.nav-link[aria-current="location"]::before {
+  opacity: 1;
+}
+
+.dark .nav-link::before {
+  background: color-mix(in oklab, var(--color-primary-900) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-link::before {
+    transition: none;
+  }
+}
+
+/* ── Brand logo wobble (components/layout/logo.tsx) ───────────────────────
+   Was a motion spring. Pure CSS on the parent `group`, so the logo renders on
+   the server and the header keeps no animation runtime. */
+.brand-tile,
+.brand-glyph {
+  transition:
+    rotate 260ms cubic-bezier(0.22, 1.4, 0.36, 1),
+    scale 260ms cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+
+.group:hover .brand-tile {
+  rotate: -6deg;
+  scale: 1.06;
+}
+
+.group:hover .brand-glyph {
+  rotate: 28deg;
+}
+
+.group:active .brand-tile {
+  rotate: -2deg;
+  scale: 0.94;
+}
+
+.group:active .brand-glyph {
+  rotate: 12deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-tile,
+  .brand-glyph {
+    transition: none;
+  }
+  .group:hover .brand-tile,
+  .group:active .brand-tile {
+    rotate: none;
+    scale: none;
+  }
+  .group:hover .brand-glyph,
+  .group:active .brand-glyph {
+    rotate: none;
+  }
+}
+
+/* ── Skip link (app/layout.tsx) ───────────────────────────────────────────
+   Hidden until focused, then pinned to the top-left above everything else. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 200;
+  translate: 0 -200%;
+  border-radius: calc(var(--radius) * 1.4);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  box-shadow: var(--elevation-card);
+  transition: translate 150ms ease-out;
+}
+
+.skip-link:focus-visible {
+  translate: 0;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
+
+/* ── Status dot (components/layout/top-strip.tsx) ─────────────────────────
+   Replaces the `animate-pulsing` utility (and the whole animations plugin it
+   needed) for the one place it was used. */
+@keyframes status-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.status-dot {
+  animation: status-dot 1s steps(2, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-dot {
+    animation: none;
+  }
+}
+
+/* ── Hero entrance (components/sections/hero-section.tsx) ─────────────────
+   A one-shot fade+lift for the hero copy. CSS keeps the hero a server
+   component; it used to hydrate the whole section just to run this. */
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-enter {
+  animation: hero-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter {
+    animation: none;
+  }
+}
+
+/* ── Scroll reveal (components/ui/reveal.tsx) ──────────────────────────────
+   Pure CSS so the sections stay server components: no motion library, no
+   hydration. Browsers without scroll-driven animations fail the @supports
+   check and render the content as-is, which is the safe default. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation-delay: var(--reveal-delay, 0s);
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-range: entry 0% entry 60%;
+      animation-timeline: view();
+    }
+  }
+}
+
 /* Theme switch: only the circular reveal is visible */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+::selection {
+  background-color: yellow;
+  color: black;
 }
 
 /* Modern scrollbars: thin, translucent, theme-aware. */

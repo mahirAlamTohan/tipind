@@ -19,8 +19,7 @@ interface ErrorBoundaryState {
  * whole page. Route files (`app/error.tsx`, `app/global-error.tsx`) catch
  * whole-segment failures; this is for the parts that should fail on their own.
  *
- * It does NOT catch errors thrown in event handlers, timers or promises —
- * those are handled where they happen (see docs/engineering/error-handling.md).
+ * It does NOT catch errors thrown in event handlers, timers or promises.
  */
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
@@ -33,8 +32,7 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Console only: no network, no PII. A hosting platform's log drain is the
-    // place for this if one is ever added.
+    // Console only: no network, no PII.
     console.error(`[tipind] ${this.props.label} failed to render`, {
       error,
       componentStack: info.componentStack,

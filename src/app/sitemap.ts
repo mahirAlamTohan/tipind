@@ -5,14 +5,14 @@ import { siteConfig } from "@/config/site"
 export const dynamic = "force-static"
 
 /**
- * The site is one catalog page plus the checkout, and the checkout is
- * `noindex`. New public pages belong here as they are added; prices and
- * products are client-side state, not URLs.
+ * One page, one entry. `/checkout` is deliberately excluded: it is marked
+ * `robots: { index: false }` and has no content without a cart.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: `${siteConfig.url}/`,
+      url: siteConfig.url,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },

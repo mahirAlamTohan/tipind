@@ -11,7 +11,10 @@ export const cartContent = {
   emptyDescription:
     "Browse our product catalog and add items to your cart to get started.",
   resizeAriaLabel: "Resize the cart sidebar",
+  browseCatalogAction: "Browse the catalog",
   productsHeading: "Cart items",
+  unitPriceLabel: "Unit price",
+  quantityLabel: "Quantity",
   lineTotalLabel: "Line total",
   totalLabel: "Cart subtotal",
   singlePacketPriceLabel: "Price per packet",
@@ -19,7 +22,12 @@ export const cartContent = {
   packPriceNote: "Prices are based on the listed catalog rate for each pack.",
   clearAction: "Clear cart",
   closeAction: "Close cart",
+  continueBrowsingAction: "Continue shopping",
   packetCountLabel: "Total packets",
+  copyAction: "Copy cart summary",
+  copiedMessage: "Cart summary copied to your clipboard.",
+  copyFailureMessage:
+    "Unable to copy the cart summary. You can still review your cart here.",
   loadingCartMessage: "Loading your cart…",
   storageUnavailableNotice:
     "Browser storage is unavailable. Your cart will remain available only until you close this tab.",
@@ -28,11 +36,4 @@ export const cartContent = {
   increaseQuantityAriaLabel: "Increase quantity for {product}",
   setQuantityAriaLabel: "Set quantity for {product}",
   proceedToCheckoutAction: "Proceed to checkout",
-  productSingular: "product",
-  productPlural: "products",
-  packetSingular: "packet",
-  packetPlural: "packets",
-  listedPackLabel: "listed pack",
-  clearedToastTitle: "Cart cleared",
-  packetTotalNote: "{count} total",
 } satisfies CartContent

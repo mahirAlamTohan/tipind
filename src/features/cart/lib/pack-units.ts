@@ -37,7 +37,8 @@ export function pluralize(word: string) {
  * `type` is the singular catalogue value; blank falls back to "unit".
  */
 export function unitWord(type: string | null | undefined, count: number) {
-  const single = type?.trim().toLowerCase() ?? ""
-  const noun = single === "" ? FALLBACK_UNIT : single
-  return count === 1 ? noun : pluralize(noun)
+  // `||`, not `??`: a blank type must fall back too.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty string must fall back, `??` would keep it.
+  const single = type?.trim().toLowerCase() || FALLBACK_UNIT
+  return count === 1 ? single : pluralize(single)
 }

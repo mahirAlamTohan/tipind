@@ -1,11 +1,10 @@
 "use client"
-
 import type { KeyboardEvent, PointerEvent } from "react"
 
-import { useCartStore } from "../cart-store"
 import { DEFAULT_WIDTH, MIN_WIDTH } from "../constants"
-import { cartContent } from "../content"
 import { maxWidth, storeWidth } from "../lib/width"
+import { useCartStore } from "../cart-store"
+import { cartContent } from "../content"
 
 const KEY_STEP = 24
 

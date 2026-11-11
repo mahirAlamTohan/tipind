@@ -11,10 +11,10 @@
 !.yarn/sdks
 !.yarn/versions
 
-# npm's lockfile is committed (deploy.ps1 and CI use npm). Bun re-resolves
-# from package.json, so its lockfile stays out of git.
+# Lockfiles (Uncomment ONLY if you explicitly want to ignore them)
 pnpm-lock.yaml
 pnpm-workspace.yaml
+package-lock.json
 yarn.lock
 bun.lock
 bun.lockb
@@ -25,8 +25,10 @@ bun.lockb
 /build
 /dist
 /out
-# Raw source catalogs are staged here temporarily and must never ship or be committed.
-/public/data/*.json
+# The published catalog artifact IS committed: CI builds with it and the site
+# would 404 without it. Only the raw source snapshots (extras/) stay out.
+!/public/data/catalog.*.dat
+/public/data/source.*.json
 /.next/
 /.nuxt/
 /.svelte-kit/
@@ -41,7 +43,6 @@ bun.lockb
 /.turbo
 /.vercel
 /.netlify
-/.wrangler
 /.next/cache
 *.tsbuildinfo
 *.swp

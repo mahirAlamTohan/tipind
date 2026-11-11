@@ -1,24 +1,34 @@
-"use client"
+import type { ReactNode } from "react"
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react"
-
-interface RevealProps extends HTMLMotionProps<"div"> {
+interface RevealProps {
+  children: ReactNode
+  className?: string
+  /** Seconds to wait before the reveal starts. */
   delay?: number
+  role?: string
+  "aria-label"?: string
+  /** Convenience for callers that pass test/automation hooks straight through. */
+  "data-testid"?: string
 }
 
-const EASE = [0.22, 1, 0.36, 1] as const
-
-/** Fades and lifts its children in once, as they scroll into view. */
-export function Reveal({ delay = 0, ...props }: RevealProps) {
-  const reduceMotion = useReducedMotion()
-
+/**
+ * Fades and lifts its children in once, as they scroll into view.
+ *
+ * Pure CSS (`animation-timeline: view()`) so this compiles to a plain <div> and
+ * the sections that use it stay server components. Browsers without scroll
+ * timelines never animate and simply show the content — the animation is
+ * decorative, so there is nothing to feature-detect or hydrate.
+ *
+ * See `.reveal` in src/styles/main.css.
+ */
+export function Reveal({ children, className, delay = 0, ...props }: RevealProps) {
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-      transition={{ delay, duration: 0.5, ease: EASE }}
-      viewport={{ margin: "0px 0px -80px 0px", once: true }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+    <div
+      className={className ? `reveal ${className}` : "reveal"}
+      style={{ "--reveal-delay": `${delay.toString()}s` } as React.CSSProperties}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 }

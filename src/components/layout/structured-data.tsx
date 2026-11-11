@@ -1,61 +1,87 @@
 import { siteConfig } from "@/config/site"
+import { siteContent } from "@/config/content"
+import { contactLinks } from "@/config/links"
 
 /**
- * JSON-LD for search engines: who we are and what this site is.
+ * Escapes the three characters that can terminate a `<script>` element.
  *
- * Rendered from the same config as the visible page, so a contact change cannot
- * leave the structured data claiming an old phone number. Kept as a plain
- * `<script>` (not next/script) so it is in the static HTML, not a late insert.
+ * `JSON.stringify` alone is NOT safe inside an inline script: a value
+ * containing `</script>` closes the element early and everything after it is
+ * parsed as HTML, so `<img onerror=...>` runs. Every string below comes from
+ * `config/*` and `.env.production`, which are reviewed content — but they are
+ * still data, and one careless paste from a client questionnaire into
+ * NEXT_PUBLIC_SITE_NAME would turn the whole site into a stored XSS vector.
+ *
+ * Escaping to `\u003c` keeps the output valid JSON: JSON.parse and Google's
+ * structured-data parser both read `\u003c` back as `<`.
+ */
+function serializeJsonLd(value: unknown) {
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+}
+
+/**
+ * JSON-LD for the organisation, the site (with the catalog search action) and
+ * the FAQ block. The FAQ entries already exist as data in `config/content.ts`,
+ * so rich-result eligibility costs nothing here.
+ *
+ * This is a `<script type="application/ld+json">`, which browsers never execute,
+ * so it is safe to render from a server component.
  */
 export function StructuredData() {
-  const contactPoint = [
-    siteConfig.contact.phone
-      ? {
-          "@type": "ContactPoint",
-          telephone: siteConfig.contact.phone,
-          contactType: "customer service",
-          availableLanguage: ["en"],
-        }
-      : null,
-    siteConfig.contact.email
-      ? {
-          "@type": "ContactPoint",
-          email: siteConfig.contact.email,
-          contactType: "sales",
-          availableLanguage: ["en"],
-        }
-      : null,
-  ].filter((entry) => entry !== null)
+  const { contact } = siteConfig
 
-  const graph = [
-    {
-      "@type": "Organization",
-      "@id": `${siteConfig.url}#organization`,
-      name: siteConfig.name,
-      url: siteConfig.url,
-      description: siteConfig.description,
-      foundingDate: String(siteConfig.founded),
-      ...(contactPoint.length > 0 ? { contactPoint } : {}),
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${siteConfig.url}#website`,
-      url: siteConfig.url,
-      name: siteConfig.name,
-      inLanguage: "en",
-      publisher: { "@id": `${siteConfig.url}#organization` },
-    },
-  ]
+  const graph = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteConfig.url}/#organization`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        description: siteConfig.description,
+        foundingDate: siteConfig.founded.toString(),
+        ...(contact.email ? { email: contact.email } : {}),
+        ...(contact.phone
+          ? { telephone: contact.phone.replace(/[^\d+]/g, "") }
+          : {}),
+        sameAs: [contactLinks.telegram()].filter(
+          (href) => href !== "#contact"
+        ),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteConfig.url}/#website`,
+        url: siteConfig.url,
+        name: siteConfig.name,
+        description: siteConfig.description,
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${siteConfig.url}/#catalog`,
+          },
+        },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${siteConfig.url}/#faq`,
+        mainEntity: siteContent.faq.items.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      },
+    ],
+  }
 
   return (
     <script
-      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- JSON-LD must be raw text in a script tag; the input is site config, never user data
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@graph": graph,
-        }),
-      }}
+      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- JSON-LD must be raw text; serializeJsonLd escapes <, > and & so the payload cannot close the script element.
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(graph) }}
       type="application/ld+json"
     />
   )

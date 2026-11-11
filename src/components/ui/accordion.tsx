@@ -1,6 +1,6 @@
-import type { ComponentProps } from "react"
 import { Accordion as BaseAccordion } from "@base-ui/react/accordion"
 import { ChevronDown } from "lucide-react"
+import type { ComponentProps } from "react"
 
 import { cn } from "@/lib/utils"
 

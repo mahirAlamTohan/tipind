@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { stripControl, toSingleLine } from "@/lib/format"
+import { stripControlChars, toSingleLine } from "@/lib/sanitize"
 
 import {
   MAX_FIELD_LENGTH,
@@ -38,15 +38,11 @@ export function fieldValue(details: ShippingDetails, field: FieldName) {
   return details[field]
 }
 
-/**
- * Lenient: a bad stored field becomes "", it never throws. Every short field is
- * forced onto one line, so a hand-edited localStorage value cannot smuggle
- * newlines into the order message.
- */
+/** Lenient: a bad stored field becomes "", it never throws. */
 const short = z
   .string()
+  .transform((v) => toSingleLine(v).slice(0, MAX_FIELD_LENGTH))
   .catch("")
-  .transform((value) => toSingleLine(value).slice(0, MAX_FIELD_LENGTH))
 
 const storedSchema = z.object({
   addressLine1: short,
@@ -66,10 +62,8 @@ const storedSchema = z.object({
   // Notes keep line breaks while editing; the message builder flattens them.
   notes: z
     .string()
-    .catch("")
-    .transform((value) =>
-      stripControl(value).trim().slice(0, MAX_NOTES_LENGTH)
-    ),
+    .transform((v) => stripControlChars(v, true).slice(0, MAX_NOTES_LENGTH))
+    .catch(""),
   paymentMethod: z
     .string()
     .catch("")

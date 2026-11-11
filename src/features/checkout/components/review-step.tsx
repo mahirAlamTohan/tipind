@@ -1,13 +1,13 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
-import { Button } from "@/components/ui/button"
 import { CartLineCard } from "@/features/cart/components/cart-line-card"
 import type { CartLineItem } from "@/features/cart/types"
 
 import { checkoutContent } from "../content"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 export function ReviewStep({ items }: { items: readonly CartLineItem[] }) {
   const reduceMotion = useReducedMotion()

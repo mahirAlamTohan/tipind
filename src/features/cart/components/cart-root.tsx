@@ -39,20 +39,11 @@ export function CartRoot() {
     }
   }, [])
 
-  // The sidebar isn't rendered on checkout, so a cart left open there would
-  // keep the page offset for a panel that doesn't exist.
-  useEffect(() => {
-    if (!onCheckout) return
-    const { actions, isOpen } = useCartStore.getState()
-    if (isOpen) actions.setOpen(false)
-  }, [onCheckout])
-
   // main.css reads these to make room for the sidebar.
   useEffect(() => {
     const root = document.documentElement
     const apply = (state: CartState) => {
-      const open = state.isOpen && !onCheckout
-      root.dataset.cart = open ? "open" : "closed"
+      root.dataset.cart = state.isOpen ? "open" : "closed"
       root.style.setProperty("--cart-width", `${state.width.toString()}px`)
     }
 
@@ -67,7 +58,7 @@ export function CartRoot() {
       delete root.dataset.cart
       root.style.removeProperty("--cart-width")
     }
-  }, [onCheckout])
+  }, [])
 
   return onCheckout ? null : (
     <ErrorBoundary fallback={() => <CartFallback />} label="cart">

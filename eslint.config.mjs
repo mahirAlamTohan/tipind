@@ -26,7 +26,12 @@ export default defineConfig([
     "test-results",
     "node_modules",
     "scripts/**/*.mjs",
+    "scripts/**/*.k6.js",
     "eslint.config.mjs",
+    // Next regenerates this file on every dev/build; it references .next/dev
+    // type stubs that only exist during `next dev`, which makes
+    // import-x/no-unresolved flap between runs.
+    "next-env.d.ts",
   ]),
 
   // Base ESLint + TypeScript
@@ -76,8 +81,8 @@ export default defineConfig([
   // Tailwind
   tailwind.configs.recommended,
 
-  // Optional "only the lines I changed" mode: ESLINT_DIFF=1 npm run lint:diff
-  ...(process.env.ESLINT_DIFF ? diff.configs["flat/diff"] : []),
+  // Git Diff
+  ...(!process.env.ESLINT_FULL_CHECK ? diff.configs["flat/diff"] : []),
 
   // Main config block
   {
@@ -114,6 +119,7 @@ export default defineConfig([
     rules: {
       "tailwindcss/no-custom-classname": "off",
       "tailwindcss/classnames-order": "off", // Prettier plugin owns ordering
+      "tailwindcss/no-custom-classname": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -141,8 +147,22 @@ export default defineConfig([
         { fixMixedExportsWithInlineTypeSpecifier: true },
       ],
 
-      "import-x/no-unresolved": "error",
+      "import-x/no-unresolved": ["error", { ignore: ["geist"] }],
       "react-compiler/react-compiler": "error",
+    },
+  },
+
+  // Service workers run in a Web Worker global scope and are plain JavaScript.
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: ["public/sw.js"],
+    languageOptions: {
+      ...tseslint.configs.disableTypeChecked.languageOptions,
+      globals: globals.serviceworker,
+    },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      "@eslint-react/no-leaked-conditional-rendering": "off",
     },
   },
 

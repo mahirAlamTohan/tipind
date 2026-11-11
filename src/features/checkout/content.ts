@@ -1,4 +1,13 @@
+import { siteConfig } from "@/config/site"
+
 import type { CheckoutContent } from "./types"
+
+/**
+ * Checkout copy.
+ *
+ * Same rules as `src/config/content.ts`: facts come from `site.ts`, never
+ * restated here. `{placeholders}` are runtime values only.
+ */
 
 export const checkoutContent = {
   eyebrow: "Secure checkout",
@@ -25,13 +34,14 @@ export const checkoutContent = {
     addressHeading: "Shipping address",
     extraHeading: "Preferences",
     optional: "Optional",
+    selectPlaceholder: "Select…",
     paymentNone: "Decide with the team",
     savedNotice: "Saved on this device as you type, cleared when you finish.",
     notesHint:
       "Delivery instructions only — please don’t include medical or prescription details.",
     clearSaved: "Clear saved details",
     noResults: "No matches",
-    showOptionsLabel: "Show options",
+    unservicedNotice: `We currently ship to ${siteConfig.shipping.countriesProse}. Contact our team before ordering to another country.`,
   },
   fields: {
     firstName: { label: "First name", placeholder: "Jane" },
@@ -83,18 +93,12 @@ export const checkoutContent = {
     description:
       "Follow the steps below to finalize and send your order details.",
     optionsHeading: "ORDERING INSTRUCTIONS",
-    stepCopyTemplate:
-      "Click “Copy message” below to copy your pre-filled order template.",
-    stepSend: "Send your copied details through our official channels:",
-    emailLabel: "Email (Preferred):",
-    telegramLabel: "Telegram:",
-    safetyTitle: "Telegram Safety Tip:",
-    safetyBody:
-      "Beware of fake impersonator accounts with subtle typos. Double-check the handle, or use Email for maximum security.",
+    pasteHint: "Message copied. Paste it into the message box.",
     messageHeading: "Your message",
     copyAction: "Copy message",
     copiedAction: "Copied",
     copyFailed: "Couldn't copy. Select the text and copy it manually.",
+    emailSubject: `New order request — ${siteConfig.name}`,
     editAction: "Edit details",
     finishAction: "Clear cart and finish",
     closeAction: "Close",
@@ -106,6 +110,7 @@ export const checkoutContent = {
     name: "Name",
     email: "Main email",
     company: "Company",
+    payment: "Preferred payment",
     subtotalLabel: "order subtotal",
     shippingLabel: "order+shipping",
     shippingText:

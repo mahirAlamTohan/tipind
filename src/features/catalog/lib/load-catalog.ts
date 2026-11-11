@@ -1,12 +1,37 @@
 import { siteConfig } from "@/config/site"
 import { isRecord } from "@/lib/guards"
 
-import { CATALOG_FORMAT, CATALOG_MAGIC, NO_VALUE } from "../constants"
+import { CATALOG_FORMAT, NO_VALUE } from "../constants"
 import type { CatalogDataset, CatalogProduct, PriceRange } from "../types"
+import { unwrapMasked } from "./catalog-mask"
+
+/**
+ * Turns a masked artifact back into catalog JSON text.
+ *
+ * `unwrapMasked` is synchronous; gunzip is not, because browsers only expose
+ * `DecompressionStream`. The error messages deliberately never mention the key
+ * value — this code runs in the visitor's browser.
+ */
+async function decodeMasked(payload: string, key: string): Promise<string> {
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error("This browser can't open the catalog. Please update it.")
+  }
+  const compressed = unwrapMasked(payload, key)
+  try {
+    const stream = new Blob([compressed])
+      .stream()
+      .pipeThrough(new DecompressionStream("gzip"))
+    return await new Response(stream).text()
+  } catch {
+    throw new Error(
+      "The catalog could not be decoded. The masking key may not match the key it was built with."
+    )
+  }
+}
 
 const corrupt = (detail: string) =>
   new Error(
-    `The catalog file is corrupted (${detail}). Rebuild and redeploy it.`
+    `The catalog file is corrupted or from an older build (${detail}). Rebuild and redeploy it with \`npm run catalog:build\`.`
   )
 
 function readStrings(value: unknown, label: string): string[] {
@@ -79,7 +104,7 @@ function readProduct(
   const priceMills = price === NO_VALUE ? null : price
   // The artifact's own price bounds are part of the contract; a row outside
   // them means the file (or the build that wrote it) is wrong. Failing closed
-  // is better than rendering a price the cart will silently refuse.
+  // beats rendering a price the cart will silently refuse.
   if (
     priceMills !== null &&
     (priceMills <= 0 ||
@@ -100,10 +125,16 @@ function readProduct(
   }
 }
 
+/**
+ * Validates an untrusted catalog document.
+ *
+ * The artifact is plain JSON so the browser and the CDN both handle the
+ * compression; there is no envelope to unwrap and no key to get wrong.
+ */
 export function parseCatalog(value: unknown): CatalogDataset {
   if (!isRecord(value) || value.format !== CATALOG_FORMAT) {
     throw new Error(
-      "The catalog file has an unsupported format version. Rebuild it with `bun run catalog:build`."
+      `The catalog file has an unsupported format version. This build expects format ${CATALOG_FORMAT.toString()}. Rebuild it with \`npm run catalog:build\`.`
     )
   }
 
@@ -125,42 +156,15 @@ export function parseCatalog(value: unknown): CatalogDataset {
   }
 }
 
-function unmask(bytes: Uint8Array<ArrayBuffer>) {
-  const magic = new TextDecoder().decode(
-    bytes.subarray(0, CATALOG_MAGIC.length)
-  )
-  if (magic !== CATALOG_MAGIC) {
-    throw new Error(
-      "The catalog file is not in the expected format. Rebuild it with `bun run catalog:build`."
-    )
-  }
-
-  const key = siteConfig.catalog.xorKey
-  if (!key) {
-    throw new Error("NEXT_PUBLIC_CATALOG_XOR_KEY is not set in this build.")
-  }
-  const keyBytes = new TextEncoder().encode(key)
-
-  return bytes
-    .subarray(CATALOG_MAGIC.length)
-    .map((byte, index) => byte ^ (keyBytes.at(index % keyBytes.length) ?? 0))
-}
-
-async function gunzip(bytes: Uint8Array<ArrayBuffer>) {
-  const stream = new Blob([bytes])
-    .stream()
-    .pipeThrough(new DecompressionStream("gzip"))
-  return new Response(stream).text()
-}
-
+/**
+ * `response.json()` lets the browser decode the body (and any gzip/brotli
+ * encoding) off the main thread, which is far cheaper than building a
+ * `DecompressionStream` pipeline by hand.
+ */
 export async function fetchCatalog(
   url: string,
   signal?: AbortSignal
 ): Promise<CatalogDataset> {
-  if (typeof DecompressionStream === "undefined") {
-    throw new Error("This browser can't open the catalog. Please update it.")
-  }
-
   let response: Response
   try {
     response = await fetch(url, {
@@ -181,22 +185,20 @@ export async function fetchCatalog(
     )
   }
 
-  const payload = unmask(new Uint8Array(await response.arrayBuffer()))
-
-  let text: string
-  try {
-    text = await gunzip(payload)
-  } catch {
-    throw new Error(
-      "The catalog could not be decoded. NEXT_PUBLIC_CATALOG_XOR_KEY may not match the key it was built with."
-    )
-  }
+  // The artifact is masked, not JSON: fetch text, unmask, then parse.
+  const payload = await response.text()
 
   let parsed: unknown
   try {
-    parsed = JSON.parse(text)
-  } catch {
-    throw corrupt("invalid JSON")
+    parsed = JSON.parse(await decodeMasked(payload, siteConfig.catalog.xorKey))
+  } catch (error) {
+    // A masking/parse failure is a build problem, not a user problem; surface
+    // the specific reason rather than a generic "not valid JSON".
+    if (error instanceof Error) throw error
+    throw new Error(
+      "The catalog file is not valid JSON. Rebuild and redeploy it.",
+      { cause: error }
+    )
   }
   return parseCatalog(parsed)
 }
