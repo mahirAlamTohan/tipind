@@ -25,6 +25,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ci": "playwright test --reporter=list",
     "post-deploy-audit": "node scripts/post-deploy-audit.mjs",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit",
+    "test:e2e": "playwright test",
+    "test:e2e:ci": "playwright test --reporter=list",
+    "test:all": "node tests/run-all.mjs --all",
     "preview": "node scripts/preview.mjs",
     "content:audit": "node scripts/content-audit.mjs"
   },
