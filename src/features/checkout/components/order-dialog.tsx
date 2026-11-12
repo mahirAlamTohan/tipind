@@ -2,7 +2,7 @@
 import { Dialog } from "@base-ui/react/dialog"
 import { Check, Copy, X } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { siteConfig } from "@/config/site"
@@ -77,6 +77,7 @@ export function OrderDialog({
 }: OrderDialogProps) {
   const copy = checkoutContent.dialog
   const { copy: copyText, state } = useCopy(999999)
+  const [hasConfirmed, setHasConfirmed] = useState(false)
 
   const message = useMemo(
     () =>
@@ -249,9 +250,19 @@ export function OrderDialog({
             <Button onClick={onClose} variant="outline">
               {copy.editAction}
             </Button>
-            <Button onClick={onFinish} variant="default">
-              {copy.finishAction}
-            </Button>
+            {!hasConfirmed ? (
+              <Button
+                onClick={() => setHasConfirmed(true)}
+                variant="outline"
+                className="text-warning-700 dark:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-950/20"
+              >
+                {copy.confirmSent}
+              </Button>
+            ) : (
+              <Button onClick={onFinish} variant="default">
+                {copy.finishAction}
+              </Button>
+            )}
           </div>
         </Dialog.Popup>
       </Dialog.Portal>

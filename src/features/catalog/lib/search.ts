@@ -100,7 +100,11 @@ function indexFor(products: readonly CatalogProduct[]) {
   return index
 }
 
-/** 3 = whole word, 2 = start of a word, 1 = inside a word, 0 = absent. */
+/**
+ * 3 = whole word, 2 = start of a word, 1 = inside a word, 0 = absent.
+ * A match at position 0 (start of the field) gets a small position boost
+ * so the most relevant match wins when quality is tied.
+ */
 function quality(text: string, term: string) {
   let best = 0
   let from = 0
@@ -114,8 +118,12 @@ function quality(text: string, term: string) {
     const endsWord = after >= text.length || !WORD_CHAR.test(text.charAt(after))
     const found = startsWord ? (endsWord ? 3 : 2) : 1
 
-    if (found === 3) return 3
-    best = Math.max(best, found)
+    // Position boost: a match at the very start of the field is more relevant.
+    const positionBoost = at === 0 ? 0.25 : 0
+    const scored = found + positionBoost
+
+    if (found === 3) return scored
+    best = Math.max(best, scored)
     from = at + 1
   }
 }

@@ -25,6 +25,7 @@ interface PersistedCart {
 }
 
 let lastWritten = ""
+let lastStorageAvailable = true
 
 /** Reads and writes through the validating parser, never raw JSON. */
 export const cartStorage: PersistStorage<PersistedCart> = {
@@ -42,10 +43,9 @@ export const cartStorage: PersistStorage<PersistedCart> = {
     try {
       window.localStorage.setItem(name, serialized)
       lastWritten = serialized
+      lastStorageAvailable = true
     } catch {
-      if (useCartStore.getState().isStorageAvailable) {
-        useCartStore.setState({ isStorageAvailable: false })
-      }
+      lastStorageAvailable = false
     }
   },
   removeItem: (name) => {
@@ -69,15 +69,14 @@ export const useCartStore = create<CartState>()(
 
       actions: {
         addProduct: (product) => {
-          const { isHydrated, items } = get()
-          if (!isHydrated) return "unavailable"
+          const { items } = get()
 
           const line = createLineItem(product)
-          if (!line) return "unavailable"
+          if (!line) return false
 
           const existing = items.find((item) => item.id === line.id)
           if (existing) {
-            if (existing.quantity >= MAX_QUANTITY) return "limit"
+            if (existing.quantity >= MAX_QUANTITY) return false
             set({
               items: items.map((item) =>
                 item.id === line.id
@@ -85,12 +84,12 @@ export const useCartStore = create<CartState>()(
                   : item
               ),
             })
-            return "updated"
+            return true
           }
 
-          if (items.length >= MAX_LINE_ITEMS) return "limit"
+          if (items.length >= MAX_LINE_ITEMS) return false
           set({ items: [...items, line] })
-          return "added"
+          return true
         },
         setQuantity: (id, quantity) => {
           const next = clampQuantity(quantity)

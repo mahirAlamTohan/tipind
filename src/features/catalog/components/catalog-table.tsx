@@ -50,8 +50,7 @@ function AddToCartButton({
         className="relative size-8 shrink-0 rounded-lg p-0 text-primary-text"
         disabled={!isHydrated || lineId === null}
         onClick={() => {
-          const result = addProduct(product)
-          if (result === "added" || result === "updated") {
+          if (addProduct(product)) {
             onAdded(product.name)
             toast.success("item added", {
               description: `${product.name} (${product.priceMills ? formatMills(product.priceMills) : ""}) added to cart`,

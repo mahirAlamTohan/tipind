@@ -124,6 +124,7 @@ export interface CheckoutContent {
     readonly emailSubject: string
     readonly editAction: string
     readonly finishAction: string
+    readonly confirmSent: string
     readonly closeAction: string
   }
   readonly message: {

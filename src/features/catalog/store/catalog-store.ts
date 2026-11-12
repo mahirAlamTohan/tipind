@@ -37,13 +37,11 @@ export interface CatalogState {
   actions: CatalogActions
 }
 
-const NO_SELECTION: FacetSelection = new Map()
-
 const FILTER_DEFAULTS = {
-  manufacturer: NO_SELECTION,
-  packaging: NO_SELECTION,
+  manufacturer: new Map<string, FilterMode>(),
+  packaging: new Map<string, FilterMode>(),
   loadedCount: PAGE_SIZE,
-  priceRange: null,
+  priceRange: null as PriceRange | null,
 }
 
 function nextMode(current: FilterMode | undefined): FilterMode | undefined {
@@ -85,7 +83,15 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
       set({ status: "loading", error: "" })
     },
     loadSucceeded: (dataset) => {
-      set({ ...FILTER_DEFAULTS, dataset, error: "", status: "ready" })
+      set({
+        manufacturer: new Map<string, FilterMode>(),
+        packaging: new Map<string, FilterMode>(),
+        loadedCount: PAGE_SIZE,
+        priceRange: null,
+        dataset,
+        error: "",
+        status: "ready",
+      })
     },
     loadFailed: (message) => {
       set({ dataset: null, error: message, status: "error" })
@@ -125,7 +131,12 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
       })
     },
     clearFilters: () => {
-      set(FILTER_DEFAULTS)
+      set({
+        manufacturer: new Map<string, FilterMode>(),
+        packaging: new Map<string, FilterMode>(),
+        loadedCount: PAGE_SIZE,
+        priceRange: null,
+      })
     },
   },
 }))

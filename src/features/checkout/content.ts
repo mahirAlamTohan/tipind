@@ -101,6 +101,7 @@ export const checkoutContent = {
     emailSubject: `New order request — ${siteConfig.name}`,
     editAction: "Edit details",
     finishAction: "Clear cart and finish",
+    confirmSent: "I have sent my order",
     closeAction: "Close",
   },
   message: {

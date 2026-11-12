@@ -17,10 +17,8 @@ export interface CartLineItem {
 export type LineItemDetails = Omit<CartLineItem, "id" | "quantity">
 
 // store types
-export type AddResult = "added" | "updated" | "limit" | "unavailable"
-
 interface CartActions {
-  addProduct: (product: CatalogProduct) => AddResult
+  addProduct: (product: CatalogProduct) => boolean
   setQuantity: (id: string, quantity: number) => void
   setWidth: (width: number) => void
   removeItem: (id: string) => void
