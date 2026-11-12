@@ -43,11 +43,11 @@ if (runUnit) {
   run("Unit tests: checkout validation", "bun test tests/unit/checkout-validation.test.ts")
 }
 
-/* ── e2e tests (Playwright) ─── */
+/* ── e2e tests (Playwright — needs dev server on :3000) ─── */
 if (runE2E) {
-  run("E2E: catalog features", "bun test tests/e2e/catalog-features.spec.ts")
-  run("E2E: checkout flow", "bun test tests/e2e/checkout-flow.spec.ts")
-  run("E2E: DOM-XSS surface", "bun test tests/e2e/dom-xss.spec.ts")
+  run("E2E: catalog features", "playwright test tests/e2e/catalog-features.spec.ts")
+  run("E2E: checkout flow", "playwright test tests/e2e/checkout-flow.spec.ts")
+  run("E2E: DOM-XSS surface", "playwright test tests/e2e/dom-xss.spec.ts")
 }
 
 /* ── security audits ─── */

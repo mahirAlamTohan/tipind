@@ -236,9 +236,11 @@ try {
   const { execSync } = await import("node:child_process");
   let auditOut = "";
   try {
-    auditOut = execSync("npm audit --audit=moderate --json 2>/dev/null || true", {
+    auditOut = execSync("npm audit --audit=moderate --json", {
       cwd: process.cwd(),
       timeout: 120000,
+      stdio: ["pipe", "pipe", "ignore"],
+      throwOnError: false,
     }).toString();
   } catch { /* npm audit non-zero is fine */ }
   const vuln = JSON.parse(auditOut || "{}");
