@@ -22,16 +22,11 @@ test.describe("checkout page", () => {
 
   test("shows empty cart message when no items", async ({ page }) => {
     await page.goto(`${BASE_URL}/checkout/`)
-    await expect(page.locator("text=Your cart is empty, text=empty cart, text=start shopping")).first().toBeVisible()
+    await expect(page.locator("text=Your cart is empty, text=empty cart, text=start shopping").first()).toBeVisible()
   })
 
   test("checkout page is not indexed (noindex)", async ({ page }) => {
     await page.goto(`${BASE_URL}/checkout/`)
-    const headers = await page.evaluate(() => {
-      // Can't read HTTP headers from client side; check meta robots instead
-      const meta = document.querySelector('meta[name="robots"]')
-      return meta ? meta.getAttribute("content") : null
-    })
     // The X-Robots-Tag is set via Cloudflare _headers, not HTML meta.
     // This test just confirms the page loads.
     expect(true).toBe(true)
@@ -49,8 +44,6 @@ test.describe("checkout form validation", () => {
       await continueButton.click()
       await page.waitForTimeout(500)
 
-      // Should show validation errors
-      const errorFields = page.locator('[aria-invalid="true"], [data-testid="field-error"]')
       // May or may not show errors depending on cart state
     }
   })

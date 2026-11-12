@@ -4,11 +4,12 @@
  * Run:  bun test tests/unit/checkout-validation.test.ts
  */
 
+// eslint-disable-next-line import-x/no-unresolved -- bun:test is a Bun runtime module
 import { describe, expect, test } from "bun:test"
 import { validateDetails } from "@/features/checkout/lib/validation"
-import type { CheckoutDetails } from "@/features/checkout/types"
+import type { ShippingDetails } from "@/features/checkout/types"
 
-function details(overrides: Partial<CheckoutDetails> = {}): CheckoutDetails {
+function details(overrides: Partial<ShippingDetails> = {}): ShippingDetails {
   return {
     firstName: "John",
     lastName: "Doe",
@@ -66,7 +67,7 @@ describe("required field validation", () => {
   })
 
   test("empty country fails", () => {
-    const errors = validateDetails(details({ country: "" }))
+    const errors = validateDetails(details({ country: "" as unknown as ShippingDetails["country"] }))
     expect(errors.has("country")).toBe(true)
   })
 

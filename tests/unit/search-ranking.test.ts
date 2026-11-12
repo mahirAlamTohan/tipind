@@ -11,6 +11,7 @@
  *   • Compact matching (spaces removed) ranks below regular matches
  */
 
+// eslint-disable-next-line import-x/no-unresolved -- bun:test is a Bun runtime module
 import { describe, expect, test } from "bun:test"
 import { searchProducts, parseQuery } from "@/features/catalog/lib/search"
 import type { CatalogProduct } from "@/features/catalog/types"
@@ -21,7 +22,7 @@ function product(
 ): CatalogProduct {
   return {
     id,
-    name: overrides.name ?? `Product ${id}`,
+    name: overrides.name ?? `Product ${String(id)}`,
     ingredient: overrides.ingredient ?? "",
     manufacturer: overrides.manufacturer ?? "",
     packaging: overrides.packaging ?? "",

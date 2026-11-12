@@ -3,10 +3,10 @@
  *
  * Run against dev server:
  *   Terminal 1: bun run dev          (http://localhost:3000)
- *   Terminal 2: bun test tests/e2e/catalog-features.spec.ts
+ *   Terminal 2: bun run test:e2e
  *
  * Or against production:
- *   BASE_URL=https://tipind.mahiralamtohan.workers.dev bun test tests/e2e/catalog-features.spec.ts
+ *   BASE_URL=https://tipind.mahiralamtohan.workers.dev bun run test:e2e
  */
 
 import { test, expect } from "@playwright/test"
@@ -24,7 +24,7 @@ test.describe("catalog search", () => {
     await page.waitForTimeout(500)
 
     // Should show matching results
-    const results = page.locator('[data-testid="catalog-row"], tr').filter(:has-text("paracetamol", { ignoreCase: true }))
+    const results = page.locator('tr, [data-testid="catalog-row"]').filter({ hasText: /paracetamol/i })
     await expect(results.first()).toBeVisible()
   })
 
@@ -37,7 +37,7 @@ test.describe("catalog search", () => {
     await page.waitForTimeout(500)
 
     // First result should have ACECLOHEAL MR in the name
-    const firstRow = page.locator('[data-testid="catalog-row"], tr').first()
+    const firstRow = page.locator('tr, [data-testid="catalog-row"]').first()
     await expect(firstRow).toContainText(/ACECLOHEAL/i)
   })
 
@@ -50,7 +50,7 @@ test.describe("catalog search", () => {
     await page.waitForTimeout(500)
 
     // Should show products
-    const rows = page.locator('[data-testid="catalog-row"], tr')
+    const rows = page.locator('tr, [data-testid="catalog-row"]')
     await expect(rows.first()).toBeVisible()
   })
 })
@@ -70,7 +70,7 @@ test.describe("catalog filtering", () => {
     await page.waitForTimeout(500)
 
     // Results should be filtered
-    await expect(page.locator('[data-testid="catalog-row"], tr')).toBeVisible()
+    await expect(page.locator('tr, [data-testid="catalog-row"]')).toBeVisible()
   })
 
   test("filters by price range", async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe("catalog filtering", () => {
     await minInput.fill("100")
     await page.waitForTimeout(500)
 
-    await expect(page.locator('[data-testid="catalog-row"], tr')).toBeVisible()
+    await expect(page.locator('tr, [data-testid="catalog-row"]')).toBeVisible()
   })
 })
 
@@ -97,10 +97,10 @@ test.describe("catalog pagination / load more", () => {
 
     const loadMore = page.locator('button:has-text("Load more"), button:has-text("Show more")')
     if (await loadMore.count() > 0) {
-      const beforeCount = await page.locator('[data-testid="catalog-row"], tr').count()
+      const beforeCount = await page.locator('tr, [data-testid="catalog-row"]').count()
       await loadMore.click()
       await page.waitForTimeout(500)
-      const afterCount = await page.locator('[data-testid="catalog-row"], tr').count()
+      const afterCount = await page.locator('tr, [data-testid="catalog-row"]').count()
       expect(afterCount).toBeGreaterThan(beforeCount)
     }
   })

@@ -4,6 +4,7 @@
  * Run:  bun test tests/unit/cart.test.ts
  */
 
+// eslint-disable-next-line import-x/no-unresolved -- bun:test is a Bun runtime module
 import { describe, expect, test } from "bun:test"
 import {
   createLineItem,
@@ -13,6 +14,7 @@ import {
   packetCount,
 } from "@/features/cart/lib/line-items"
 import type { CatalogProduct } from "@/features/catalog/types"
+import type { CartLineItem } from "@/features/cart/types"
 
 function product(
   id: number,
@@ -20,7 +22,7 @@ function product(
 ): CatalogProduct {
   return {
     id,
-    name: `Product ${id}`,
+    name: `Product ${String(id)}`,
     ingredient: "ING",
     manufacturer: "MFR",
     packaging: "PACK",
@@ -30,11 +32,25 @@ function product(
   }
 }
 
+function lineItem(overrides: Partial<CartLineItem> = {}): CartLineItem {
+  return {
+    id: "item-1",
+    name: "Test Item",
+    ingredient: "ING",
+    manufacturer: "MFR",
+    packaging: "PACK",
+    type: "tablet",
+    unitPriceMills: 1000,
+    quantity: 1,
+    ...overrides,
+  }
+}
+
 describe("createLineItem", () => {
   test("creates a line item from a valid product", () => {
     const p = product(1, { name: "PARACETAMOL", priceMills: 500 })
     const item = createLineItem(p)
-    expect(item).not.toBeNull()
+    expect(item).not.toBe(null)
     expect(item?.id).toContain("PARACETAMOL")
     expect(item?.quantity).toBe(1)
     expect(item?.unitPriceMills).toBe(500)
@@ -42,17 +58,17 @@ describe("createLineItem", () => {
 
   test("rejects products with null price", () => {
     const p = product(1, { priceMills: null })
-    expect(createLineItem(p)).toBeNull()
+    expect(createLineItem(p)).toBe(null)
   })
 
   test("rejects products with zero price", () => {
     const p = product(1, { priceMills: 0 })
-    expect(createLineItem(p)).toBeNull()
+    expect(createLineItem(p)).toBe(null)
   })
 
   test("rejects products with negative price", () => {
     const p = product(1, { priceMills: -100 })
-    expect(createLineItem(p)).toBeNull()
+    expect(createLineItem(p)).toBe(null)
   })
 })
 
@@ -78,7 +94,7 @@ describe("clampQuantity", () => {
 
 describe("lineTotalMills", () => {
   test("calculates unit price times quantity", () => {
-    const item = { id: "a", unitPriceMills: 500, quantity: 3 }
+    const item = lineItem({ unitPriceMills: 500, quantity: 3 })
     expect(lineTotalMills(item)).toBe(1500)
   })
 })
@@ -86,8 +102,8 @@ describe("lineTotalMills", () => {
 describe("totalMills", () => {
   test("sums all line totals", () => {
     const items = [
-      { id: "a", unitPriceMills: 1000, quantity: 2 },
-      { id: "b", unitPriceMills: 500, quantity: 4 },
+      lineItem({ unitPriceMills: 1000, quantity: 2 }),
+      lineItem({ unitPriceMills: 500, quantity: 4 }),
     ]
     expect(totalMills(items)).toBe(4000)
   })
@@ -100,8 +116,8 @@ describe("totalMills", () => {
 describe("packetCount", () => {
   test("sums all quantities", () => {
     const items = [
-      { id: "a", unitPriceMills: 1000, quantity: 2 },
-      { id: "b", unitPriceMills: 500, quantity: 3 },
+      lineItem({ quantity: 2 }),
+      lineItem({ quantity: 3 }),
     ]
     expect(packetCount(items)).toBe(5)
   })

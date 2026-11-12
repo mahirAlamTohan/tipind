@@ -9,7 +9,6 @@ const WORDS = /[\p{L}\p{N}]+/gu
  */
 const FIELD_ORDER = ["name", "ingredient", "manufacturer", "packaging", "price"] as const
 
-const QUALITY_UNIT = 100
 const COMPACT_SCORE = 5
 
 const ACCENTS = /[\u0300-\u036f]/g
@@ -163,6 +162,7 @@ export function searchProducts(
       let termBestField = -1
 
       for (let i = 0; i < enabledFields.length; i++) {
+        // eslint-disable-next-line security/detect-object-injection -- `folded` is a readonly string[] and `i` is a numeric index
         const q = quality(row.folded[i], term)
         if (
           q > 0 &&

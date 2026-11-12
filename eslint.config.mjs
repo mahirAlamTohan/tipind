@@ -32,6 +32,8 @@ export default defineConfig([
     // type stubs that only exist during `next dev`, which makes
     // import-x/no-unresolved flap between runs.
     "next-env.d.ts",
+    // Test runner script, not source code.
+    "tests/run-all.mjs",
   ]),
 
   // Base ESLint + TypeScript
