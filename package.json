@@ -2,10 +2,6 @@
   "name": "tipind",
   "version": "0.1.0",
   "private": true,
-  "overrides": {
-    "minimatch": "^11.0.1",
-    "zod": "^4.6.6"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

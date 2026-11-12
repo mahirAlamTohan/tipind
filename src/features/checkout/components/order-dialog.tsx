@@ -100,7 +100,7 @@ export function OrderDialog({
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-90 bg-neutral-950/55 backdrop-blur-xs transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 motion-reduce:transition-none" />
-        <Dialog.Popup className="fixed inset-0 z-91 m-auto flex h-fit max-h-[calc(100dvh-1.5rem)] w-[min(40rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl transition-[opacity,scale] duration-200 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none">
+        <Dialog.Popup className="fixed inset-0 z-91 flex flex-col overflow-hidden border border-border bg-background shadow-2xl transition-[opacity,scale] duration-200 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none md:m-auto md:h-fit md:max-h-[calc(100dvh-1.5rem)] md:w-[min(40rem,calc(100vw-1.5rem))] md:rounded-2xl">
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <PendingMark />
@@ -254,7 +254,7 @@ export function OrderDialog({
               <Button
                 onClick={() => setHasConfirmed(true)}
                 variant="outline"
-                className="text-warning-700 dark:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-950/20"
+                className="text-warning-700 hover:bg-warning-50 dark:text-warning-300 dark:hover:bg-warning-950/20"
               >
                 {copy.confirmSent}
               </Button>

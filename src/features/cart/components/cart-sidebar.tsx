@@ -70,88 +70,71 @@ export function CartSidebar() {
     >
       <CartResizeHandle />
 
-      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4">
-        <div className="min-w-0">
-          <span className="inline-flex items-center gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
+      <header className="w-full shrink-0 items-center justify-between gap-4 border-b border-border px-5 py-2 md:items-start md:py-4">
+        <span className="flex items-center justify-between">
+          <span className="inline-flex gap-2 text-[0.68rem] font-extrabold tracking-[0.12em] text-primary-text uppercase">
             <ShoppingCart aria-hidden="true" className="size-4" />
             {copy.eyebrow}
           </span>
-          <h2 className="mt-1 mb-0 font-display text-xl font-extrabold tracking-tight text-ink">
-            {copy.title}
-          </h2>
-          <p className="mt-1 mb-0 text-xs leading-5 text-muted-foreground">
-            {copy.description}
-          </p>
-        </div>
-        <div className="flex flex-row items-center justify-center space-x-2">
-          <Tooltip
-            content={{
-              title: copy.clearAction,
-            }}
-            wrap
-          >
-            <Button
-              className="w-full shrink-0 rounded-lg text-danger-600 hover:bg-danger-50 hover:text-danger-700 dark:text-danger-300 dark:hover:bg-danger-800/50"
-              onClick={() => {
-                clear()
-                if (items.length > 0)
-                  toast.success("Cart cleared", {
-                    position: "bottom-left",
-                    dismissible: true,
-                    closeButton: true,
-                    icon: (
-                      <CircleCheck
-                        aria-hidden="true"
-                        className="size-6 stroke-success-500"
-                      />
-                    ),
-                    classNames: {
-                      title:
-                        "ml-2 text-sm font-semibold text-success-950! dark:text-success-100!",
-                      closeButton:
-                        "bg-success-100! dark:bg-success-900! size-6! shadow",
-                      toast:
-                        "bg-success-50! dark:bg-success-950/70! backdrop-blur-sm! shadow-lg! dark:shadow-none!",
-                    },
-                  })
+          <div className="flex flex-row items-center justify-center space-x-2">
+            <Tooltip
+              content={{
+                title: copy.clearAction,
               }}
+              wrap
+            >
+              <Button
+                className="w-full shrink-0 rounded-lg text-danger-600 hover:bg-danger-50 hover:text-danger-700 dark:text-danger-300 dark:hover:bg-danger-800/50"
+                onClick={() => {
+                  clear()
+                  if (items.length > 0)
+                    toast.success("Cart cleared", {
+                      position: "bottom-left",
+                      dismissible: true,
+                      closeButton: true,
+                      icon: (
+                        <CircleCheck
+                          aria-hidden="true"
+                          className="size-6 stroke-success-500"
+                        />
+                      ),
+                      classNames: {
+                        title:
+                          "ml-2 text-sm font-semibold text-success-950! dark:text-success-100!",
+                        closeButton:
+                          "bg-success-100! dark:bg-success-900! size-6! shadow",
+                        toast:
+                          "bg-success-50! dark:bg-success-950/70! backdrop-blur-sm! shadow-lg! dark:shadow-none!",
+                      },
+                    })
+                }}
+                variant="ghost"
+              >
+                <Trash2 aria-hidden="true" />
+                {copy.clearAction}
+              </Button>
+            </Tooltip>
+            <Button
+              aria-label={copy.closeAction}
+              className="size-9 shrink-0 rounded-lg text-ink-soft"
+              onClick={() => {
+                setOpen(false)
+              }}
+              ref={closeRef}
+              size="icon"
               variant="ghost"
             >
-              <Trash2 aria-hidden="true" />
-              {copy.clearAction}
+              <X aria-hidden="true" />
             </Button>
-          </Tooltip>
-          <Button
-            aria-label={copy.closeAction}
-            className="size-9 shrink-0 rounded-lg text-ink-soft"
-            onClick={() => {
-              setOpen(false)
-            }}
-            ref={closeRef}
-            size="icon"
-            variant="ghost"
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </div>
+          </div>
+        </span>
+        <h2 className="mt-1 mb-0 hidden font-display text-xl font-extrabold tracking-tight text-ink md:block">
+          {copy.title}
+        </h2>
+        <p className="mt-1 mb-0 hidden text-xs leading-5 text-muted-foreground md:block">
+          {copy.description}
+        </p>
       </header>
-
-      <div className="shrink-0 space-y-3 border-b border-border px-5 py-3">
-        <Card className="gap-1 border-primary-200/80 bg-primary-50/80 p-3 text-xs leading-5 text-primary-950 dark:border-primary-900/80 dark:bg-primary-950/40 dark:text-primary-100">
-          <p className="m-0">{copy.cartNotice}</p>
-          <p className="m-0 text-primary-800 dark:text-primary-200">
-            {copy.packPriceNote}
-          </p>
-        </Card>
-        {!isStorageAvailable && (
-          <p
-            className="m-0 rounded-xl border border-warning-300 bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-950 dark:border-warning-800 dark:bg-warning-950 dark:text-warning-100"
-            role="status"
-          >
-            {copy.storageUnavailableNotice}
-          </p>
-        )}
-      </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
         {!isHydrated ? (
@@ -175,42 +158,60 @@ export function CartSidebar() {
             </p>
           </Card>
         ) : (
-          <section aria-labelledby="cart-products-heading">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <h3
-                className="m-0 font-display text-base font-extrabold text-ink"
-                id="cart-products-heading"
+          <>
+            <Card className="my-2 gap-1 border-primary-200/80 bg-primary-50/80 p-3 text-xs leading-5 text-primary-950 dark:border-primary-900/80 dark:bg-primary-950/40 dark:text-primary-100">
+              <p className="m-0">{copy.cartNotice}</p>
+              <p className="m-0 text-primary-800 dark:text-primary-200">
+                {copy.packPriceNote}
+              </p>
+            </Card>
+            {!isStorageAvailable && (
+              <p
+                className="m-0 mb-2 rounded-xl border border-warning-300 bg-warning-50 px-3 py-2 text-xs font-semibold text-warning-950 dark:border-warning-800 dark:bg-warning-950 dark:text-warning-100"
+                role="status"
               >
-                {copy.productsHeading}
-              </h3>
-              <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-                {formatNumber(items.length)}{" "}
-                {pluralize(items.length, "product", "products")} ·{" "}
-                {packetsLabel}
-              </span>
-            </div>
-            <div className="space-y-3">
-              {items.map((item) => (
-                <CartLineCard item={item} key={item.id} />
-              ))}
-            </div>
-          </section>
+                {copy.storageUnavailableNotice}
+              </p>
+            )}
+            <section aria-labelledby="cart-products-heading" className="mt-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3
+                  className="m-0 font-display text-base font-extrabold text-ink"
+                  id="cart-products-heading"
+                >
+                  {copy.productsHeading}
+                </h3>
+                <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                  {formatNumber(items.length)}{" "}
+                  {pluralize(items.length, "product", "products")} ·{" "}
+                  {packetsLabel}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <CartLineCard item={item} key={item.id} />
+                ))}
+              </div>
+            </section>
+          </>
         )}
       </div>
 
       {isHydrated && items.length > 0 && (
         <div className="shrink-0 border-t border-border bg-card px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-          <div className="flex items-end justify-between gap-3">
-            <h3 className="m-0 text-sm font-extrabold tracking-wide text-muted-foreground uppercase">
-              {copy.totalLabel}
-            </h3>
+          <div className="flex items-center justify-between gap-3">
+            <span>
+              <h3 className="m-0 text-sm font-extrabold tracking-wide text-muted-foreground uppercase">
+                {copy.totalLabel}
+              </h3>
+              <p className="mt-1 mb-0 text-xs text-muted-foreground">
+                {packetsLabel} total
+              </p>
+            </span>
             <p className="m-0 text-2xl font-extrabold tracking-tight text-primary-text tabular-nums">
               {formatMills(total)}
             </p>
           </div>
-          <p className="mt-1 mb-0 text-xs text-muted-foreground">
-            {packetsLabel} total
-          </p>
           <ButtonLink
             className="mt-4 w-full"
             href="/checkout"
