@@ -3,10 +3,10 @@
  *
  * Run against dev server:
  *   Terminal 1: bun run dev          (http://localhost:3000)
- *   Terminal 2: bun test tests/e2e/checkout-flow.spec.ts
+ *   Terminal 2: playwright test tests/e2e/checkout-flow.spec.ts
  *
  * Or against production:
- *   BASE_URL=https://tipind.mahiralamtohan.workers.dev bun test tests/e2e/checkout-flow.spec.ts
+ *   BASE_URL=https://tipind.mahiralamtohan.workers.dev playwright test tests/e2e/checkout-flow.spec.ts
  */
 
 import { test, expect } from "@playwright/test"
@@ -22,7 +22,10 @@ test.describe("checkout page", () => {
 
   test("shows empty cart message when no items", async ({ page }) => {
     await page.goto(`${BASE_URL}/checkout/`)
-    await expect(page.locator("text=Your cart is empty, text=empty cart, text=start shopping").first()).toBeVisible()
+    // Checkout page empty message: "Nothing to check out yet"
+    await expect(
+      page.locator('text=Nothing to check out yet').first()
+    ).toBeVisible()
   })
 
   test("checkout page is not indexed (noindex)", async ({ page }) => {
