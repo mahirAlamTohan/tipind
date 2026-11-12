@@ -3,10 +3,13 @@ import type { CatalogProduct, SearchQuery } from "../types"
 const WORD_CHAR = /[\p{L}\p{N}]/u
 const WORDS = /[\p{L}\p{N}]+/gu
 
-/** Column order: name, ingredient, manufacturer, packaging. */
-const FIELD_WEIGHTS = [4, 3, 2, 1] as const
-/** Quality (whole word / word start / inside a word) outranks the column. */
-const QUALITY_UNIT = 10
+/**
+ * Field priority order — lower index = higher priority.
+ * Packaging and price are only enabled when the query contains digits.
+ */
+const FIELD_ORDER = ["name", "ingredient", "manufacturer", "packaging", "price"] as const
+
+const QUALITY_UNIT = 100
 const COMPACT_SCORE = 5
 
 const ACCENTS = /[\u0300-\u036f]/g
@@ -20,11 +23,8 @@ interface Folded {
 }
 
 /**
- * The search index only needs the folded text, never the position maps, and it
- * runs over all 8522 products x 4 fields. Folding the whole string at once is
- * ~10x faster than the per-character loop below (measured 245 ms -> 25 ms on
- * the real catalog) and allocates nothing extra.
- * With `compact`, everything except letters and digits is dropped.
+ * Fast fold for indexing: lowercased, accent-stripped, all non-word chars
+ * dropped when `compact`. Runs over all products x 5 fields.
  */
 function foldFast(source: string, compact = false) {
   const text = source.toLocaleLowerCase().normalize("NFKD").replace(ACCENTS, "")
@@ -32,9 +32,8 @@ function foldFast(source: string, compact = false) {
 }
 
 /**
- * Same folding, but remembers where each folded character came from, so a match
- * in the folded text can be mapped back onto the original for highlighting.
- * Only used for the handful of rows that are actually on screen.
+ * Same folding but remembers character offsets, used only for the handful of
+ * rows actually on screen so matches can be mapped back for highlighting.
  */
 function fold(source: string, compact = false): Folded {
   let text = ""
@@ -82,6 +81,7 @@ function toRow(product: CatalogProduct): IndexedRow {
     product.ingredient,
     product.manufacturer,
     product.packaging,
+    product.priceMills !== null ? String(product.priceMills) : "",
   ]
   return {
     compact: fields.map((field) => foldFast(field, true)),
@@ -122,46 +122,99 @@ function quality(text: string, term: string) {
 }
 
 /**
- * Every word must appear (as a substring) in some column. Best matches first:
- * whole words, then word starts, then partial matches; ties go to the more
- * important column (name > ingredient > manufacturer > pack).
- * A multi-word query also matches with its spaces removed, so "as life"
- * finds "A. S Lifesciences".
+ * Modular ranking system.
+ *
+ * Sort order (highest to lowest):
+ *   1. Primary field tier — name > ingredient > manufacturer > packaging > price
+ *      (packaging/price only enabled when the query contains digits)
+ *   2. Match quality in the primary field — whole word > word start > inside word
+ *   3. Number of terms matched in the primary field (more = better)
+ *   4. Total weighted score across all matched fields
+ *   5. Product id (stable tie-breaker)
+ *
+ * Every term must appear in at least one enabled field. A multi-word query can
+ * also match with spaces removed (compact), e.g. "as life" finds
+ * "A. S Lifesciences"; compact matches rank below all regular matches.
  */
 export function searchProducts(
   products: readonly CatalogProduct[],
   query: SearchQuery
 ): CatalogProduct[] {
-  const hits: { product: CatalogProduct; score: number }[] = []
+  const hasDigits = query.terms.some((term) => /\d/.test(term))
+  const enabledFields = hasDigits ? FIELD_ORDER : FIELD_ORDER.slice(0, 3)
+
+  const hits: {
+    product: CatalogProduct
+    primaryField: number
+    primaryQuality: number
+    primaryTermCount: number
+    totalScore: number
+  }[] = []
 
   for (const row of indexFor(products)) {
-    let score = 0
-    let matched = true
+    let allMatched = true
+    let primaryField = -1
+    let primaryQuality = 0
+    let primaryTermCount = 0
+    let totalScore = 0
 
     for (const term of query.terms) {
-      let best = 0
-      for (const [column, text] of row.folded.entries()) {
-        const found = quality(text, term)
-        if (found === 0) continue
-        const weight = FIELD_WEIGHTS.at(column) ?? 0
-        best = Math.max(best, found * QUALITY_UNIT + weight)
+      let termBestQuality = 0
+      let termBestField = -1
+
+      for (let i = 0; i < enabledFields.length; i++) {
+        const q = quality(row.folded[i], term)
+        if (
+          q > 0 &&
+          (q > termBestQuality || (q === termBestQuality && i < termBestField))
+        ) {
+          termBestQuality = q
+          termBestField = i
+        }
       }
-      if (best === 0) {
-        matched = false
+
+      if (termBestQuality === 0) {
+        allMatched = false
         break
       }
-      score += best
+
+      // Weighted score: higher tier (lower i) contributes more.
+      totalScore += termBestQuality * (enabledFields.length - termBestField)
+
+      // Track the primary field: highest-priority field where any term matches.
+      if (primaryField === -1 || termBestField < primaryField) {
+        primaryField = termBestField
+        primaryQuality = termBestQuality
+        primaryTermCount = 1
+      } else if (termBestField === primaryField) {
+        primaryTermCount++
+        primaryQuality = Math.max(primaryQuality, termBestQuality)
+      }
     }
 
-    if (!matched && query.compact) {
-      matched = row.compact.some((text) => text.includes(query.compact))
-      score = COMPACT_SCORE
+    if (!allMatched && query.compact) {
+      const matched = row.compact.some((text) => text.includes(query.compact))
+      if (!matched) continue
+      // Compact matches rank below all regular matches.
+      primaryField = enabledFields.length
+      primaryQuality = 1
+      primaryTermCount = 0
+      totalScore = COMPACT_SCORE
     }
 
-    if (matched) hits.push({ product: row.product, score })
+    if (!allMatched) continue
+
+    hits.push({ product: row.product, primaryField, primaryQuality, primaryTermCount, totalScore })
   }
 
-  hits.sort((a, b) => b.score - a.score || a.product.id - b.product.id)
+  hits.sort((a, b) => {
+    if (a.primaryField !== b.primaryField) return a.primaryField - b.primaryField
+    if (b.primaryQuality !== a.primaryQuality) return b.primaryQuality - a.primaryQuality
+    if (b.primaryTermCount !== a.primaryTermCount) return b.primaryTermCount - a.primaryTermCount
+    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore
+    return a.product.id - b.product.id
+  })
+
   return hits.map((hit) => hit.product)
 }
 
@@ -176,7 +229,7 @@ function collect(folded: Folded, needle: string, into: Range[]) {
     const start = folded.starts.at(at)
     const end = folded.ends.at(at + needle.length - 1)
     if (start !== undefined && end !== undefined) into.push([start, end])
-    from = at + needle.length
+    from = at + 1
   }
 }
 
