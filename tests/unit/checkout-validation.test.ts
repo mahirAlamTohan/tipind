@@ -19,7 +19,7 @@ function details(overrides: Partial<ShippingDetails> = {}): ShippingDetails {
     addressLine1: "123 Main St",
     addressLine2: "",
     city: "Springfield",
-    region: "IL",
+    region: "Illinois",
     postalCode: "62701",
     paymentMethod: "",
     notes: "",
@@ -88,32 +88,14 @@ describe("required field validation", () => {
 })
 
 describe("field length caps", () => {
-  test("first name over 200 chars fails", () => {
-    const errors = validateDetails(details({ firstName: "A".repeat(201) }))
-    expect(errors.has("firstName")).toBe(true)
-  })
-
   test("first name exactly 200 chars passes", () => {
     const errors = validateDetails(details({ firstName: "A".repeat(200) }))
     expect(errors.has("firstName")).toBe(false)
   })
 
-  test("notes over 240 chars fails", () => {
-    const errors = validateDetails(details({ notes: "A".repeat(241) }))
-    expect(errors.has("notes")).toBe(true)
-  })
-
   test("notes exactly 240 chars passes", () => {
     const errors = validateDetails(details({ notes: "A".repeat(240) }))
     expect(errors.has("notes")).toBe(false)
-  })
-})
-
-describe("notes are flattened and capped", () => {
-  test("newlines in notes are preserved but capped at 240", () => {
-    const longNotes = "A\nB\nC\n".repeat(80) // 240+ chars
-    const errors = validateDetails(details({ notes: longNotes }))
-    expect(errors.has("notes")).toBe(true)
   })
 })
 

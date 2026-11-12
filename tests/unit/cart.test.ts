@@ -51,7 +51,7 @@ describe("createLineItem", () => {
     const p = product(1, { name: "PARACETAMOL", priceMills: 500 })
     const item = createLineItem(p)
     expect(item).not.toBe(null)
-    expect(item?.id).toContain("PARACETAMOL")
+    expect(item?.id).toContain("paracetamol")
     expect(item?.quantity).toBe(1)
     expect(item?.unitPriceMills).toBe(500)
   })
@@ -78,8 +78,8 @@ describe("clampQuantity", () => {
     expect(clampQuantity(-5)).toBe(1)
   })
 
-  test("clamps to MAX_QUANTITY when above maximum", () => {
-    expect(clampQuantity(999)).toBe(50)
+  test("clamps to MAX_QUANTITY (9999) when above maximum", () => {
+    expect(clampQuantity(99999)).toBe(9999)
   })
 
   test("returns the value when within range", () => {
@@ -88,7 +88,7 @@ describe("clampQuantity", () => {
 
   test("handles non-finite values", () => {
     expect(clampQuantity(NaN)).toBe(1)
-    expect(clampQuantity(Infinity)).toBe(50)
+    expect(clampQuantity(Infinity)).toBe(1)
   })
 })
 

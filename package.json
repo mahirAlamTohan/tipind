@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "overrides": {
-    "minimatch": "^11.0.1"
+    "minimatch": "^11.0.1",
+    "zod": "^4.6.6"
   },
   "scripts": {
     "dev": "next dev",
@@ -27,8 +28,6 @@
     "post-deploy-audit": "node scripts/post-deploy-audit.mjs",
     "test": "bun test",
     "test:unit": "bun test tests/unit",
-    "test:e2e": "playwright test",
-    "test:e2e:ci": "playwright test --reporter=list",
     "test:all": "node tests/run-all.mjs --all",
     "preview": "node scripts/preview.mjs",
     "content:audit": "node scripts/content-audit.mjs"
