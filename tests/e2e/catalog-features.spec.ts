@@ -71,7 +71,7 @@ test.describe("catalog filtering", () => {
     await page.waitForTimeout(500)
 
     // Results should still be visible (filtered)
-    await expect(page.locator("tbody tr")).toBeVisible()
+    await expect(page.locator("tbody tr").first()).toBeVisible()
   })
 
   test("filters by price range", async ({ page }) => {
