@@ -16,11 +16,6 @@ export interface PaymentMethod {
 }
 
 /**
- * Everything the business *is*: facts, contact channels, business rules and
- * build plumbing. Owned by `src/config/site.ts`.
- *
- * The words on the page are not here — they live in `src/config/content.ts`
- * and `src/features/<area>/content.ts`.
  */
 export interface SiteConfig {
   /* identity */
@@ -36,12 +31,7 @@ export interface SiteConfig {
 
   /* how to reach us */
   contact: {
-    /** As typed by the client, e.g. "+91 8766267499". May be empty. */
-    phone: string
-    /** Digits only, for wa.me links. May be empty. */
-    whatsappNumber: string
     email: string
-    /** Without the leading "@". May be empty. */
     telegramUsername: string
     supportHours: string
   }

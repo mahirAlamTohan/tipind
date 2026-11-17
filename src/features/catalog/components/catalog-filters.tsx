@@ -1,6 +1,4 @@
 "use client"
-
-import { siteContent } from "@/config/content"
 import { formatMessage, formatNumber, pluralize } from "@/lib/format"
 
 import { useCatalogStore } from "../store/catalog-store"
@@ -8,6 +6,7 @@ import type { CatalogDataset } from "../types"
 import { FacetFilter } from "./facet-filter"
 import { PriceFilter } from "./price-filter"
 import { SelectionSummary } from "./selection-summary"
+import { catalogContent } from "../content"
 
 interface CatalogFiltersProps {
   dataset: CatalogDataset | null
@@ -15,11 +14,12 @@ interface CatalogFiltersProps {
 }
 
 export function CatalogFilters({ dataset, matchCount }: CatalogFiltersProps) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const open = useCatalogStore((state) => state.filtersOpen)
   const selectedCount = useCatalogStore(
     (state) => state.manufacturer.size + state.packaging.size
   )
+
   return (
     <>
       {open && dataset && (

@@ -1,7 +1,7 @@
 import { Pill } from "lucide-react"
 
 import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface BrandProps {
   className?: string

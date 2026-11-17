@@ -1,14 +1,13 @@
 "use client"
-
 import { RangeSlider } from "@/components/ui/slider"
-import { siteContent } from "@/config/content"
 import { formatMills } from "@/lib/format"
 
 import { useCatalogStore } from "../store/catalog-store"
 import type { PriceRange } from "../types"
+import { catalogContent } from "../content"
 
 export function PriceFilter({ bounds }: { bounds: PriceRange }) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const range = useCatalogStore((state) => state.priceRange) ?? bounds
   const setPriceRange = useCatalogStore((state) => state.actions.setPriceRange)
 

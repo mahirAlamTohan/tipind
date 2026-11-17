@@ -3,7 +3,7 @@
 import { Check } from "lucide-react"
 import { motion, useReducedMotion } from "motion/react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 import { checkoutContent } from "../content"
 

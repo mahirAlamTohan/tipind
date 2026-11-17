@@ -1,7 +1,8 @@
 import type { SERVICED_COUNTRIES } from "./constants"
 
-export type PaymentMethodId =
-  "btc" | "usdt-erc20" | "usdt-trc20" | "eth" | "usdc-erc20"
+import type { PAYMENT_METHODS } from "@/config/site" // adjust path to your site config file
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 export type CheckoutStep = "review" | "details"
 export type ChannelId = "email" | "whatsapp" | "telegram"
 export type ErrorKind = "required" | "email" | "postal" | "region"
@@ -9,10 +10,7 @@ export type ErrorKind = "required" | "email" | "postal" | "region"
 export type SERVICED_COUNTRIES_TYPE = typeof SERVICED_COUNTRIES
 export type SERVICED_COUNTRY = (typeof SERVICED_COUNTRIES)[number]
 
-export interface PaymentMethod {
-  readonly id: PaymentMethodId
-  readonly label: string
-}
+export type PaymentMethodId = PaymentMethod["id"]
 
 export interface ShippingDetails {
   firstName: string

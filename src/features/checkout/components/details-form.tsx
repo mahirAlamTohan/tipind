@@ -34,13 +34,12 @@ const COUNTRY_OPTIONS: readonly ComboboxOption[] = COUNTRIES.map((country) => ({
   value: country.code,
 }))
 
-const PAYMENT_OPTIONS: readonly ComboboxOption[] = [
-  { label: checkoutContent.details.paymentNone, value: "" },
-  ...PAYMENT_METHODS.map((method) => ({
+const PAYMENT_OPTIONS: readonly ComboboxOption[] = PAYMENT_METHODS.map(
+  (method) => ({
     label: method.label,
     value: method.id,
-  })),
-]
+  })
+)
 
 function Section({
   children,

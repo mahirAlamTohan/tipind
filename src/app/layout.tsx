@@ -27,8 +27,6 @@ const headingFont = localFont({
 })
 
 const pageTitle = `${siteConfig.name} | ${siteConfig.tagline}`
-const socialDescription =
-  "Quality medicines support better healthcare. Browse the pharmaceutical catalog or contact our team for ordering assistance."
 const socialImageAlt = `${siteConfig.name} — quality medicines for better healthcare`
 
 export const viewport: Viewport = {
@@ -69,7 +67,7 @@ export const metadata: Metadata = {
     url: "/",
     siteName: siteConfig.name,
     title: pageTitle,
-    description: socialDescription,
+    description: siteConfig.description,
     images: [
       {
         url: "/opengraph-image",
@@ -82,7 +80,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: pageTitle,
-    description: socialDescription,
+    description: siteConfig.description,
     images: ["/opengraph-image"],
   },
 }
@@ -97,7 +95,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
     >
-      <body className="min-h-dvh bg-background font-sans text-foreground antialiased selection:bg-primary-200 selection:text-ink">
+      <body className="min-h-dvh bg-background font-body text-foreground antialiased selection:bg-primary-200 selection:text-ink">
         <StructuredData />
         {/* First tab stop: keyboard users can jump past the header and nav. */}
         <a className="skip-link" href="#catalog">

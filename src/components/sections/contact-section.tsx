@@ -3,7 +3,6 @@ import {
   Clock3,
   Mail,
   MessageCircle,
-  Phone,
   type LucideIcon,
 } from "lucide-react"
 
@@ -13,6 +12,8 @@ import { Reveal } from "@/components/ui/reveal"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 import { contactLinks } from "@/config/links"
+import { TelegramIcon } from "../icons/telegram-icon"
+import { cn } from "cn"
 
 const rowClass = "group -mx-3 flex min-w-0 items-center gap-3 rounded-2xl p-3"
 const rowHoverClass =
@@ -20,7 +21,7 @@ const rowHoverClass =
 
 interface ContactDetailProps {
   href?: string
-  icon: LucideIcon
+  icon: LucideIcon | typeof TelegramIcon
   label: string
   value: string
 }
@@ -29,7 +30,13 @@ function ContactDetail({ href, icon: Icon, label, value }: ContactDetailProps) {
   const body = (
     <>
       <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-primary-200 transition-colors group-hover:border-white group-hover:bg-white group-hover:text-primary-700">
-        <Icon aria-hidden="true" className="size-4.25" />
+        <Icon
+          aria-hidden="true"
+          className={cn(
+            "size-4.25 stroke-white",
+            typeof Icon === typeof TelegramIcon && "fill-white"
+          )}
+        />
       </span>
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="text-[0.62rem] font-bold tracking-wide text-primary-200 uppercase">
@@ -83,14 +90,17 @@ export function ContactSection() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
               <ButtonLink
                 className="min-h-11 w-full bg-white px-4 text-primary-800 shadow-lg shadow-primary-950/20 hover:bg-primary-50 sm:w-auto"
-                href={contactLinks.whatsapp()}
+                href={contactLinks.telegram()}
                 rel="noreferrer"
                 size="sm"
                 target="_blank"
                 variant="secondary"
               >
-                <MessageCircle aria-hidden="true" />
-                {contact.whatsappLabel}
+                <TelegramIcon
+                  className="fill-primary-800 stroke-primary-800"
+                  aria-hidden="true"
+                />
+                {contact.telegramMessageLabel}
                 <ArrowUpRight aria-hidden="true" />
               </ButtonLink>
               <a
@@ -107,10 +117,12 @@ export function ContactSection() {
 
           <div className="relative z-10 mt-6 grid gap-1 border-t border-white/20 pt-5 sm:grid-cols-2 lg:mt-0 lg:grid-cols-1 lg:content-center lg:border-t-0 lg:border-l lg:py-4 lg:pl-8">
             <ContactDetail
-              href={contactLinks.phone()}
-              icon={Phone}
-              label={contact.phoneLabel}
-              value={siteConfig.contact.phone || contact.phoneFallback}
+              href={contactLinks.telegram()}
+              icon={TelegramIcon}
+              label={contact.telegramLabel}
+              value={
+                siteConfig.contact.telegramUsername || contact.telegramFallback
+              }
             />
             <ContactDetail
               href={contactLinks.email()}

@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, MessageCircle } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type { MouseEvent } from "react"
@@ -16,6 +16,7 @@ import { contactLinks } from "@/config/links"
 import { CartTrigger } from "@/features/cart/components/cart-trigger"
 import { useActiveSection } from "@/hooks/use-active-section"
 import { scrollToSection } from "@/lib/scroll"
+import { TelegramIcon } from "../icons/telegram-icon"
 
 const HOME_ID = "home"
 
@@ -35,7 +36,7 @@ interface NavProps {
 function DesktopNav({ activeId, onSelect }: NavProps) {
   return (
     <nav
-      aria-label={siteContent.ui.mainNavigationLabel}
+      aria-label={siteContent.header.mainNavigationLabel}
       className="hidden flex-1 items-center justify-center gap-1 md:flex"
     >
       {NAV_ITEMS.map((item) => (
@@ -59,7 +60,7 @@ function MobileNav({ activeId, onSelect }: NavProps) {
   return (
     <Container className="md:hidden">
       <nav
-        aria-label={siteContent.ui.mobileNavigationLabel}
+        aria-label={siteContent.header.mobileNavigationLabel}
         className="flex h-12 items-center gap-1 border-t border-border"
       >
         {MOBILE_ITEMS.map((item) => (
@@ -84,12 +85,6 @@ function MobileNav({ activeId, onSelect }: NavProps) {
  * Sticky header.
  *
  * The docked→floating transition, the reading-progress bar and the floating
- * gap all run on CSS scroll-driven animations (`.site-header*` in main.css).
- * They used to be `motion` springs driven by a scroll listener, which cost a
- * 95 kB animation runtime plus a JS scroll handler on every page. See the
- * `.site-header` block for the fallback story: browsers without
- * `animation-timeline` simply get the docked header, which is the pre-scroll
- * state and fully usable.
  */
 export function SiteHeader() {
   const pathname = usePathname()
@@ -136,16 +131,16 @@ export function SiteHeader() {
 
               <div className="ml-auto flex shrink-0 items-center gap-1.5 md:gap-2">
                 <ButtonLink
-                  aria-label={siteContent.ui.chatAction}
+                  aria-label={siteContent.header.chatAction}
                   className="w-9 gap-2 px-0 shadow-md shadow-primary-900/15 min-[400px]:w-auto min-[400px]:px-3 sm:px-3.5 [&_svg]:size-3.5"
-                  href={contactLinks.whatsapp()}
+                  href={contactLinks.telegram()}
                   rel="noreferrer"
                   size="sm"
                   target="_blank"
                 >
-                  <MessageCircle aria-hidden="true" />
+                  <TelegramIcon aria-hidden="true" />
                   <span className="sr-only min-[400px]:not-sr-only">
-                    {siteContent.ui.chatAction}
+                    {siteContent.header.chatAction}
                   </span>
                   <ArrowUpRight
                     aria-hidden="true"

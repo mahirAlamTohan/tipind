@@ -31,7 +31,7 @@ export function InfiniteScrollSentinel({
         }
       },
       {
-        root: scrollRef?.current ?? null, // ← key change
+        root: scrollRef?.current ?? null,
         rootMargin,
       }
     )

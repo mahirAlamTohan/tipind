@@ -42,3 +42,120 @@ export interface CatalogResults {
   readonly loadedCount: number
   readonly isFiltered: boolean
 }
+
+export interface CatalogContent {
+  eyebrow: string
+  title: string
+  description: string
+  overline: string
+  cardTitle: string
+  cardDescription: string
+  searchLabel: string
+  searchPlaceholder: string
+  searchHelp: string
+  facetSearchAriaLabel: string
+  loadErrorAdvice: string
+  noCatalogRecordsTitle: string
+  paginationLabel: string
+  filtersAction: string
+  closeFiltersAction: string
+  includedFiltersTitle: string
+  excludedFiltersTitle: string
+  noIncludedFilters: string
+  noExcludedFilters: string
+  facetCycleAriaLabel: string
+  unselectedLabel: string
+  priceRangeTitle: string
+  priceUnit: string
+  minimumPriceLabel: string
+  maximumPriceLabel: string
+  minimumPriceAriaLabel: string
+  maximumPriceAriaLabel: string
+  priceLimitHelp: string
+  manufacturerLabel: string
+  packagingLabel: string
+  includeSelected: string
+  excludeSelected: string
+  selectedCount: string
+  facetSearchPlaceholder: string
+  noFacetValues: string
+  noFacetMatches: string
+  clearFiltersAction: string
+  downloadAction: string
+  openCatalogAction: string
+  productSingular: string
+  productPlural: string
+  searchableProducts: string
+  tableRegionLabel: string
+  tableHeadings: {
+    product: string
+    ingredient: string
+    manufacturer: string
+    packaging: string
+    rate: string
+    addToCartButton: string
+  }
+  status: {
+    unconfigured: string
+    loading: string
+    loaded: string
+    error: string
+    indexing: string
+    searchError: string
+  }
+  addTip: {
+    add: { title: string; note: string }
+    more: {
+      title: string
+      note: string
+    }
+    unavailable: {
+      title: string
+      note: string
+    }
+  }
+  facetTip: {
+    none: {
+      title: string
+      points: string[]
+    }
+    include: {
+      title: string
+      points: string[]
+    }
+    exclude: {
+      title: string
+      note: string
+    }
+  }
+  facetHelp: {
+    title: string
+    points: string[]
+  }
+  removeFilterTip: { title: string; note: string }
+  filtersTip: {
+    title: string
+    points: string[]
+  }
+  clearFiltersTip: {
+    title: string
+    note: string
+  }
+  emptyTitle: string
+  emptyDescription: string
+  noCatalogConfiguredDescription: string
+  noCatalogRecordsDescription: string
+  noCatalogUnavailableDescription: string
+  removeFilterAriaLabel: string
+  noProducts: string
+  summaryShowing: string
+  summaryOf: string
+  previousPage: string
+  nextPage: string
+  previousPageAriaLabel: string
+  nextPageAriaLabel: string
+  sourceNote: string
+  addToCartAriaLabel: string
+  addedToCartAnnouncement: string
+  unavailablePriceAriaLabel: string
+}

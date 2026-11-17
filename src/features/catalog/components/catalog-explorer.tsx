@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Container } from "@/components/ui/container"
 import { siteConfig } from "@/config/site"
-import { siteContent } from "@/config/content"
 import { formatNumber, pluralize } from "@/lib/format"
 
 import { RESULTS_ANCHOR_ID } from "../constants"
@@ -17,12 +16,13 @@ import { CatalogFilters } from "./catalog-filters"
 import { CatalogStat, CatalogStatusBar } from "./catalog-status"
 import { CatalogTable } from "./catalog-table"
 import { CatalogToolbar } from "./catalog-toolbar"
+import { catalogContent } from "../content"
 
 /** Load the catalog once the section is this close to the viewport. */
 const PRELOAD_MARGIN = "600px"
 
 export function CatalogExplorer() {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const sectionRef = useRef<HTMLElement>(null)
   const [shouldLoad, setShouldLoad] = useState(false)
 
@@ -51,7 +51,7 @@ export function CatalogExplorer() {
   const status = useCatalogLoader(shouldLoad ? siteConfig.catalog.dataUrl : "")
   const dataset = useCatalogStore((state) => state.dataset)
   const loadError = useCatalogStore((state) => state.error)
-  const loadMore = useCatalogStore((state) => state.actions.loadMore) // ← new
+  const loadMore = useCatalogStore((state) => state.actions.loadMore)
   const results = useCatalogResults()
 
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -77,8 +77,6 @@ export function CatalogExplorer() {
     <section
       className="bg-linear-to-b from-surface-tint to-background py-16 outline-none sm:py-20 lg:py-24"
       id="catalog"
-      // tabIndex lets the skip link move keyboard focus here, not just the
-      // scroll position — without it focus falls back to <body>.
       tabIndex={-1}
       ref={sectionRef}
     >

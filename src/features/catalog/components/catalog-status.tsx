@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority"
 import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react"
 
-import { siteContent } from "@/config/content"
 import { formatNumber, pluralize } from "@/lib/format"
 
 import type { StatusTone } from "../lib/status"
 import type { CatalogLoadStatus } from "../types"
+import { catalogContent } from "../content"
 
 const iconTile = cva(
   "grid size-9 place-items-center rounded-lg bg-card shadow-sm",
@@ -59,7 +59,7 @@ interface CatalogStatProps {
 
 /** Product count badge in the card header. */
 export function CatalogStat({ count, status }: CatalogStatProps) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const tone: StatusTone =
     status === "ready"
       ? "success"
@@ -72,7 +72,7 @@ export function CatalogStat({ count, status }: CatalogStatProps) {
   return (
     <div
       aria-live="polite"
-      className="flex w-fit shrink-0 items-center gap-2.5 rounded-xl border border-primary-100 bg-primary-50/70 px-2.5 py-2 dark:border-border dark:bg-neutral-900/70"
+      className="flex w-fit shrink-0 items-center rounded-xl"
     >
       <span className={iconTile({ tone })}>
         <StatusIcon className="size-4.25" tone={tone} />
@@ -82,13 +82,6 @@ export function CatalogStat({ count, status }: CatalogStatProps) {
           {formatNumber(count)}{" "}
           {pluralize(count, copy.productSingular, copy.productPlural)}
         </strong>
-        <small className="mt-0.5 text-[0.62rem] text-muted-foreground">
-          {status === "ready"
-            ? copy.fullCatalogLabel
-            : status === "loading"
-              ? copy.searchNowLabel
-              : copy.noCatalogRecordsTitle}
-        </small>
       </span>
     </div>
   )
@@ -118,7 +111,9 @@ export function CatalogStatusBar({
         )}
         {message}
       </span>
-      <span className="text-muted-foreground sm:text-right">{summary}</span>
+      <span className="hidden text-muted-foreground sm:text-right md:block">
+        {summary}
+      </span>
     </div>
   )
 }

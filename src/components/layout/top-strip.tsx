@@ -1,9 +1,11 @@
-import { Mail, Phone } from "lucide-react"
+import { Mail } from "lucide-react"
 
 import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 import { contactLinks } from "@/config/links"
+import { TelegramIcon } from "../icons/telegram-icon"
+import { cn } from "cn"
 
 const linkClass =
   "inline-flex min-h-6 min-w-0 items-center gap-1.5 py-0.5 transition-colors hover:text-white dark:hover:text-primary-300"
@@ -20,21 +22,36 @@ export function TopStrip() {
             aria-hidden="true"
             className="status-dot size-1.5 rounded-full bg-success-300 ring-4 ring-success-300/20 dark:bg-success-400 dark:ring-success-400/15"
           />
-          {siteContent.ui.headerIntro} {siteConfig.founded}
+          {siteContent.header.headerTopIntro} {siteConfig.founded}
         </p>
         <div className="flex min-w-0 flex-1 items-center justify-between gap-3 md:flex-none md:justify-end md:gap-6">
-          <a className={`${linkClass} shrink-0`} href={contactLinks.phone()}>
-            <Phone aria-hidden="true" className={iconClass} />
-            <span className="whitespace-nowrap">
-              {contact.phone || siteContent.ui.phoneFallback}
-            </span>
-          </a>
-          <a className={linkClass} href={contactLinks.email()}>
-            <Mail aria-hidden="true" className={iconClass} />
-            <span className="truncate">
-              {contact.email || siteContent.ui.emailFallback}
-            </span>
-          </a>
+          {contact.telegramUsername ? (
+            <a
+              className={`${linkClass} shrink-0`}
+              href={contactLinks.telegram()}
+            >
+              <TelegramIcon
+                aria-hidden="true"
+                className={cn(
+                  "fill-primary-200 stroke-primary-200 dark:fill-primary-300 dark:stroke-primary-300",
+                  iconClass
+                )}
+              />
+              <span className="whitespace-nowrap">
+                {contact.telegramUsername
+                  ? `@${contact.telegramUsername}`
+                  : siteContent.header.telegramFallback}
+              </span>
+            </a>
+          ) : null}
+          {contact.email ? (
+            <a className={linkClass} href={contactLinks.email()}>
+              <Mail aria-hidden="true" className={iconClass} />
+              <span className="truncate">
+                {contact.email || siteContent.header.emailFallback}
+              </span>
+            </a>
+          ) : null}
         </div>
       </Container>
     </div>

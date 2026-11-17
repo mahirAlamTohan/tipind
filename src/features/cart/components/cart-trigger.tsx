@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { siteContent } from "@/config/content"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 import { SIDEBAR_ID } from "../constants"
 import { useCartStore, selectPacketCount } from "../cart-store"

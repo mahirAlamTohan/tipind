@@ -319,6 +319,9 @@
   --shadow-header-floating: var(--header-shadow-floating);
   --shadow-soft: var(--elevation-soft);
   --shadow-card: var(--elevation-card);
+
+  --font-body: var(--font-body);
+  --font-heading: var(--font-heading);
 }
 
 /* Cart sidebar: on lg+ the page shrinks to make room for it. */

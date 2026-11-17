@@ -2,130 +2,19 @@
  * ─────────────────────────────────────────────────────────────────────────────
  *  SITE CONFIGURATION — the only file that defines what this business *is*.
  * ─────────────────────────────────────────────────────────────────────────────
- *
- * Read this file first. If you are looking for a value and cannot find it here,
- * see `src/config/content.ts` (visible copy) or `src/features/<area>/content.ts`
- * (copy for one feature). The rule is:
- *
- *   site.ts     facts and switches: name, contact, places we ship, how we get
- *               paid, sizes, keys. Values a developer or `.env` sets.
- *   content.ts  the words on the page. Values a copywriter or the client sets.
- *
- * Both are build-time only. There are no runtime environment variables: the
- * site is a static export, so anything here is compiled into the HTML/JS.
- *
- * Precedence, lowest to highest:
- *
- *   default in this file  →  .env.production  →  the build environment
- *
- * Everything under "env-driven" is overridable without touching code, which is
- * what `.env.production` is for. Everything under "structural" is a business
- * decision that belongs in review, not in a deploy button.
  */
 
-import type { CountryCode } from "libphonenumber-js"
-
+import {
+  noHtml,
+  publicCountryCodes,
+  publicSiteUrl,
+  publicValue,
+  publicYear,
+  safeEmail,
+  safeTelegram,
+} from "@/lib/utils"
 import type { SiteConfig } from "@/types/site"
-
-/* ── env helpers ──────────────────────────────────────────────────────────── */
-
-/**
- * A public env value, or the fallback when unset/blank.
- *
- * Blank counts as unset on purpose: `NEXT_PUBLIC_CONTACT_PHONE=` in an env file
- * should mean "not configured", not "the empty string". So an empty result must
- * fall through to the fallback, which is why this is not `??`.
- */
-function publicValue(value: string | undefined, fallback = "") {
-  const trimmed = value?.trim()
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must fall through; `??` would keep "".
-  return trimmed ? trimmed : fallback
-}
-
-/** An env value that must be HTTPS; throws at build time if it is not. */
-function publicSiteUrl(value: string | undefined, fallback: string) {
-  const url = new URL(publicValue(value, fallback))
-  if (url.protocol !== "https:") {
-    throw new Error("NEXT_PUBLIC_SITE_URL must use HTTPS.")
-  }
-  return url.origin
-}
-
-/** `2012` / `"2012"` → 2012. Rejects anything that is not a plausible year. */
-function publicYear(value: string | undefined, fallback: number) {
-  const parsed = Number.parseInt(publicValue(value), 10)
-  if (!Number.isFinite(parsed)) return fallback
-  if (parsed < 1800 || parsed > 2200) {
-    throw new Error(`NEXT_PUBLIC_FOUNDED_YEAR must be a four-digit year, got "${String(value)}".`)
-  }
-  return parsed
-}
-
-/** Comma-separated ISO country codes → validated list. */
-function publicCountryCodes(value: string | undefined, fallback: readonly CountryCode[]) {
-  const raw = publicValue(value)
-  if (!raw) return fallback
-  return raw
-    .split(",")
-    .map((code) => code.trim().toUpperCase())
-    .filter(Boolean) as CountryCode[]
-}
-
-
-
-/* ── stored-XSS guardrails ───────────────────────────────────────────────── */
-/*
- * Everything in siteConfig is compiled into the static HTML/JS at build time.
- * If `.env.production` is ever compromised (MITM on your machine, or a GitHub
- * / Cloudflare account takeover), an attacker could inject HTML or script
- * through any env-driven value. These validators run at build time and fail
- * the build before anything dangerous ships.
- *
- * React auto-escapes JSX text and attribute values, but defense in depth means
- * rejecting the value at the source rather than trusting every render site.
- */
-
-const HTML_SCRIPT_RE = /[<>&"']/  // any character that can break out of HTML text or an attribute
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/  // eslint-disable-line regexp/no-super-linear-backtracking
-// Telegram usernames: 5–32 chars, alphanumeric + underscores only
-const TELEGRAM_RE = /^\w{5,32}$/
-
-/** Rejects any value that could break out of HTML text or an attribute. */
-function noHtml(value: string | undefined, label: string) {
-  const raw = publicValue(value)
-  if (raw && HTML_SCRIPT_RE.test(raw)) {
-    throw new Error(
-      `${label} contains HTML-breaking characters (<, >, &, ", '). Refusing to build.`
-    )
-  }
-  return raw
-}
-
-/** Validates an email address shape; rejects anything that could inject into a mailto: href. */
-function safeEmail(value: string | undefined, label: string) {
-  const raw = publicValue(value)
-  if (!raw) return raw
-  if (!EMAIL_RE.test(raw) || HTML_SCRIPT_RE.test(raw)) {
-    throw new Error(
-      `${label} is not a safe email address: "${raw}". Refusing to build.`
-    )
-  }
-  return raw
-}
-
-/** Validates a Telegram username shape; rejects anything that could inject into a t.me/ href. */
-function safeTelegram(value: string | undefined, label: string) {
-  const raw = publicValue(value)
-  if (!raw) return raw
-  // Strip a single leading "@" — the same normalization the raw value had before.
-  const username = raw.replace(/^@/, "")
-  if (!TELEGRAM_RE.test(username)) {
-    throw new Error(
-      `${label} is not a safe Telegram username: "${raw}". Refusing to build.`
-    )
-  }
-  return username
-}
+import type { CountryCode } from "libphonenumber-js"
 
 /* ── raw env ──────────────────────────────────────────────────────────────── */
 
@@ -134,50 +23,68 @@ const DEFAULTS = {
   url: "https://tipind.mahiralamtohan.workers.dev",
 } as const
 
-const contactPhone = noHtml(process.env.NEXT_PUBLIC_CONTACT_PHONE, "NEXT_PUBLIC_CONTACT_PHONE")
-const whatsappNumber = publicValue(
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
-).replace(/\D/g, "")
-const contactEmail = safeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL, "NEXT_PUBLIC_CONTACT_EMAIL")
+const contactEmail = safeEmail(
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+  "NEXT_PUBLIC_CONTACT_EMAIL"
+)
 const telegramUsername = safeTelegram(
   process.env.NEXT_PUBLIC_TELEGRAM_USERNAME,
   "NEXT_PUBLIC_TELEGRAM_USERNAME"
 )
 
-/* ── where we ship ─────────────────────────────────────────────────────────
- * ONE list. The checkout dropdown, the FAQ answer, the checkout notice, the
- * about section and the footer all read from this. Before this was centralised
- * the list existed in five places and had already drifted: the dropdown offered
- * India while every piece of prose said four countries.
- */
+/* ── where we ship ───────────────────────────────────────────────────────── */
 
 /** Countries you actively ship to, in display order. */
 export const DELIVERY_COUNTRIES: readonly CountryCode[] = publicCountryCodes(
   process.env.NEXT_PUBLIC_DELIVERY_COUNTRIES,
-  ["US", "GB", "NZ", "AU"]
+  ["GB", "US", "CN", "KR", "JP", "SG", "MY", "TH", "AU", "VN", "CO", "PH"]
 )
 
 /** Countries whose address form needs a state/province field. */
-export const NEED_OR_HAS_REGION: readonly CountryCode[] = ["US", "AU", "IN"]
+export const NEED_OR_HAS_REGION: readonly CountryCode[] = [
+  "US", // United States (Has regions)
+  "GB", // United Kingdom (Has regions/countries/council areas in the package)
+  "CN", // China (Has regions)
+  "KR", // South Korea (Has regions)
+  "JP", // Japan (Has regions)
+  "MY", // Malaysia (Has regions)
+  "TH", // Thailand (Has regions)
+  "AU", // Australia (Has regions)
+  "VN", // Vietnam (Has regions)
+  "CO", // Colombia (Has regions)
+  "PH", // Philippines (Has regions)
+]
 
 /** Full display names, for sentences and selects. */
 export const COUNTRY_LABELS: Readonly<Partial<Record<CountryCode, string>>> = {
   AU: "Australia",
-  CA: "Canada",
+  CN: "China",
+  CO: "Colombia",
   GB: "United Kingdom",
-  IN: "India",
-  NZ: "New Zealand",
+  JP: "Japan",
+  KR: "South Korea",
+  MY: "Malaysia",
+  PH: "Philippines",
+  SG: "Singapore",
+  TH: "Thailand",
   US: "United States",
+  VN: "Vietnam",
 }
 
 /** Short forms for tight labels (footer, badges). Falls back to the full name. */
 export const COUNTRY_SHORT: Readonly<Partial<Record<CountryCode, string>>> = {
   AU: "Australia",
-  CA: "Canada",
+  CN: "China",
+  CO: "Colombia",
   GB: "UK",
-  IN: "India",
-  NZ: "NZ",
+  JP: "Japan",
+  KR: "Korea",
+  MY: "Malaysia",
+  PH: "Philippines",
+  SG: "Singapore",
+  TH: "Thailand",
   US: "USA",
+  VN: "Vietnam",
 }
 
 /** "United States, United Kingdom, New Zealand, Australia" — for sentences. */
@@ -192,32 +99,33 @@ export const DELIVERY_COUNTRIES_COMPACT = DELIVERY_COUNTRIES.map(
   (code) => COUNTRY_SHORT[code] ?? COUNTRY_LABELS[code] ?? code
 ).join(" · ")
 
-/* ── how we get paid ───────────────────────────────────────────────────────
- * Client-facing business config, so it lives here rather than in the checkout
- * feature's constants. `id` is stored in localStorage and in the order message;
- * never change an id, only its label.
- */
+/* ── how we get paid ─────────────────────────────────────────────────────── */
 
 export const PAYMENT_METHODS = [
   { id: "btc", label: "Bitcoin (BTC)" },
-  { id: "usdt-trc20", label: "USDT (TRC-20)" },
   { id: "usdt-erc20", label: "USDT (ERC-20)" },
-  { id: "eth", label: "Ethereum (ETH)" },
+  { id: "usdt-trc20", label: "USDT (TRC-20)" },
+  { id: "usdt-sol", label: "USDT (SOL)" },
   { id: "usdc-erc20", label: "USDC (ERC-20)" },
+  { id: "usdc-sol", label: "USDC (SOL)" },
+  { id: "eth", label: "Ethereum (ETH)" },
+  { id: "sol", label: "Solana (SOL)" },
 ] as const
 
 /* ── the config object ────────────────────────────────────────────────────── */
 
 export const siteConfig = {
   /* — identity: env-driven, shown everywhere — */
-  name: noHtml(process.env.NEXT_PUBLIC_SITE_NAME, "NEXT_PUBLIC_SITE_NAME") || DEFAULTS.name,
+  name:
+    noHtml(process.env.NEXT_PUBLIC_SITE_NAME, "NEXT_PUBLIC_SITE_NAME") ||
+    DEFAULTS.name,
   url: publicSiteUrl(process.env.NEXT_PUBLIC_SITE_URL, DEFAULTS.url),
-  founded: publicYear(process.env.NEXT_PUBLIC_FOUNDED_YEAR, 2012),
+  founded: publicYear(process.env.NEXT_PUBLIC_FOUNDED_YEAR, 2020),
 
   /* — SEO / social: copy, but structural enough to live with identity — */
-  tagline: "Pharmaceutical healthcare you can trust",
+  tagline: "Your Trusted Partner in Pharmaceutical Care.",
   description:
-    "Supplies generic medicines and ethical brand medications from India. Browse the pharmaceutical catalog or contact our team for ordering assistance.",
+    "Explore generic medicines and ethical pharmaceutical brands from India. Browse our catalog or contact us for ordering assistance.",
 
   copyrightYear: new Date().getFullYear(),
 
@@ -230,7 +138,12 @@ export const siteConfig = {
       mobileLabel: "Catalog",
       footerLabel: "Pharmaceutical Catalog",
     },
-    { id: "about", label: "About Us", mobileLabel: "About", footerLabel: "About Us" },
+    {
+      id: "about",
+      label: "About Us",
+      mobileLabel: "About",
+      footerLabel: "About Us",
+    },
     {
       id: "faq",
       label: "FAQs",
@@ -247,14 +160,13 @@ export const siteConfig = {
 
   /* — how to reach us: env-driven — */
   contact: {
-    phone: contactPhone,
-    whatsappNumber,
     email: contactEmail,
     telegramUsername,
-    supportHours: noHtml(
-      process.env.NEXT_PUBLIC_SUPPORT_HOURS,
-      "NEXT_PUBLIC_SUPPORT_HOURS"
-    ) || "Monday – Saturday · 9:00 AM – 8:00 PM IST",
+    supportHours:
+      noHtml(
+        process.env.NEXT_PUBLIC_SUPPORT_HOURS,
+        "NEXT_PUBLIC_SUPPORT_HOURS"
+      ) || "Monday – Saturday",
   },
 
   /* — shipping + payment: structural — */
@@ -271,14 +183,10 @@ export const siteConfig = {
     dataUrl: publicValue(process.env.NEXT_PUBLIC_CATALOG_DATA_URL),
     /**
      * Repeating-XOR key used to mask the catalog artifact.
-     *
-     * This is *not* a secret and must not be treated as one: it is inlined
-     * into the public JS bundle by definition. Its job is to make the artifact
-     * useless to anyone who does not run the site's code.
      */
     xorKey: publicValue(
       process.env.NEXT_PUBLIC_CATALOG_XOR_KEY,
-      "tipind-catalog-mask-v6"
+      "tipind-catalog-v6"
     ),
   },
 } satisfies SiteConfig

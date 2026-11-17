@@ -1,4 +1,4 @@
-import { Globe2, Pill, ShieldCheck } from "lucide-react"
+import { BadgeDollarSign, Globe2, Pill, ShieldCheck } from "lucide-react"
 
 import { Container } from "@/components/ui/container"
 import { Reveal } from "@/components/ui/reveal"
@@ -32,12 +32,12 @@ export function AboutSection() {
                 key={highlight}
               >
                 {index === 0 ? (
-                  <ShieldCheck
+                  <BadgeDollarSign
                     aria-hidden="true"
                     className="size-5 text-primary-text"
                   />
                 ) : (
-                  <Globe2
+                  <ShieldCheck
                     aria-hidden="true"
                     className="size-5 text-primary-text"
                   />

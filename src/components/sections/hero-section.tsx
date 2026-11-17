@@ -1,10 +1,4 @@
-import {
-  ArrowDown,
-  ArrowRight,
-  Mail,
-  MessageCircle,
-  ShieldCheck,
-} from "lucide-react"
+import { ArrowDown, ArrowRight, Mail, ShieldCheck } from "lucide-react"
 import Image from "next/image"
 
 import { ButtonLink } from "@/components/ui/button"
@@ -14,6 +8,7 @@ import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 import { contactLinks } from "@/config/links"
 import heroImage from "@/images/hero-visual.webp"
+import { TelegramIcon } from "../icons/telegram-icon"
 
 export function HeroSection() {
   const content = siteContent.hero
@@ -21,7 +16,7 @@ export function HeroSection() {
   return (
     <section
       aria-label={`${siteConfig.name} healthcare`}
-      className="bg-linear-to-b from-hero-surface to-background pb-7 sm:pb-10"
+      className="bg-linear-to-b from-hero-surface to-background"
       id="home"
     >
       <div className="relative isolate h-[clamp(510px,72svh,610px)] min-h-125 w-full overflow-hidden bg-hero-image-surface md:h-[clamp(500px,68svh,650px)]">
@@ -42,18 +37,16 @@ export function HeroSection() {
         />
 
         <Container className="relative z-10 flex h-full items-center pb-4">
-          {/* Entrance animation is CSS (see .hero-enter) so this stays a server
-              component and nothing hydrates for a decorative fade. */}
           <div className="hero-enter max-w-172.5 py-8 md:py-11">
-            <span className="hidden min-h-9 items-center gap-2 rounded-full border border-primary/20 bg-background/75 px-3.5 py-2 text-[0.62rem] font-extrabold tracking-widest text-primary-text shadow-sm backdrop-blur-xl sm:inline-flex sm:text-[0.68rem]">
+            <span className="hidden min-h-9 items-center gap-2 rounded-full border border-success-500/20 bg-success-50 px-3.5 py-2 text-[0.62rem] font-extrabold tracking-widest text-success-700 shadow-sm backdrop-blur-xl sm:inline-flex sm:text-[0.68rem] dark:bg-success-950/30 dark:text-success-300">
               <ShieldCheck aria-hidden="true" className="size-4 shrink-0" />
               {content.eyebrow} {siteConfig.founded}
             </span>
 
-            <h1 className="leading-1.02 max-w-162.5 font-display text-[clamp(2.7rem,6.5vw,4.85rem)] font-extrabold tracking-[-0.07em] text-balance text-ink">
+            <h1 className="leading-1.02 max-w-162.5 font-display text-[clamp(2.7rem,6.5vw,4.85rem)] font-extrabold tracking-[-0.07em] text-nowrap text-ink">
               {content.title}
               <br />
-              <span className="bg-linear-to-r from-primary-700 via-primary-500 to-highlight-600 bg-clip-text text-transparent dark:from-primary-300 dark:via-primary-200 dark:to-highlight-200">
+              <span className="bg-linear-to-r from-primary-700 via-primary-500 to-highlight-600 bg-clip-text px-0.5 text-transparent dark:from-primary-300 dark:via-primary-200 dark:to-highlight-200">
                 {content.titleAccent}
               </span>
             </h1>
@@ -65,12 +58,12 @@ export function HeroSection() {
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <ButtonLink
                 className="min-h-12 bg-linear-to-r from-primary to-primary-500 px-5 shadow-lg shadow-primary-700/25"
-                href={contactLinks.whatsapp()}
+                href={contactLinks.telegram()}
                 rel="noreferrer"
                 size="lg"
                 target="_blank"
               >
-                <MessageCircle aria-hidden="true" />
+                <TelegramIcon aria-hidden="true" />
                 {content.primaryAction}
                 <ArrowRight aria-hidden="true" />
               </ButtonLink>
@@ -104,7 +97,7 @@ export function HeroSection() {
           </div>
         </Container>
 
-        <div className="absolute right-4 bottom-4 z-10 hidden min-h-9 items-center gap-2 rounded-full border border-primary-100/90 bg-white/80 px-3 text-[0.62rem] font-semibold text-primary-800 shadow-lg shadow-primary-950/10 backdrop-blur-xl sm:right-6 md:inline-flex dark:border-primary-900 dark:bg-neutral-950/80 dark:text-primary-200">
+        <div className="absolute right-4 bottom-4 z-10 hidden min-h-9 items-center gap-2 rounded-full border border-primary-100/90 bg-white/80 px-3 text-[0.62rem] font-semibold text-primary-800 shadow-lg shadow-primary-950/10 backdrop-blur-xl sm:right-6 xl:inline-flex dark:border-primary-900 dark:bg-neutral-950/80 dark:text-primary-200">
           <ShieldCheck
             aria-hidden="true"
             className="size-4 text-success-600 dark:text-success-300"
@@ -113,7 +106,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <Container className="relative z-10 -mt-8">
+      <Container className="absolute inset-x-0 z-10 -mt-8">
         <Card
           className="bg-card/90 p-4 shadow-xl shadow-primary-950/10 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between"
           size="sm"
@@ -129,13 +122,13 @@ export function HeroSection() {
           <CardContent className="flex flex-nowrap items-center gap-2">
             <ButtonLink
               className="h-9 px-3"
-              href={contactLinks.whatsapp()}
+              href={contactLinks.telegram()}
               rel="noreferrer"
               size="sm"
               target="_blank"
             >
-              <MessageCircle aria-hidden="true" />
-              {content.whatsappAction}
+              <TelegramIcon aria-hidden="true" />
+              {content.telegramAction}
             </ButtonLink>
             <ButtonLink
               className="h-9 px-3"

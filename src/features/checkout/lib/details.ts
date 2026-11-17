@@ -25,7 +25,7 @@ export const EMPTY_DETAILS: ShippingDetails = {
   firstName: "",
   lastName: "",
   notes: "",
-  paymentMethod: "",
+  paymentMethod: "btc",
   postalCode: "",
   region: "",
 }

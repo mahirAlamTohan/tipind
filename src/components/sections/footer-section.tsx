@@ -4,7 +4,6 @@ import {
   Globe2,
   Mail,
   MessageCircle,
-  Phone,
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
@@ -15,6 +14,8 @@ import { Container } from "@/components/ui/container"
 import { siteContent } from "@/config/content"
 import { siteConfig } from "@/config/site"
 import { contactLinks } from "@/config/links"
+import { TelegramIcon } from "../icons/telegram-icon"
+import { cn } from "cn"
 
 const SERVICE_ICONS: readonly LucideIcon[] = [
   MessageCircle,
@@ -26,8 +27,7 @@ const headingClass =
   "text-[0.68rem] font-extrabold tracking-[0.075em] text-footer-foreground uppercase"
 const labelClass =
   "text-[0.58rem] font-extrabold tracking-[0.09em] text-footer-muted/70 uppercase"
-const rowClass =
-  "group -mx-2 flex min-w-0 flex-col gap-1 rounded-xl px-2 py-1.5"
+const rowClass = "group -mx-2 flex min-w-0 flex-col gap-1 rounded-lg px-4 py-2"
 const rowHoverClass =
   "transition-colors hover:bg-footer-card focus-visible:bg-footer-card focus-visible:outline-2 focus-visible:outline-footer-accent"
 const pillLinkClass =
@@ -35,7 +35,7 @@ const pillLinkClass =
 
 interface FooterContactProps {
   href?: string
-  icon: LucideIcon
+  icon: LucideIcon | typeof TelegramIcon
   label: string
   value: string
 }
@@ -47,7 +47,10 @@ function FooterContact({ href, icon: Icon, label, value }: FooterContactProps) {
       <span className="flex items-center gap-2">
         <Icon
           aria-hidden="true"
-          className="size-4 shrink-0 text-footer-accent transition-transform group-hover:scale-110 motion-reduce:transition-none"
+          className={cn(
+            "size-4 shrink-0 stroke-footer-accent text-footer-accent transition-transform group-hover:scale-110 motion-reduce:transition-none",
+            typeof Icon === typeof TelegramIcon && "fill-footer-accent"
+          )}
         />
         <span className="text-xs font-bold wrap-anywhere text-footer-foreground transition-colors group-hover:text-footer-accent">
           {value}
@@ -110,11 +113,7 @@ export default function FooterSection() {
           <span className={headingClass}>{footer.navigationHeading}</span>
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 sm:flex sm:flex-col sm:items-start sm:gap-y-0.5">
             {siteConfig.navigation.map((item) => (
-              <SectionLink
-                className={pillLinkClass}
-                id={item.id}
-                key={item.id}
-              >
+              <SectionLink className={pillLinkClass} id={item.id} key={item.id}>
                 {item.footerLabel}
               </SectionLink>
             ))}
@@ -125,10 +124,12 @@ export default function FooterSection() {
           <span className={headingClass}>{footer.contactHeading}</span>
           <div className="grid gap-1 sm:grid-cols-3 lg:grid-cols-1">
             <FooterContact
-              href={contactLinks.phone()}
-              icon={Phone}
-              label={contact.phoneLabel}
-              value={siteConfig.contact.phone || contact.phoneFallback}
+              href={contactLinks.telegram()}
+              icon={TelegramIcon}
+              label={contact.telegramLabel}
+              value={
+                siteConfig.contact.telegramUsername || contact.telegramFallback
+              }
             />
             <FooterContact
               href={contactLinks.email()}
@@ -145,12 +146,12 @@ export default function FooterSection() {
             />
           </div>
           <a
-            className="-mx-2 inline-flex items-center gap-2 self-start rounded-full px-3 py-2 text-[0.7rem] font-extrabold text-footer-accent transition-colors hover:bg-footer-accent hover:text-footer-start focus-visible:outline-2 focus-visible:outline-footer-accent"
-            href={contactLinks.whatsapp()}
+            className="-mx-2 inline-flex items-center gap-2 self-start rounded-full fill-footer-accent px-3 py-2 text-[0.7rem] font-extrabold text-footer-accent transition-colors hover:bg-footer-accent hover:fill-black hover:text-footer-start focus-visible:outline-2 focus-visible:outline-footer-accent"
+            href={contactLinks.telegram()}
             rel="noreferrer"
             target="_blank"
           >
-            <MessageCircle aria-hidden="true" className="size-4" />
+            <TelegramIcon aria-hidden="true" className="size-4" />
             {contact.supportCallout}
             <ArrowUpRight aria-hidden="true" className="size-3.5" />
           </a>
@@ -171,7 +172,7 @@ export default function FooterSection() {
       </Container>
 
       <Container className="mt-5">
-        <div className="grid gap-1.5 rounded-xl border border-l-[3px] border-footer-border border-l-footer-accent bg-footer-card/70 px-4 py-3 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4">
+        <div className="grid items-center gap-1.5 rounded-xl border border-l-[3px] border-footer-border border-l-footer-accent bg-footer-card/70 px-4 py-3 sm:grid-cols-[130px_minmax(0,1fr)] sm:gap-4">
           <strong className="text-[0.62rem] font-extrabold tracking-[0.07em] text-footer-accent uppercase">
             {footer.noticeHeading}
           </strong>

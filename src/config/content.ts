@@ -1,41 +1,26 @@
 import type { SiteContent } from "@/types/content"
-
 import { siteConfig } from "./site"
-
-/**
- * ─────────────────────────────────────────────────────────────────────────────
- *  VISIBLE COPY — every string the visitor reads.
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * Section copy is ordered the same way as the page: ui → hero → catalog → faq →
- * about → contact → footer.
- *
- * Two rules keep this file honest:
- *
- *  1. Never restate a fact that lives in `site.ts`. Use the interpolation below
- *     (`${siteConfig.name}`) rather than typing the name, the year or the list
- *     of countries again. Five copies of the shipping list had already drifted.
- *
- *  2. `{placeholders}` are for *runtime* values only — counts, product names,
- *     filter labels. Anything known at build time is interpolated here, so a
- *     string that leaves this file is final and no component has to remember to
- *     call a replace helper. (One component used to forget.)
- */
 
 /** Country list as a sentence: "the United States, United Kingdom, …". */
 const SHIPS_TO = siteConfig.shipping.countriesProse
 /** Budget carriers change; keep the human wording in one place. */
 const ESTABLISHED = siteConfig.founded.toString()
 
+/** Payment methods list as a sentence: "Bitcoin (BTC), USDT (ERC-20), …". */
+const PAYMENT_METHODS_PROSE = siteConfig.payments.map((p) => p.label).join(", ")
+
 export const siteContent = {
-  ui: {
-    headerIntro: "Your trusted healthcare partner since",
-    phoneFallback: "Call our team",
+  header: {
+    headerTopIntro: "Your trusted healthcare partner since",
     emailFallback: "Email our team",
-    chatAction: "Chat with us",
-    themeToggleLabel: "Toggle color theme",
+    telegramFallback: "Chat with us on Telegram",
     mainNavigationLabel: "Main navigation",
     mobileNavigationLabel: "Mobile navigation",
+
+    chatAction: "Chat with us",
+  },
+  ui: {
+    themeToggleLabel: "Toggle color theme",
     footerNavigationLabel: "Footer navigation",
     contactUsAction: "Contact Us",
     callUsAction: "Call Us",
@@ -66,12 +51,12 @@ export const siteContent = {
   },
   hero: {
     eyebrow: "Trusted healthcare partner since",
-    title: "Quality medicines.",
-    titleAccent: "Better healthcare.",
+    title: "Quality Medicines",
+    titleAccent: "Affordable Healthcare",
     description:
-      "Quality medicines support better healthcare. We provide reliable access to generic and ethical-brand products, backed by thoughtful service and international shipping from India.",
+      "High-Quality pharmaceuticals are essential to effective healthcare. We provide reliable access to generic and branded medications, complemented by dedicated customer support and international shipping from India.",
     proofPrimary: "Quality focused",
-    proofSecondary: "Worldwide shipping",
+    proofSecondary: "Trusted Source and Partner",
     imageBadge: "Carefully sourced healthcare",
     imageAlt: "Medicine bottles image.",
     contactEyebrow: "Here for your healthcare needs",
@@ -79,151 +64,8 @@ export const siteContent = {
       "For product availability and orders, contact our team directly.",
     primaryAction: "Talk to our team",
     secondaryAction: "Explore catalog",
-    whatsappAction: "WhatsApp us",
+    telegramAction: "Telegram us",
     emailAction: "Email us",
-  },
-  catalog: {
-    eyebrow: "Pharmaceutical Catalog",
-    title: "Search the medicine catalog",
-    description:
-      "Find products by active ingredient, brand, manufacturer or pack size.",
-    overline: "product directory",
-    cardTitle: "Find the right product",
-    cardDescription:
-      "Search across full ingredient names, product names, packaging, pricing and manufacturer details.",
-    searchLabel: "Search the medicine catalog",
-    searchPlaceholder: "Search by ingredient, product, pack…",
-    searchHelp:
-      "Fuzzy search checks active ingredient, product, pack size, rate and manufacturer.",
-    facetSearchAriaLabel: "Search {label} filters",
-    fullCatalogLabel: "full catalog",
-    searchNowLabel: "loading catalog",
-    loadErrorAdvice:
-      "Check the catalog URL in .env.production and rebuild with `npm run catalog:build`.",
-    paginationLabel: "Catalog pagination",
-    filtersAction: "Filters",
-    closeFiltersAction: "Close filters",
-    includedFiltersTitle: "Including filters",
-    excludedFiltersTitle: "Excluding filters",
-    noIncludedFilters: "Tap a pill to include it.",
-    noExcludedFilters: "Tap an included pill again to exclude it.",
-    facetCycleAriaLabel:
-      "{label}. Current state: {mode}. Activate to change the filter state.",
-    unselectedLabel: "not selected",
-    priceRangeTitle: "Price range",
-    priceUnit: "USD",
-    minimumPriceLabel: "Minimum",
-    maximumPriceLabel: "Maximum",
-    minimumPriceAriaLabel: "Minimum price in US dollars",
-    maximumPriceAriaLabel: "Maximum price in US dollars",
-    priceLimitHelp:
-      "Drag the handles or use the arrow keys to adjust the USD range.",
-    manufacturerLabel: "Manufacturer",
-    packagingLabel: "Packaging",
-    includeSelected: "Include",
-    excludeSelected: "Exclude",
-    selectedCount: "{count} selected",
-    facetSearchPlaceholder: "Search {label}…",
-    noFacetValues: "No values available in this catalog.",
-    noFacetMatches: "No matching values.",
-    clearFiltersAction: "Clear filters",
-    downloadAction: "Download full catalog",
-    openCatalogAction: "View the full product catalog",
-    productSingular: "product",
-    productPlural: "products",
-    searchableProducts: "searchable products",
-    tableRegionLabel: "Scrollable product catalog table",
-    tableHeadings: {
-      product: "Product Name",
-      ingredient: "Active Ingredient",
-      manufacturer: "Manufacturer",
-      packaging: "Packaging",
-      rate: "RATE (USD)",
-      addToCartButton: "Add to cart",
-    },
-    status: {
-      unconfigured: "No records are available.",
-      loading: "Loading the product catalog…",
-      loaded: "Catalog loaded: {count} products.",
-      error: "Catalog unavailable. No records are displayed.",
-      indexing: "Preparing search…",
-      searchError: "Search is unavailable. Try again later.",
-    },
-    addTip: {
-      add: {
-        title: "Add to cart",
-        note: "Adds one packet to your cart.",
-      },
-      more: {
-        title: "{count} in your cart",
-        note: "Click to add another packet.",
-      },
-      unavailable: {
-        title: "Can't be added yet",
-        note: "No price is listed for this product. Contact us for a quote.",
-      },
-    },
-    facetTip: {
-      none: {
-        title: "{value}",
-        points: [
-          "Click once to show only this",
-          "Click twice to hide it instead",
-        ],
-      },
-      include: {
-        title: "Showing only this",
-        points: [
-          "Click again to hide it instead",
-          "Click a third time to clear",
-        ],
-      },
-      exclude: {
-        title: "Hiding this",
-        note: "Click again to clear the filter.",
-      },
-    },
-    facetHelp: {
-      title: "How filters work",
-      points: [
-        "Click once: show only matching products",
-        "Click twice: hide matching products",
-        "Click a third time: clear it",
-        "Combine as many options as you like",
-      ],
-    },
-    removeFilterTip: { title: "Remove filter", note: "{label}" },
-    filtersTip: {
-      title: "Narrow the results",
-      points: ["Manufacturer", "Packaging", "Price range"],
-    },
-    clearFiltersTip: {
-      title: "Clear filters",
-      note: "Resets every filter. Your search text stays.",
-    },
-    emptyTitle: "No matches",
-    emptyDescription:
-      "Try another ingredient, product name, manufacturer or pack size.",
-    noCatalogRecordsTitle: "No catalog records available",
-    noCatalogConfiguredDescription:
-      "No versioned catalog file to load product records.",
-    noCatalogRecordsDescription:
-      "The catalog files loaded, but they contain no product records.",
-    noCatalogUnavailableDescription:
-      "The catalog, manufacturer, or packaging file could not be fetched or decoded. Check the file URLs, CORS policy and XOR key.",
-    removeFilterAriaLabel: "Remove {label} from the {mode} filters",
-    noProducts: "No products to display",
-    summaryShowing: "Showing",
-    summaryOf: "of",
-    previousPage: "Prev",
-    nextPage: "Next",
-    previousPageAriaLabel: "Previous page",
-    nextPageAriaLabel: "Next page",
-    sourceNote: "",
-    addToCartAriaLabel: "Add {product} to your cart",
-    addedToCartAnnouncement: "{product} added to your cart.",
-    unavailablePriceAriaLabel:
-      "Cannot add {product}: a valid USD price is unavailable",
   },
   faq: {
     eyebrow: "Good to know",
@@ -234,68 +76,65 @@ export const siteContent = {
     items: [
       {
         question: "How can I pay?",
-        answer:
-          "Our preferred payment methods are Bitcoin (BTC), USDT (ERC-20), USDT (TRC-20), Ethereum (ETH), and USDC (ERC-20).",
+        answer: `We accept cryptocurrency payments via ${PAYMENT_METHODS_PROSE}. At checkout, you can select your preferred option, though you may pay using any of the supported coins listed above.`,
       },
       {
         question: "How do you ship, and where are orders shipped from?",
         answer:
-          "Packages are dispatched from India using India Post or another postal service, depending on the circumstances. Customs declarations are made according to the applicable shipping and customs requirements at the time of dispatch.",
+          "All orders are dispatched directly from India exclusively via India Post.",
       },
       {
         question:
           "What should I do if my order is missing an item or I receive a different brand?",
         answer:
-          "Please contact us so we can review the order. If an item was omitted during fulfillment, we will arrange to send it promptly or, with your approval, include it with your next order. If a product is unavailable, we may offer an alternative of equivalent or higher value.",
+          "Please reach out to us with an unboxing video so we can verify the issue. Once confirmed, we can reship the missing item free of shipping charges, include it with your next order if you prefer, or issue a refund directly to your crypto wallet.",
       },
       {
         question: "Why hasn't my tracking information been updated?",
         answer:
-          "International shipments can sometimes go for up to two weeks without a tracking update. We will do our best to help with tracking inquiries, but scans and delivery updates ultimately depend on the postal and logistics services handling the shipment.",
+          "Going up to two weeks without a tracking update is normal, and many packages still arrive even after 2–4 weeks of silence due to slower transit processing or missed postal scans. We only consider a package eligible for reshipment if there have been no continuous tracking updates for more than 28 days.",
       },
       {
         question: "What is your reshipment policy?",
         answer:
-          "All purchases are final and refunds are not offered. For eligible international orders, a reshipment may be considered when a shipment is confirmed as seized with appropriate documentation, appears lost in transit, or has had no tracking update for more than 20 days. Store credit may be offered in some circumstances.",
+          "All sales are final and non-refundable once processed. However, we may consider a reshipment if your package is confirmed seized with official documentation, lost in transit, or shows no continuous tracking updates for more than 28 days.",
       },
       {
         question: "What happens if a reshipment is also seized?",
         answer:
-          "Refunds are not offered if a replacement shipment is subsequently seized. Depending on the circumstances, we may offer the affected products at base cost for another attempt.",
+          "Since we also absorb the loss on the initial reshipment, we cannot offer further free replacements or refunds if a second package is seized. You will need to accept the loss, though we are happy to let you place a new order at base cost.",
       },
       {
         question: "Which countries are you currently shipping to?",
-        answer:
-          `We currently ship only to ${SHIPS_TO}.`,
+        answer: `We currently ship exclusively to ${SHIPS_TO}.`,
       },
       {
         question: "How long does processing and delivery take?",
         answer:
-          "Please allow 2–5 business days for your order to be packaged and dispatched. International delivery typically takes approximately 2–3 weeks, though transit times vary. We recommend allowing at least four weeks before submitting a delivery-related complaint.",
+          "Orders are packed and dispatched within 10 business days at the latest. International delivery typically takes 2–5 weeks, depending on your destination country and local postal circumstances.",
       },
       {
         question: "Is there a minimum order quantity?",
         answer:
-          "There is no minimum order quantity. Orders can be placed for any quantity offered in the catalog.",
+          "No, there is no minimum order quantity or value—you can order any quantity listed in our catalog.",
       },
       {
         question: "Do I need to sign for my package?",
         answer:
-          "A signature may be required by the local delivery service. Please follow the delivery requirements applicable to your shipment and contact the carrier if you have questions about a signature request.",
+          "A signature may be required upon delivery depending on your local postal service's procedures.",
       },
       {
         question: "Do I need to use my real name on the shipping address?",
         answer:
-          "Please provide accurate recipient and delivery information. Inaccurate or misleading information may cause delays or delivery problems, so make sure the name and address are sufficient for successful delivery.",
+          "Yes, please use your real name and ensure your shipping address has no spelling errors or discrepancies to avoid delivery issues or delays.",
       },
     ],
   },
   about: {
     eyebrow: `About ${siteConfig.name}`,
-    title: "Reliable healthcare supply, built on trust.",
-    description:
-      `${siteConfig.name} has supplied generic medicines and ethical-brand medications from India since ${ESTABLISHED}, with a focus on reliable service, competitive pricing and international shipping.`,
-    highlights: ["Quality focused", "International support"],
+    title: "Quality and Affordable medicines, built on trust.",
+    description: `Since ${ESTABLISHED}, ${siteConfig.name} has been connecting international customers with generic and ethical-brand medications from India—backed by great service, competitive pricing, and dependable worldwide delivery.`,
+    highlights: ["Competitive pricing", "Quality focused"],
     sinceLabel: "Serving customers since",
     serviceTitle: "International shipping",
     serviceRegions: siteConfig.shipping.countriesCompact,
@@ -305,20 +144,19 @@ export const siteContent = {
     eyebrow: "Contact our team",
     title: "We’re here to help you find what you need.",
     description:
-      "Questions about products or orders? Contact our team by WhatsApp or email. We're here to help.",
-    whatsappLabel: "Message on WhatsApp",
-    phoneLabel: "Phone / WhatsApp",
+      "Questions about products or orders? Contact our team by Telegram or email. We're here to help.",
+    telegramMessageLabel: "Message on Telegram",
+    telegramLabel: "Telegram",
     emailLabel: "Email",
     supportHoursLabel: "Support hours",
-    phoneFallback: "Contact us",
+    telegramFallback: "Contact us",
     emailFallback: "Email our team",
     supportHoursFallback: "Contact us for current hours",
     supportCallout: "Here to help",
   },
   footer: {
     kicker: "Reliable Healthcare Supply",
-    description:
-      `${siteConfig.name} has supplied generic medicines and ethical-brand medications from India since ${ESTABLISHED}, with a focus on reliable service, competitive pricing and international shipping.`,
+    description: `Trusted since ${ESTABLISHED}, ${siteConfig.name} exports generic and ethical-brand pharmaceuticals from India—offering competitive pricing, attentive support, and worldwide delivery.`,
     navigationHeading: "Quick links",
     contactHeading: "Contact us",
     serviceItems: [
@@ -335,7 +173,7 @@ export const siteContent = {
         description: "Reliable pharmaceutical supply",
       },
     ],
-    noticeHeading: "Important notice",
+    noticeHeading: "Important notice:",
     notice:
       "Information on this website is for general informational purposes only and should not replace professional medical advice. Prescription medicines should be used only under the guidance of a qualified healthcare professional.",
     supportLink: "Contact support",

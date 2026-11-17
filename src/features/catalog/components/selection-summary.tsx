@@ -1,15 +1,14 @@
 "use client"
-
 import { cva } from "class-variance-authority"
 import { CircleCheck, CircleMinus, X } from "lucide-react"
 import { useMemo } from "react"
 
-import { siteContent } from "@/config/content"
 import { formatMessage, formatNumber } from "@/lib/format"
 
 import { useCatalogStore } from "../store/catalog-store"
 import type { FacetKind, FacetSelection, FilterMode } from "../types"
 import { formatTip, Tooltip } from "@/components/ui/tooltip"
+import { catalogContent } from "../content"
 
 const chipStyles = cva(
   "inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 text-left text-[0.65rem] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-ring",
@@ -43,7 +42,7 @@ function chipsFor(
 }
 
 export function SelectionSummary({ mode }: { mode: FilterMode }) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const manufacturer = useCatalogStore((state) => state.manufacturer)
   const packaging = useCatalogStore((state) => state.packaging)
   const removeFacet = useCatalogStore((state) => state.actions.removeFacet)

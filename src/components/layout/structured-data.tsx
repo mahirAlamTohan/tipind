@@ -44,12 +44,7 @@ export function StructuredData() {
         description: siteConfig.description,
         foundingDate: siteConfig.founded.toString(),
         ...(contact.email ? { email: contact.email } : {}),
-        ...(contact.phone
-          ? { telephone: contact.phone.replace(/[^\d+]/g, "") }
-          : {}),
-        sameAs: [contactLinks.telegram()].filter(
-          (href) => href !== "#contact"
-        ),
+        sameAs: [contactLinks.telegram()].filter((href) => href !== "#contact"),
       },
       {
         "@type": "WebSite",

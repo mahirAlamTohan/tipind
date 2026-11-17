@@ -7,7 +7,7 @@ import { flushSync } from "react-dom"
 
 import { Button } from "@/components/ui/button"
 import { siteContent } from "@/config/content"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface ThemeToggleProps {
   className?: string

@@ -3,7 +3,6 @@ import { CircleCheck, Plus } from "lucide-react"
 import { type RefObject, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { siteContent } from "@/config/content"
 import { formatMessage, formatMills, formatNumber } from "@/lib/format"
 import type { CatalogProduct, SearchQuery } from "../types"
 
@@ -14,6 +13,7 @@ import { InfiniteScrollSentinel } from "./infinite-scroll-sentinel"
 import { useCartStore } from "@/features/cart/cart-store"
 import { productLineId, quantityOf } from "@/features/cart/lib/line-items"
 import { toast } from "sonner"
+import { catalogContent } from "../content"
 
 const th =
   "px-4 py-3 text-[0.62rem] font-extrabold tracking-[0.075em] text-muted-foreground uppercase"
@@ -25,7 +25,7 @@ function AddToCartButton({
   onAdded: (name: string) => void
   product: CatalogProduct
 }) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const lineId = productLineId(product)
   const isHydrated = useCartStore((state) => state.isHydrated)
   const addProduct = useCartStore((state) => state.actions.addProduct)
@@ -115,7 +115,7 @@ export function CatalogTable({
   onLoadMore,
   scrollRef,
 }: CatalogTableProps) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const [announcement, setAnnouncement] = useState("")
 
   function handleAdded(name: string) {

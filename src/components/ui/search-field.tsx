@@ -1,7 +1,7 @@
 import { Search } from "lucide-react"
 import type { ComponentProps } from "react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface SearchFieldProps extends Omit<
   ComponentProps<"input">,

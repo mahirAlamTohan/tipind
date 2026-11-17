@@ -4,9 +4,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react"
 
 interface ErrorBoundaryProps {
   children: ReactNode
-  /** Rendered instead of the subtree once a descendant throws. */
   fallback: (reset: () => void) => ReactNode
-  /** Names the surface in the console report ("catalog", "cart", …). */
   label: string
 }
 

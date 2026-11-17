@@ -1,18 +1,17 @@
 "use client"
-
 import { cva } from "class-variance-authority"
 import { CircleCheck, CircleMinus, Plus, Info } from "lucide-react"
 import { useDeferredValue, useMemo, useState } from "react"
 
 import { SearchField } from "@/components/ui/search-field"
 import { VirtualList } from "@/components/ui/virtual-list"
-import { siteContent } from "@/config/content"
 import { compactText, formatMessage, formatNumber } from "@/lib/format"
 
 import { selectFacet, useCatalogStore } from "../store/catalog-store"
 import type { FacetKind, FilterMode } from "../types"
 
 import { formatTip, Tooltip } from "@/components/ui/tooltip"
+import { catalogContent } from "../content"
 
 const ROW_HEIGHT = 44
 const LIST_HEIGHT = 288
@@ -66,7 +65,7 @@ export function FacetFilter({
   layout,
   options,
 }: FacetFilterProps) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const [search, setSearch] = useState("")
   const deferredSearch = useDeferredValue(search)
   const selection = useCatalogStore((state) => selectFacet(state, kind))
@@ -78,8 +77,6 @@ export function FacetFilter({
     [options]
   )
 
-  // "as life" -> "aslife", which matches "A. S Lifesciences".
-  // Options that start with the text come first.
   const visible = useMemo(() => {
     const needle = compactText(deferredSearch)
     if (!needle) return indexed

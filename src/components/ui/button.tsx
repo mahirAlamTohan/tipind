@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import Link from "next/link"
 import type { ComponentProps } from "react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 /**
  * Hover lift and press squish are pure CSS (see the `data-lift` / `active:`
@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils"
  * the whole animation runtime on the critical path of every page because this
  * component is imported almost everywhere.
  */
-const LIFT = "hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100"
+const LIFT =
+  "hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.96] motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100"
 
 export const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-full text-sm font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,translate,scale] duration-200 ease-out select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -89,7 +90,9 @@ export function ButtonLink({
 
   // External, mailto and tel links don't benefit from next/link.
   if (typeof href === "string" && EXTERNAL_HREF.test(href)) {
-    return <a className={classes} data-slot="button-link" href={href} {...props} />
+    return (
+      <a className={classes} data-slot="button-link" href={href} {...props} />
+    )
   }
 
   return (

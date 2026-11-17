@@ -1,19 +1,18 @@
 "use client"
-
 import { RotateCcw, SlidersHorizontal, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { SearchField } from "@/components/ui/search-field"
 import { Tooltip } from "@/components/ui/tooltip"
-import { siteContent } from "@/config/content"
 
 import {
   selectActiveFilterCount,
   useCatalogStore,
 } from "../store/catalog-store"
+import { catalogContent } from "../content"
 
 export function CatalogToolbar() {
-  const copy = siteContent.catalog
+  const copy = catalogContent
   const query = useCatalogStore((state) => state.query)
   const filtersOpen = useCatalogStore((state) => state.filtersOpen)
   const activeCount = useCatalogStore(selectActiveFilterCount)

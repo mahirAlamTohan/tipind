@@ -1,7 +1,7 @@
-import { siteContent } from "@/config/content"
 import { formatMessage, formatNumber } from "@/lib/format"
 
 import type { CatalogLoadStatus } from "../types"
+import { catalogContent } from "../content"
 
 export type StatusTone = "success" | "busy" | "error" | "muted"
 
@@ -14,7 +14,7 @@ export function getStatusView({ productCount, status }: StatusInput): {
   tone: StatusTone
   message: string
 } {
-  const copy = siteContent.catalog.status
+  const copy = catalogContent.status
 
   switch (status) {
     case "unconfigured":
@@ -34,7 +34,7 @@ export function getStatusView({ productCount, status }: StatusInput): {
 }
 
 export function getEmptyView({ productCount, status }: StatusInput) {
-  const copy = siteContent.catalog
+  const copy = catalogContent
 
   if (status === "loading") {
     return { title: copy.status.loading, description: "" }

@@ -97,7 +97,7 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
       set({ dataset: null, error: message, status: "error" })
     },
     setQuery: (query) => {
-      set({ loadedCount: PAGE_SIZE, query }) // ← reset on search
+      set({ loadedCount: PAGE_SIZE, query })
     },
     loadMore: () => {
       set((state) => ({ loadedCount: state.loadedCount + PAGE_SIZE }))
@@ -124,9 +124,6 @@ export const useCatalogStore = create<CatalogState>()((set) => ({
         const bounds = state.dataset?.priceBounds
         const isFull =
           !bounds || (range[0] <= bounds[0] && range[1] >= bounds[1])
-        // Resetting the page is what the facet filters do too. This used to
-        // write `page`, a key that does not exist on CatalogState, so the
-        // price filter never reset pagination and Zustand kept a stray key.
         return { loadedCount: PAGE_SIZE, priceRange: isFull ? null : range }
       })
     },

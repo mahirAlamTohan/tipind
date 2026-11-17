@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface VirtualListProps<T> {
   className?: string
