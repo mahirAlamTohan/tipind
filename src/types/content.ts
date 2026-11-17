@@ -16,7 +16,7 @@ export interface SiteContent {
     themeToggleLabel: string
     footerNavigationLabel: string
     contactUsAction: string
-    callUsAction: string
+    messageUsAction: string
     emailUsAction: string
     closeContactOptionsLabel: string
     contactOptionsLabel: string

@@ -1,3 +1,4 @@
+import { FloatingActions } from "@/components/layout/floating-actions"
 import { AboutSection } from "@/components/sections/about-section"
 import { ContactSection } from "@/components/sections/contact-section"
 import { FAQSection } from "@/components/sections/faq-section"
@@ -17,7 +18,7 @@ export default function Home() {
       <AboutSection />
       <ContactSection />
       <FooterSection />
-      {/* <FloatingActions /> */}
+      <FloatingActions />
     </main>
   )
 }

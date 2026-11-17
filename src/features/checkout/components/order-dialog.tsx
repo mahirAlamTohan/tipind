@@ -94,7 +94,9 @@ export function OrderDialog({
   return (
     <Dialog.Root
       onOpenChange={(open) => {
-        if (!open) onClose()
+        if (!open) {
+          onClose()
+        }
       }}
       open
     >
@@ -252,7 +254,9 @@ export function OrderDialog({
             </Button>
             {!hasConfirmed ? (
               <Button
-                onClick={() => setHasConfirmed(true)}
+                onClick={() => {
+                  setHasConfirmed(true)
+                }}
                 variant="outline"
                 className="text-warning-700 hover:bg-warning-50 dark:text-warning-300 dark:hover:bg-warning-950/20"
               >

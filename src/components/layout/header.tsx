@@ -43,7 +43,7 @@ function DesktopNav({ activeId, onSelect }: NavProps) {
         <Link
           aria-current={item.id === activeId ? "location" : undefined}
           className="nav-link relative isolate inline-flex min-h-10 items-center rounded-full px-3.5 text-[0.78rem] font-semibold text-neutral-600 transition-colors duration-150 hover:text-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-[current=location]:text-primary-700 dark:text-neutral-300 dark:hover:text-primary-100 dark:aria-[current=location]:text-primary-200"
-          href={`/#${item.id}`}
+          href={item.id === "home" ? "/" : `/#${item.id}`}
           key={item.id}
           onClick={(event) => {
             onSelect(item.id, event)
@@ -67,7 +67,7 @@ function MobileNav({ activeId, onSelect }: NavProps) {
           <Link
             aria-current={item.id === activeId ? "location" : undefined}
             className="inline-flex h-9 min-w-0 flex-1 items-center justify-center rounded-full px-1.5 text-xs font-semibold text-neutral-600 transition-colors active:bg-primary-100 aria-[current=location]:bg-primary-100 aria-[current=location]:text-primary-800 dark:text-neutral-300 dark:active:bg-primary-900/50 dark:aria-[current=location]:bg-primary-900/50 dark:aria-[current=location]:text-primary-100"
-            href={`/#${item.id}`}
+            href={item.id === "home" ? "/" : `/#${item.id}`}
             key={item.id}
             onClick={(event) => {
               onSelect(item.id, event)

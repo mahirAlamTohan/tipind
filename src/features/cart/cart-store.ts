@@ -25,7 +25,17 @@ interface PersistedCart {
 }
 
 let lastWritten = ""
-let lastStorageAvailable = true
+
+/**
+ * Mirrors the result of the latest storage write into the store.
+ *
+ * `persist` wraps `setState`, so updating the store here triggers `setItem`
+ * again. The early return stops that from looping when writes keep failing.
+ */
+function reportStorageAvailable(available: boolean) {
+  if (useCartStore.getState().isStorageAvailable === available) return
+  useCartStore.setState({ isStorageAvailable: available })
+}
 
 /** Reads and writes through the validating parser, never raw JSON. */
 export const cartStorage: PersistStorage<PersistedCart> = {
@@ -43,9 +53,9 @@ export const cartStorage: PersistStorage<PersistedCart> = {
     try {
       window.localStorage.setItem(name, serialized)
       lastWritten = serialized
-      lastStorageAvailable = true
+      reportStorageAvailable(true)
     } catch {
-      lastStorageAvailable = false
+      reportStorageAvailable(false)
     }
   },
   removeItem: (name) => {

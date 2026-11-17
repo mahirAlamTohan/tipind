@@ -23,7 +23,7 @@ export const siteContent = {
     themeToggleLabel: "Toggle color theme",
     footerNavigationLabel: "Footer navigation",
     contactUsAction: "Contact Us",
-    callUsAction: "Call Us",
+    messageUsAction: "Message Us",
     emailUsAction: "Email Us",
     closeContactOptionsLabel: "Close contact options",
     contactOptionsLabel: "Contact options",

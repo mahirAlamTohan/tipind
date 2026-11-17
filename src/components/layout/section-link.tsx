@@ -15,5 +15,5 @@ type SectionLinkProps = Omit<ComponentProps<"a">, "href"> & {
  * sections became server components, had to go.
  */
 export function SectionLink({ id, ...props }: SectionLinkProps) {
-  return <a href={`/#${id}`} {...props} />
+  return <a href={id === "home" ? "/" : `/#${id}`} {...props} />
 }
